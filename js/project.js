@@ -6,6 +6,8 @@ if(!project){location.replace('index.html');throw new Error('Project not found')
 document.title=`${project.title} — Пухов Кирилл`;
 document.querySelector('#projectTitle').textContent=project.title;
 document.querySelector('#projectDescription').textContent=project.description||'';
+document.querySelector('#projectDate').textContent=project.date||'—';
+document.querySelector('#projectDuration').textContent=project.duration||'—';
 const gallery=document.querySelector('#gallery');
 const slides=project.slides||[];
 gallery.innerHTML=slides.map((slide,i)=>`<button class="gallery-item" type="button" data-index="${i}" aria-label="Открыть изображение ${i+1}"><img src="${escapeHTML(slide.src)}" alt="${escapeHTML(slide.alt||project.title)}" loading="${i<2?'eager':'lazy'}"></button>`).join('');
