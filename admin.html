@@ -4,7 +4,8 @@
 <body class="admin-page">
   <main class="admin-shell">
     <header class="admin-header"><a class="back-button" href="index.html"><span>‹</span><span>К работам</span></a><p class="eyebrow">УПРАВЛЕНИЕ</p></header>
-    <section class="admin-section"><div class="admin-section-title"><div><p class="eyebrow">ПОРТФОЛИО</p><h1>Проекты</h1></div><button class="primary-button" id="addProject" type="button">Добавить <span>＋</span></button></div><div class="admin-list" id="adminList"></div></section>
+    <section class="admin-section" id="loginSection" hidden><div class="admin-section-title"><div><p class="eyebrow">ОБЛАЧНОЕ ХРАНИЛИЩЕ</p><h1>Войти в админку</h1></div></div><form id="loginForm" class="form-grid"><label>Email<input name="email" type="email" autocomplete="username" required></label><label>Пароль<input name="password" type="password" autocomplete="current-password" required></label><div class="form-actions full-width"><button class="primary-button" type="submit">Войти <span>→</span></button><span id="loginStatus" role="status"></span></div></form></section>
+    <section class="admin-section" id="adminContent"><div class="admin-section-title"><div><p class="eyebrow">ПОРТФОЛИО</p><h1>Проекты</h1></div><button class="primary-button" id="addProject" type="button">Добавить <span>＋</span></button></div><div class="admin-list" id="adminList"></div></section>
     <section class="admin-section"><div class="admin-section-title"><div><p class="eyebrow">СТРУКТУРА КАТАЛОГА</p><h2>Типы и категории</h2></div></div>
       <div class="admin-builder"><form id="typeForm" class="builder-row"><input id="newType" required maxlength="36" placeholder="Новый тип работ"><button class="primary-button" type="submit">Добавить</button></form><div class="builder-list" id="typeList"></div>
       <form id="categoryForm" class="builder-row"><input id="newCategory" required maxlength="36" placeholder="Новая категория"><select id="categoryType" aria-label="Тип работ"></select><button class="primary-button" type="submit">Добавить</button></form><div class="builder-list" id="categoryList"></div></div>
@@ -20,10 +21,11 @@
         <label class="full-width">Описание<textarea name="description" rows="3" placeholder="Коротко о проекте"></textarea></label>
         <div class="full-width"><p class="upload-title">Слайды проекта</p><label class="drop-zone" id="dropZone" for="slides"><input id="slides" name="slides" type="file" accept="image/*" multiple><span>Перетащите изображения сюда</span><small>или нажмите, чтобы выбрать файлы</small></label></div>
         <div class="slide-preview full-width" id="slidePreview"></div>
+        <div class="full-width story-builder"><div class="story-builder-heading"><div><p class="upload-title">СТАТЬЯ О ПРОЕКТЕ</p><small>Добавьте блоки с заголовком, описанием и изображением.</small></div><button class="secondary-button" id="addStorySection" type="button">Добавить блок ＋</button></div><div id="storySections"></div></div>
         <div class="form-actions full-width"><button class="primary-button" type="submit">Сохранить проект <span>✓</span></button><button class="delete-button" id="deleteProject" type="button" hidden>Удалить проект</button><span id="saveStatus" role="status"></span></div>
       </form>
     </section>
-    <p class="storage-note">Добавленные проекты и изображения хранятся в этом браузере. Для публикации на всех устройствах понадобится серверное хранилище.</p>
+    <p class="storage-note" id="storageNote"></p><button class="delete-button" id="logoutButton" type="button" hidden>Выйти из облачной админки</button>
   </main>
 </body>
 </html>

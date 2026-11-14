@@ -10,7 +10,10 @@ document.querySelector('#projectDate').textContent=project.date||'—';
 document.querySelector('#projectDuration').textContent=project.duration||'—';
 const gallery=document.querySelector('#gallery');
 const slides=project.slides||[];
+gallery.dataset.count=String(slides.length);
 gallery.innerHTML=slides.map((slide,i)=>`<button class="gallery-item" type="button" data-index="${i}" aria-label="Открыть изображение ${i+1}"><img src="${escapeHTML(slide.src)}" alt="${escapeHTML(slide.alt||project.title)}" loading="${i<2?'eager':'lazy'}"></button>`).join('');
+const storySections=project.sections||[];
+if(storySections.length){const article=document.createElement('article');article.className='project-story';article.innerHTML=storySections.map(section=>`<section class="project-story-section">${section.heading?`<h2>${escapeHTML(section.heading)}</h2>`:''}${section.description?`<p>${escapeHTML(section.description)}</p>`:''}${section.image?.src?`<img src="${escapeHTML(section.image.src)}" alt="${escapeHTML(section.image.alt||section.heading||project.title)}" loading="lazy">`:''}</section>`).join('');gallery.after(article);}
 const viewer=document.querySelector('#viewer'),image=document.querySelector('#viewerImage'),counter=document.querySelector('#viewerCount'),frame=document.querySelector('#viewerFrame');
 let index=0,scale=1,panX=0,panY=0,returnFocus=null;
 function applyZoom(){image.style.setProperty('--zoom',scale);image.style.setProperty('--x',`${panX}px`);image.style.setProperty('--y',`${panY}px`);image.classList.toggle('zoomed',scale>1.01);}
