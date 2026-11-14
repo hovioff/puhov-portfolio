@@ -1,0 +1,30 @@
+/* Motion language: quiet, tactile, and tied to user actions. Cards and carousel remain owned by styles.css. */
+:root{--motion-fast:180ms;--motion-base:280ms;--motion-slow:420ms;--motion-ease:cubic-bezier(.22,.68,.18,1)}
+@view-transition{navigation:auto}
+::view-transition-old(root){animation:site-fade-out 140ms ease both}
+::view-transition-new(root){animation:site-fade-in 240ms ease both}
+@keyframes site-fade-out{to{opacity:0}}
+@keyframes site-fade-in{from{opacity:0}to{opacity:1}}
+/* Remove accumulated page and section entrance effects; they caused visible jumps. */
+.catalog-shell,.project-shell,.admin-shell,.contact-shell,.portfolio-notice,.segmented,.filters,.search,.project-intro,.project-intro>*,.project-gallery,.project-gallery>*,.case-article,.case-article>*,.contact-hero,.contact-hero>*,.contact-header,.order-fab{animation:none!important;filter:none!important}
+/* Native-like selection feedback without scale, bounce, or hover-only behavior. */
+.segment,.category-chip{transition:background-color var(--motion-base) var(--motion-ease),color var(--motion-base) ease,border-color var(--motion-base) ease,box-shadow var(--motion-base) ease!important}
+.segment.is-active{box-shadow:inset 0 0 0 1px #ffffff20,0 2px 8px #17171912}
+.segment:active,.category-chip:active,.back-button:active,.contact-back:active,.viewer-close:active,.order-fab:active,.telegram-button:active,.primary-button:active,.secondary-button:active{transform:none!important;filter:brightness(.94)}
+.segment,.category-chip,.back-button,.contact-back,.viewer-close,.order-fab,.telegram-button,.primary-button,.secondary-button{transition:background-color var(--motion-fast) ease,color var(--motion-fast) ease,border-color var(--motion-fast) ease,box-shadow var(--motion-fast) ease,filter var(--motion-fast) ease!important}
+/* Filtering fades content in place instead of moving the entire grid. */
+.work-grid,.work-grid.is-filtering{transform:none!important;filter:none!important;transition:opacity 140ms ease!important}
+.work-grid.is-filtering{opacity:.35}
+/* Gallery movement is continuous; image viewer only fades, never pops or zooms. */
+.case-slide-track{transition:transform var(--motion-slow) var(--motion-ease)!important}
+.case-slider-dots button{transition:width var(--motion-base) var(--motion-ease),background-color var(--motion-fast) ease!important}
+.viewer.open,.viewer.closing{animation:none!important}
+.viewer.open .viewer-frame{animation:viewer-fade-in 220ms ease both!important}
+.viewer.closing .viewer-frame{animation:viewer-fade-out 160ms ease both!important}
+@keyframes viewer-fade-in{from{opacity:0}to{opacity:1}}
+@keyframes viewer-fade-out{to{opacity:0}}
+.viewer-count,.viewer-close{animation:none!important}
+@media(prefers-reduced-motion:reduce){::view-transition-old(root),::view-transition-new(root){animation:none!important}.segment,.category-chip,.back-button,.contact-back,.viewer-close,.order-fab,.telegram-button,.primary-button,.secondary-button,.work-grid,.case-slide-track,.case-slider-dots button,.viewer-frame{transition:none!important;animation:none!important}}
+
+/* Drag-to-dismiss feedback for the full-screen photo viewer. */
+#viewerFrame{will-change:transform,opacity;transition:transform .22s cubic-bezier(.2,.7,.25,1),opacity .22s ease}

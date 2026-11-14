@@ -58,8 +58,8 @@ async function prepareTrack(track,project){
 function draw(){
   const shown=sortedProjects.filter(project=>(activeType==='all'||project.type===activeType)&&(!activeCategories.size||activeCategories.has(project.category)));
   grid.innerHTML=shown.map((project,index)=>card(project,index)).join('');grid.hidden=!shown.length;empty.hidden=!!shown.length;
-  grid.querySelectorAll('img').forEach(img=>{img.classList.add('is-image-loading');const finish=()=>{img.classList.remove('is-image-loading');img.classList.add('image-ready');};if(img.complete&&img.naturalWidth)finish();else{img.addEventListener('load',finish,{once:true});img.addEventListener('error',()=>{img.classList.remove('is-image-loading');img.classList.add('is-image-error');},{once:true});}});
-  for(const track of grid.querySelectorAll('[data-carousel]')){const project=shown.find(item=>item.id===track.dataset.carousel);if(project)prepareTrack(track,project);}
+  grid.querySelectorAll('img').forEach(img=>{img.classList.add('is-image-loading');const finish=()=>{img.classList.remove('is-image-loading');img.classList.add('image-ready');};if(img.complete&&img.naturalWidth)finish();else{img.addEventListener('load',finish,{once:true});img.addEventListener('error',()=>{img.classList.remove('is-image-loading');img.classList.add('is-image-error');},{once:true});setTimeout(()=>{if(img.classList.contains('is-image-loading')){img.classList.remove('is-image-loading');img.classList.add('is-image-error');}},8000);}});
+  for(const track of grid.querySelectorAll('[data-carousel]')){const project=shown.find(item=>item.id===track.dataset.carousel);if(project)prepareTrack(track,project).catch(error=>{console.error('Не удалось подготовить карусель:',error);track.classList.add('is-static');track.closest('.carousel-window')?.classList.add('carousel-ready');});}
   empty.textContent='Проекты этого типа появятся здесь.';
 }
 function setCatalogLoading(loading){grid.classList.toggle('is-loading',loading);grid.setAttribute('aria-busy',String(loading));}
