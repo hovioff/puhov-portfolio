@@ -31,12 +31,11 @@
       } else if (!control.matches('.case-slide,.viewer-arrow')) window.portfolioHaptic('light');
     }, {capture:true,passive:true});
 
-    if (document.body.classList.contains('project-page') && app.BackButton) {
+    if ((document.body.classList.contains('project-page') || document.body.classList.contains('contact-page')) && app.BackButton) {
       app.BackButton.show();
       app.BackButton.onClick(() => {
         const close = document.querySelector('#viewerClose');
         if (document.querySelector('#viewer.open')) close?.click();
-        else if (history.length > 1) history.back();
         else location.href = 'index.html';
       });
     } else app.BackButton?.hide();

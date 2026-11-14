@@ -26,31 +26,22 @@ function card(project,cardIndex=0){
   const slides=project.slides||[];
   if(project.previewImage?.src)return `<a class="work-block" style="--card-index:${Math.min(cardIndex,8)}" href="project.html?id=${encodeURIComponent(project.id)}" aria-label="Открыть проект «${escapeHTML(project.title)}"><div class="carousel-window catalog-static-window"><img class="catalog-static-preview" src="${escapeHTML(project.previewImage.src)}" alt="${escapeHTML(project.title)}" loading="lazy"></div><div class="block-caption"><h2 class="block-title">${escapeHTML(project.title)}</h2><span class="slide-count"><b>${slides.length}</b><span aria-hidden="true">▣</span></span></div></a>`;
   const orderedSlides=slides.length>1?[slides[slides.length-1],...slides.slice(0,-1)]:slides;
-  const group=(duplicate=false)=>`<div class="track-set${duplicate?' track-set-repeat':''}"${duplicate?' aria-hidden="true"':''}>${orderedSlides.map((slide,index)=>{const near=index%2===1,drift=index%2?'-4px':'4px',cycle=6+(index%3)*1.4,loading=duplicate||cardIndex>1||index>1?'lazy':'eager',priority=!duplicate&&cardIndex===0&&index===0?'high':'auto';return`<div class="slide" style="--depth:${index+1};--depth-z:${near?'44px':'-24px'};--depth-yaw:${near?'-6deg':'4deg'};--depth-scale:${near?'1.045':'.965'};--shadow-y:${near?'8px':'2px'};--shadow-blur:${near?'18px':'6px'};--shadow-alpha:${near?'.28':'.14'};--float-duration:${cycle}s;--float-delay:-${index*.45}s;--drift-x:${drift};--drift-y:${index%2?'0.56px':'-0.56px'}"><img src="${escapeHTML(slide.src)}" alt="${duplicate?'':escapeHTML(slide.alt||project.title)}" loading="${loading}" fetchpriority="${priority}" decoding="async"></div>`;}).join('')}</div>`;
+  const group=(duplicate=false)=>`<div class="track-set${duplicate?' track-set-repeat':''}"${duplicate?' aria-hidden="true"':''}>${orderedSlides.map((slide,index)=>{const near=index%2===1,drift=near?'-2px':'4.5px',cycle=near?8.8+(index%3)*.8:6.8+(index%3)*.5,loading=duplicate||cardIndex>1||index>1?'lazy':'eager',priority=!duplicate&&cardIndex===0&&index===0?'high':'auto';return`<div class="slide" style="--depth:${index+1};--depth-z:${near?'12px':'-7px'};--depth-yaw:${near?'-1.4deg':'1deg'};--depth-scale:${near?'1.012':'.994'};--shadow-y:${near?'4px':'1px'};--shadow-blur:${near?'9px':'4px'};--shadow-alpha:${near?'.15':'.08'};--float-duration:${cycle}s;--float-delay:0s;--drift-x:${drift};--drift-y:${near?'-0.8px':'0.7px'}"><img src="${escapeHTML(slide.src)}" alt="${duplicate?'':escapeHTML(slide.alt||project.title)}" loading="${loading}" fetchpriority="${priority}" decoding="async"></div>`;}).join('')}</div>`;
   return `<a class="work-block" style="--card-index:${Math.min(cardIndex,8)}" href="project.html?id=${encodeURIComponent(project.id)}" aria-label="Открыть проект «${escapeHTML(project.title)}"><div class="carousel-window"><div class="track${slides.length<2?' is-static':''}" data-carousel="${escapeHTML(project.id)}">${group()}</div></div><div class="block-caption"><h2 class="block-title">${escapeHTML(project.title)}</h2><span class="slide-count"><b>${slides.length}</b><svg viewBox="0 0 24 24" aria-hidden="true"><path fill="currentColor" d="M5 3.5h14A2.5 2.5 0 0 1 21.5 6v12a2.5 2.5 0 0 1-2.5 2.5H5A2.5 2.5 0 0 1 2.5 18V6A2.5 2.5 0 0 1 5 3.5Z"/><circle cx="8.2" cy="8.4" r="2" fill="#f0f0f2"/><path d="m4.5 17 5.1 5 3.1 2.8 2.1-1.8 4.7 4H4.5Z" fill="#f0f0f2"/></svg></span></div></a>`;
 }
 const cardAngle=-Math.PI*8/180,pixelsPerSecond=34;
-async function naturalSize(slide,img){
-  if(slide.width&&slide.height)return{width:slide.width,height:slide.height};
-  if(img.complete&&img.naturalWidth)return{width:img.naturalWidth,height:img.naturalHeight};
-  try{await img.decode();}catch{}
-  return img.naturalWidth?{width:img.naturalWidth,height:img.naturalHeight}:{width:3,height:4};
-}
 async function prepareTrack(track,project){
   const ordered=project.slides.length>1?[project.slides.at(-1),...project.slides.slice(0,-1)]:project.slides;
-  const viewport=track.parentElement,overscan=64,viewportWidth=viewport.clientWidth,viewportHeight=viewport.clientHeight;
-  const sizes=await Promise.all(ordered.map((slide,i)=>naturalSize(slide,track.querySelector(`.track-set:not(.track-set-repeat) .slide:nth-child(${i+1}) img`))));
-  // Keep the established card size for portrait work; add a small coverage reserve only for landscape slides.
-  const maxAspect=Math.max(...sizes.map(size=>size.width/size.height));
-  const aspectReserve=maxAspect>1?Math.min(24,viewportHeight*.055):0;
-  const h=viewportHeight+viewportWidth*Math.tan(Math.abs(cardAngle))+overscan+aspectReserve;
-  const widths=sizes.map(size=>h*size.width/size.height);
-  const advances=widths.map(width=>width-38),stepX=advances.map(advance=>advance*Math.cos(cardAngle)),stepY=advances.map(advance=>advance*Math.sin(cardAngle));
+  const viewport=track.parentElement,overscan=18,viewportWidth=viewport.clientWidth,viewportHeight=viewport.clientHeight;
+  // Every portfolio preview uses the agreed 808:632 canvas; object-fit:cover fills it without gaps.
+  const h=viewportHeight+viewportWidth*Math.tan(Math.abs(cardAngle))+18;
+  const widths=ordered.map((slide,index)=>{const image=track.querySelectorAll('.slide img')[index];const w=Number(slide.width)||image?.naturalWidth||808;const h0=Number(slide.height)||image?.naturalHeight||632;return h*(w/h0);});
+  const advances=widths.map(width=>Math.max(1,width-10)),stepX=advances.map(advance=>advance*Math.cos(cardAngle)),stepY=advances.map(advance=>advance*Math.sin(cardAngle));
   const groupX=stepX.reduce((sum,step)=>sum+step,0),groupY=stepY.reduce((sum,step)=>sum+step,0);
   const base=track.querySelector('.track-set');
   const startX=project.slides.length>1?35-widths[0]*Math.cos(cardAngle):20;
-  const copies=Math.max(1,Math.floor((track.parentElement.clientWidth-startX)/groupX)+1);
-  while(track.querySelectorAll('.track-set').length<copies+1){const clone=base.cloneNode(true);clone.classList.add('track-set-repeat');clone.setAttribute('aria-hidden','true');clone.querySelectorAll('img').forEach(img=>{img.alt='';img.loading='lazy';img.fetchPriority='low';});track.append(clone);}
+  const copies=Math.max(1,Math.ceil((track.parentElement.clientWidth-startX)/groupX)+3);
+  while(track.querySelectorAll('.track-set').length<copies+1){const clone=base.cloneNode(true);clone.classList.add('track-set-repeat');clone.setAttribute('aria-hidden','true');clone.querySelectorAll('img').forEach(img=>{img.alt='';img.loading='eager';img.fetchPriority='low';});track.append(clone);}
   track.querySelectorAll('.track-set').forEach((set,setIndex)=>{
     let rise=0;set.querySelectorAll('.slide').forEach((node,index)=>{
       const width=widths[index],advance=advances[index];
@@ -67,7 +58,7 @@ async function prepareTrack(track,project){
 function draw(){
   const shown=sortedProjects.filter(project=>(activeType==='all'||project.type===activeType)&&(!activeCategories.size||activeCategories.has(project.category)));
   grid.innerHTML=shown.map((project,index)=>card(project,index)).join('');grid.hidden=!shown.length;empty.hidden=!!shown.length;
-  grid.querySelectorAll('img').forEach(img=>{img.classList.add('is-image-loading');const finish=()=>img.classList.remove('is-image-loading');if(img.complete&&img.naturalWidth)finish();else{img.addEventListener('load',finish,{once:true});img.addEventListener('error',()=>{img.classList.remove('is-image-loading');img.classList.add('is-image-error');},{once:true});}});
+  grid.querySelectorAll('img').forEach(img=>{img.classList.add('is-image-loading');const finish=()=>{img.classList.remove('is-image-loading');img.classList.add('image-ready');};if(img.complete&&img.naturalWidth)finish();else{img.addEventListener('load',finish,{once:true});img.addEventListener('error',()=>{img.classList.remove('is-image-loading');img.classList.add('is-image-error');},{once:true});}});
   for(const track of grid.querySelectorAll('[data-carousel]')){const project=shown.find(item=>item.id===track.dataset.carousel);if(project)prepareTrack(track,project);}
   empty.textContent='Проекты этого типа появятся здесь.';
 }

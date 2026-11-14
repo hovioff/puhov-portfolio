@@ -197,8 +197,9 @@ html,body{overflow-x:hidden;scrollbar-width:none}html::-webkit-scrollbar,body::-
 .project-skeleton{min-height:180px;border-radius:23px;background:linear-gradient(105deg,#ededf0 22%,#f7f7f8 38%,#ededf0 62%);background-size:300% 100%;animation:skeleton-shimmer 1.35s ease-in-out infinite}
 .project-skeleton-large{grid-column:1/-1;min-height:clamp(220px,48vw,420px)}
 .project-loading .project-skeleton:not(.project-skeleton-large){min-height:clamp(140px,30vw,240px)}
-.work-block .carousel-window,.slide,.gallery-item,.case-slide,.article-image-open{background:linear-gradient(105deg,#ededf0 22%,#f7f7f8 38%,#ededf0 62%);background-size:300% 100%;animation:skeleton-shimmer 1.35s ease-in-out infinite}
-.work-block .carousel-window.carousel-ready,.slide:has(img:not(.is-image-loading)),.gallery-item:has(img:not(.is-image-loading)),.case-slide:has(img:not(.is-image-loading)),.article-image-open:has(img:not(.is-image-loading)){animation:none;background:#f0f0f2}
+.work-block .carousel-window,.gallery-item,.case-slide,.article-image-open{background:linear-gradient(105deg,#ededf0 22%,#f7f7f8 38%,#ededf0 62%);background-size:300% 100%;animation:skeleton-shimmer 1.35s ease-in-out infinite}
+.work-block .carousel-window.carousel-ready,.gallery-item:has(img:not(.is-image-loading)),.case-slide:has(img:not(.is-image-loading)),.article-image-open:has(img:not(.is-image-loading)){animation:none;background:#f0f0f2}
+.slide{background:#f0f0f2;animation:slide-float var(--float-duration,8s) ease-in-out infinite alternate;animation-delay:var(--float-delay,0s);animation-fill-mode:both}
 img.is-image-loading{opacity:0!important;animation:none!important}
 img.is-image-error{opacity:0!important}
 .work-block .carousel-window:has(.is-image-error)::after,.gallery-item:has(.is-image-error)::after,.case-slide:has(.is-image-error)::after,.article-image-open:has(.is-image-error)::after{content:"Изображение не загрузилось";position:absolute;inset:0;display:grid;place-items:center;padding:16px;color:#8c8b90;font-size:12px;text-align:center}
@@ -254,7 +255,7 @@ img.is-image-error{opacity:0!important}
 .contact-header,.contact-kicker,.contact-hero h1,.contact-hero .contact-lead,.contact-hero .telegram-button{animation:soft-section-in .32s ease both}
 .work-block:hover{transform:translateY(-2px)}
 .category-chip:active,.segment:active,.admin-row button:active,.primary-button:active,.secondary-button:active,.back-button:active,.icon-button:active,.order-fab:active,.telegram-button:active{transform:scale(.98)}
-.skeleton-media,.skeleton-caption i,.skeleton-caption b,.project-skeleton,.work-block .carousel-window,.slide,.gallery-item,.case-slide,.article-image-open{animation-duration:1.9s}
+.skeleton-media,.skeleton-caption i,.skeleton-caption b,.project-skeleton,.work-block .carousel-window,.gallery-item,.case-slide,.article-image-open{animation-duration:1.9s}
 @media(prefers-reduced-motion:reduce){::view-transition-old(root),::view-transition-new(root){animation:none!important}.catalog-shell,.project-shell,.admin-shell,.work-block,.project-gallery>.gallery-item,.case-article>*,.admin-header,.admin-section,.editor:not([hidden]),.catalog-static-preview,.slide img,.gallery-item img,.case-slide img,.article-image-open img,.portfolio-notice,.order-fab,.contact-header,.contact-kicker,.contact-hero h1,.contact-hero .contact-lead,.contact-hero .telegram-button{animation:none!important}}
 
 /* Telegram Mini App and touch-first behavior: no hover lift or cursor-only effects. */
@@ -281,3 +282,138 @@ body.tg-mini-app.project-page #backButton{display:none}
 .case-slide-track{transition:transform .42s cubic-bezier(.22,.7,.2,1)}
 .viewer{overscroll-behavior:contain}
 @media(max-width:600px){.work-grid.has-content>.work-skeleton:nth-child(2){grid-column:1;grid-row:2}.work-grid.has-content>.work-block:nth-of-type(2){grid-column:1;grid-row:2}}
+.viewer-frame{transition:none}
+.viewer-frame{position:relative;background:#121214}
+.viewer-frame::before{content:"";position:absolute;inset:0;z-index:0;background:linear-gradient(105deg,#29292d 22%,#333338 38%,#29292d 62%);background-size:300% 100%;animation:skeleton-shimmer 1.8s ease-in-out infinite}
+.viewer-frame:has(#viewerImage:not(.is-image-loading))::before{opacity:0;animation-play-state:paused}
+.viewer img{position:relative;z-index:1}
+.work-block:has(.track){animation:none!important}
+.work-block:has(.track) .block-caption{animation:soft-section-in .28s ease both}
+.work-grid.is-filtering{opacity:1;transform:none}
+.work-grid.is-filtering .block-caption{opacity:.38;transition:opacity .14s ease}
+.work-grid:not(.is-filtering) .block-caption{opacity:1}
+.carousel-window{isolation:auto}
+@supports (overflow:clip){.carousel-window{overflow:clip}}
+.carousel-window:not(.carousel-ready) .track,.carousel-window:not(.carousel-ready) .slide{animation-play-state:paused!important}
+.carousel-window.carousel-ready .track,.carousel-window.carousel-ready .slide{animation-play-state:running}
+.viewer.open .viewer-frame{animation:viewer-present .26s cubic-bezier(.2,.8,.2,1) both}
+.viewer.closing .viewer-frame{animation:viewer-dismiss .18s ease both}
+@keyframes viewer-present{from{opacity:0;transform:scale(.975)}to{opacity:1;transform:scale(1)}}
+@keyframes viewer-dismiss{to{opacity:0;transform:scale(.98)}}
+.viewer.open .viewer-frame{animation:viewer-present .34s cubic-bezier(.16,1,.3,1) both}
+@keyframes viewer-present{from{opacity:0;transform:scale(.94) translateY(10px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.viewer.closing .viewer-frame{animation:viewer-dismiss .22s cubic-bezier(.4,0,1,1) both}
+@keyframes viewer-dismiss{to{opacity:0;transform:scale(.965) translateY(5px)}}
+.slide img.image-ready{animation:depth-image-arrive .44s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc((var(--depth,1) - 1)*58ms)}
+@keyframes depth-image-arrive{from{opacity:0;transform:scale(1.025)}to{opacity:1;transform:scale(1)}}
+.gallery-item img.image-ready,.article-image-open img.image-ready{animation:photo-arrive .38s cubic-bezier(.2,.8,.2,1) both}
+@keyframes photo-arrive{from{opacity:0;transform:scale(.985)}to{opacity:1;transform:scale(1)}}
+.work-block:active .carousel-window{transform:scale(.96)}
+.work-block:active .block-caption{transform:scale(.985);transition:transform .16s cubic-bezier(.2,.8,.2,1)}
+.viewer.open .viewer-frame{animation:viewer-present .36s cubic-bezier(.16,1,.3,1) both}
+@keyframes viewer-present{from{opacity:0;transform:scale(.93) translateY(12px)}to{opacity:1;transform:scale(1) translateY(0)}}
+.case-article>*{animation:article-block-enter .42s cubic-bezier(.2,.8,.2,1) both}
+.case-article>*:nth-child(2){animation-delay:55ms}.case-article>*:nth-child(3){animation-delay:105ms}.case-article>*:nth-child(4){animation-delay:155ms}.case-article>*:nth-child(5){animation-delay:205ms}.case-article>*:nth-child(n+6){animation-delay:245ms}
+@keyframes article-block-enter{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:translateY(0)}}
+.project-gallery>.gallery-item{animation:photo-section-enter .38s cubic-bezier(.2,.8,.2,1) both}
+.project-gallery>.gallery-item:nth-child(2){animation-delay:45ms}.project-gallery>.gallery-item:nth-child(3){animation-delay:90ms}.project-gallery>.gallery-item:nth-child(4){animation-delay:135ms}.project-gallery>.gallery-item:nth-child(n+5){animation-delay:180ms}
+@keyframes photo-section-enter{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+::view-transition-new(root){animation:soft-route-in .3s cubic-bezier(.2,.8,.2,1) both}
+@keyframes soft-route-in{from{opacity:.72;transform:translateX(8px)}to{opacity:1;transform:translateX(0)}}
+@media(prefers-reduced-motion:reduce){.slide img.image-ready,.gallery-item>.image-ready,.article-image-open img.image-ready,.case-article>*,.project-gallery>.gallery-item{animation:none!important}.work-block:active .carousel-window,.work-block:active .block-caption{transform:none!important}}
+.slide{animation-fill-mode:both}
+.catalog-shell{animation:soft-screen-in .42s cubic-bezier(.2,.8,.2,1) both}
+.project-shell,.admin-shell{animation:app-screen-enter .42s cubic-bezier(.2,.8,.2,1) both}
+.work-grid:not(.is-loading) .work-block{animation:soft-card-in .42s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(var(--card-index,0)*64ms)}
+.work-block:active .carousel-window{transform:scale(.985);transition:transform .16s cubic-bezier(.2,.8,.2,1)}
+.carousel-window{transition:transform .18s cubic-bezier(.2,.8,.2,1)}
+.segment:active,.category-chip:active,.primary-button:active,.secondary-button:active,.order-fab:active,.telegram-button:active,.back-button:active,.viewer-close:active{transform:scale(.95);transition-duration:.15s}
+.category-chip,.segment{transition:background-color .26s cubic-bezier(.2,.8,.2,1),color .26s,border-color .26s,transform .16s}
+.case-slide-track{transition:transform .46s cubic-bezier(.18,.76,.22,1)}
+.work-grid.is-filtering .block-caption{opacity:.18;transform:translateY(3px);transition:opacity .18s ease,transform .18s ease}
+.work-grid:not(.is-filtering) .block-caption{opacity:1;transform:none;transition:opacity .24s ease,transform .24s ease}
+
+/* Final motion pass: tactile feedback, clear route transitions, quiet entrance rhythm. */
+:root{--ease-out:cubic-bezier(.18,.82,.24,1);--ease-spring:cubic-bezier(.2,.9,.25,1)}
+button,a{transition:transform .2s var(--ease-out),background-color .22s ease,color .22s ease,box-shadow .24s ease,border-color .22s ease}
+.work-block:active,.segment:active,.category-chip:active,.order-fab:active,.telegram-button:active,.back-button:active,.viewer-close:active,.primary-button:active,.secondary-button:active{transform:scale(.975);filter:brightness(.97)}
+.work-block:active .carousel-window{transform:scale(.985)}
+.case-slide-track{transition:transform .52s var(--ease-spring)}
+.viewer{transition:opacity .24s ease,visibility .24s ease}
+.viewer.open .viewer-frame{animation:viewer-present .38s var(--ease-spring) both}
+.viewer.closing .viewer-frame{animation:viewer-dismiss .22s ease-in both}
+@keyframes viewer-present{from{opacity:0;transform:scale(.965) translateY(8px)}to{opacity:1;transform:scale(1) translateY(0)}}
+@keyframes viewer-dismiss{to{opacity:0;transform:scale(.985) translateY(4px)}}
+.work-grid:not(.is-loading) .work-block{animation:soft-card-in .4s var(--ease-spring) both;animation-delay:calc(var(--card-index,0)*52ms)}
+.segment.is-active{animation:segment-select .25s var(--ease-spring)}
+@keyframes segment-select{from{transform:scale(.96)}to{transform:scale(1)}}
+.order-fab:active,.telegram-button:active{box-shadow:0 5px 16px #17171922}
+@media(prefers-reduced-motion:reduce){button,a,.work-grid,.work-block,.case-slide-track,.viewer,.viewer-frame{transition:none!important;animation:none!important}.work-block:active,.work-block:active .carousel-window,.segment:active,.category-chip:active,.order-fab:active,.telegram-button:active{transform:none!important}}
+
+/* Motion polish across navigation, loading, galleries, and touch feedback. */
+:root{--motion-out:cubic-bezier(.18,.82,.24,1);--motion-spring:cubic-bezier(.2,.9,.25,1)}
+.catalog-shell,.project-shell,.admin-shell,.contact-shell{animation:screen-arrive .48s var(--motion-out) both}
+@keyframes screen-arrive{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:none}}
+.project-intro>*{animation:content-arrive .42s var(--motion-out) both}
+.project-intro>*:nth-child(2){animation-delay:55ms}.project-intro>*:nth-child(3){animation-delay:100ms}
+@keyframes content-arrive{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.project-gallery>.gallery-item,.case-article>*,.contact-hero>*{animation:content-arrive .4s var(--motion-out) both;animation-delay:calc(min(var(--stagger,0),6)*42ms)}
+.project-gallery>.gallery-item:nth-child(2),.case-article>*:nth-child(2){--stagger:1}.project-gallery>.gallery-item:nth-child(3),.case-article>*:nth-child(3){--stagger:2}.project-gallery>.gallery-item:nth-child(4),.case-article>*:nth-child(4){--stagger:3}.project-gallery>.gallery-item:nth-child(n+5),.case-article>*:nth-child(n+5){--stagger:4}
+.work-skeleton,.project-skeleton{animation:skeleton-breathe 1.35s ease-in-out infinite alternate}
+@keyframes skeleton-breathe{from{opacity:.68}to{opacity:1}}
+.case-slider-dots button{transition:width .28s var(--motion-spring),background-color .22s,transform .2s}
+.case-slider-dots button:active{transform:scale(.8)}
+.viewer.open{animation:viewer-backdrop-in .28s ease both}.viewer.closing{animation:viewer-backdrop-out .2s ease both}
+@keyframes viewer-backdrop-in{from{opacity:0}to{opacity:1}}@keyframes viewer-backdrop-out{to{opacity:0}}
+button:active,a:active{transition-duration:.12s}
+@media(prefers-reduced-motion:reduce){.catalog-shell,.project-shell,.admin-shell,.contact-shell,.project-intro>*,.project-gallery>.gallery-item,.case-article>*,.contact-hero>*,.work-skeleton,.project-skeleton,.viewer{animation:none!important}.case-slider-dots button{transition:none!important}}
+
+/* Cohesive app-like motion */
+:root{--motion:cubic-bezier(.2,.8,.2,1);--motion-pop:cubic-bezier(.16,1,.3,1)}
+.catalog-shell,.project-shell,.admin-shell,.contact-shell{animation:screen-in .52s var(--motion-pop) both}
+@keyframes screen-in{from{opacity:0;transform:translateY(12px) scale(.99);filter:blur(3px)}to{opacity:1;transform:none;filter:blur(0)}}
+.portfolio-notice,.segmented,.filters,.search{animation:toolbar-in .48s var(--motion-pop) both}
+.segmented{animation-delay:45ms}.filters{animation-delay:80ms}.search{animation-delay:110ms}
+@keyframes toolbar-in{from{opacity:0;transform:translateY(9px)}to{opacity:1;transform:none}}
+.work-grid:not(.is-loading) .work-block{animation:card-in .56s var(--motion-pop) both;animation-delay:calc(var(--card-index,0)*70ms)}
+@keyframes card-in{from{opacity:0;transform:translateY(20px) scale(.965)}to{opacity:1;transform:none}}
+.project-intro>*{animation:story-in .48s var(--motion-pop) both}
+.project-intro>*:nth-child(2){animation-delay:60ms}.project-intro>*:nth-child(3){animation-delay:120ms}
+.project-gallery>.gallery-item,.case-article>*,.contact-hero>*{animation:story-in .48s var(--motion-pop) both;animation-delay:calc(var(--stagger,0)*55ms)}
+.project-gallery>.gallery-item:nth-child(2),.case-article>*:nth-child(2){--stagger:1}.project-gallery>.gallery-item:nth-child(3),.case-article>*:nth-child(3){--stagger:2}.project-gallery>.gallery-item:nth-child(4),.case-article>*:nth-child(4){--stagger:3}.project-gallery>.gallery-item:nth-child(n+5),.case-article>*:nth-child(n+5){--stagger:4}
+@keyframes story-in{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+.case-slide-track{transition:transform .58s var(--motion-pop)}
+.case-slider-dots button{transition:width .3s var(--motion-pop),background-color .25s,transform .2s}
+.case-slider-dots button:active{transform:scale(.78)}
+.viewer.open{animation:veil-in .24s ease both}.viewer.open .viewer-frame{animation:viewer-in .44s var(--motion-pop) both}
+.viewer.closing{animation:veil-out .2s ease both}.viewer.closing .viewer-frame{animation:viewer-out .2s ease both}
+@keyframes veil-in{from{opacity:0}to{opacity:1}}@keyframes veil-out{to{opacity:0}}
+@keyframes viewer-in{from{opacity:0;transform:scale(.92) translateY(14px)}to{opacity:1;transform:none}}@keyframes viewer-out{to{opacity:0;transform:scale(.97) translateY(6px)}}
+.work-block:active{transform:scale(.975);transition:transform .16s var(--motion)}
+.segment:active,.category-chip:active,.order-fab:active,.telegram-button:active,.back-button:active,.viewer-close:active,.primary-button:active,.secondary-button:active{transform:scale(.94);transition:transform .14s var(--motion)}
+.work-skeleton,.project-skeleton{animation:skeleton-wave 1.25s ease-in-out infinite alternate}
+@keyframes skeleton-wave{from{opacity:.58}to{opacity:1}}
+@media(prefers-reduced-motion:reduce){.catalog-shell,.project-shell,.admin-shell,.contact-shell,.portfolio-notice,.segmented,.filters,.search,.work-block,.project-intro>*,.project-gallery>.gallery-item,.case-article>*,.contact-hero>*,.viewer,.viewer-frame,.work-skeleton,.project-skeleton{animation:none!important}.case-slide-track,.case-slider-dots button{transition:none!important}}
+
+/* Non-card app interactions: filters, navigation, lightbox, and article carousel. */
+.segment,.category-chip,.back-button,.contact-back,.viewer-close,.case-slider-dots button,.telegram-button,.order-fab{transition:transform .2s cubic-bezier(.2,.8,.2,1),background-color .24s,color .24s,box-shadow .24s,border-color .24s}
+.segment:active,.category-chip:active,.back-button:active,.contact-back:active,.viewer-close:active,.telegram-button:active,.order-fab:active{transform:scale(.94)}
+.case-slide-track{transition:transform .56s cubic-bezier(.16,1,.3,1)}
+.case-slider-dots button{transition:width .3s cubic-bezier(.16,1,.3,1),background-color .22s}
+.viewer.open{animation:viewer-veil-in .24s ease both}.viewer.open .viewer-frame{animation:viewer-image-in .42s cubic-bezier(.16,1,.3,1) both}
+.viewer.closing{animation:viewer-veil-out .2s ease both}.viewer.closing .viewer-frame{animation:viewer-image-out .2s ease both}
+@keyframes viewer-veil-in{from{opacity:0}to{opacity:1}}@keyframes viewer-veil-out{to{opacity:0}}
+@keyframes viewer-image-in{from{opacity:0;transform:scale(.93) translateY(10px)}to{opacity:1;transform:none}}@keyframes viewer-image-out{to{opacity:0;transform:scale(.975) translateY(5px)}}
+.viewer-count,.viewer-close{animation:viewer-controls-in .32s .08s cubic-bezier(.16,1,.3,1) both}
+@keyframes viewer-controls-in{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+.contact-hero .telegram-button{animation:contact-cta-in .48s .16s cubic-bezier(.16,1,.3,1) both}
+@keyframes contact-cta-in{from{opacity:0;transform:translateY(12px) scale(.97)}to{opacity:1;transform:none}}
+@media(prefers-reduced-motion:reduce){.segment,.category-chip,.back-button,.contact-back,.viewer-close,.case-slider-dots button,.telegram-button,.order-fab,.case-slide-track,.viewer,.viewer-frame,.viewer-count{animation:none!important;transition:none!important}}
+
+
+/* Telegram viewport insets and definitive image error state */
+body.tg-mini-app .catalog-shell,body.tg-mini-app .project-shell,body.tg-mini-app .admin-shell{padding-top:calc(18px + max(env(safe-area-inset-top,0px),var(--tg-content-safe-area-inset-top,0px),var(--tg-safe-area-inset-top,0px)));padding-bottom:calc(24px + max(env(safe-area-inset-bottom,0px),var(--tg-content-safe-area-inset-bottom,0px),var(--tg-safe-area-inset-bottom,0px)))}
+body.tg-mini-app .order-fab{bottom:calc(16px + max(env(safe-area-inset-bottom,0px),var(--tg-content-safe-area-inset-bottom,0px),var(--tg-safe-area-inset-bottom,0px)))}
+.carousel-window:has(.is-image-error),.gallery-item:has(.is-image-error),.case-slide:has(.is-image-error),.article-image-open:has(.is-image-error){animation:none!important;background:#f0f0f2!important}
+.carousel-window.carousel-ready{animation:none!important;background:#f0f0f2!important}
+#viewerFrame{touch-action:none}

@@ -28,7 +28,7 @@ export async function getPortfolio(){
   try{
     const url=new URL(`${SUPABASE_URL}/rest/v1/portfolio_content`);
     url.searchParams.set('select','payload');url.searchParams.set('id','eq.main');
-    const response=await fetch(url,{headers:{apikey:SUPABASE_PUBLISHABLE_KEY,Authorization:`Bearer ${SUPABASE_PUBLISHABLE_KEY}`,Accept:'application/json'},cache:'no-store'});
+    const response=await fetch(url,{headers:{apikey:SUPABASE_PUBLISHABLE_KEY,Authorization:`Bearer ${SUPABASE_PUBLISHABLE_KEY}`,Accept:'application/json'},cache:'no-store',signal:AbortSignal.timeout(9000)});
     if(!response.ok)throw new Error(`Supabase read failed (${response.status})`);
     const rows=await response.json();
     return normalise(rows[0]?.payload||await getLocal());
