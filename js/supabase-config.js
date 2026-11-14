@@ -1,5 +1,6 @@
-// Укажите Project URL и Publishable key (или старый anon key) из настроек Supabase.
-// Secret/service_role key сюда добавлять нельзя.
-export const SUPABASE_URL='YOUR_SUPABASE_PROJECT_URL';
-export const SUPABASE_ANON_KEY='YOUR_SUPABASE_PUBLISHABLE_OR_ANON_KEY';
+// Заполните значениями из Supabase Dashboard → Connect или Settings → API Keys.
+// В браузере используйте только Publishable key (sb_publishable_...) либо legacy anon key.
+// НИКОГДА не вставляйте Secret key (sb_secret_...) или service_role.
+export const SUPABASE_URL='https://hkfubiqsepanqtuosfty.supabase.co';
+export const SUPABASE_PUBLISHABLE_KEY='sb_publishable_BcQmT_qko7aYMyZdyCOTrQ_Ja6RCsQu';
 export const SUPABASE_BUCKET='portfolio-slides';

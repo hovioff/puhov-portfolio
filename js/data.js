@@ -1,4 +1,4 @@
-import {SUPABASE_URL,SUPABASE_ANON_KEY,SUPABASE_BUCKET} from './supabase-config.js';
+import {SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,SUPABASE_BUCKET} from './supabase-config.js';
 
 export const DEFAULT_DATA = {
   types:[{id:'products',name:'Карточки товаров'},{id:'banners',name:'Экспресс-баннеры'}],
@@ -12,10 +12,10 @@ export const DEFAULT_DATA = {
 };
 const DB_NAME='puhov-portfolio';
 let clientPromise;
-export const cloudEnabled=Boolean(SUPABASE_URL&&SUPABASE_ANON_KEY&&!SUPABASE_URL.includes('YOUR_')&&!SUPABASE_ANON_KEY.includes('YOUR_'));
+export const cloudEnabled=Boolean(SUPABASE_URL&&SUPABASE_PUBLISHABLE_KEY&&!SUPABASE_URL.includes('YOUR_')&&!SUPABASE_PUBLISHABLE_KEY.includes('YOUR_'));
 export async function getSupabase(){
   if(!cloudEnabled)throw new Error('Сначала заполните js/supabase-config.js.');
-  clientPromise||=(async()=>{const {createClient}=await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm');return createClient(SUPABASE_URL,SUPABASE_ANON_KEY,{auth:{persistSession:true,autoRefreshToken:true}});})();
+  clientPromise||=(async()=>{const {createClient}=await import('https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm');return createClient(SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,{auth:{persistSession:true,autoRefreshToken:true}});})();
   return clientPromise;
 }
 function clone(value){return JSON.parse(JSON.stringify(value));}
@@ -40,6 +40,8 @@ export async function savePortfolio(data){
   for(const project of data.projects){
     project.slides=await Promise.all((project.slides||[]).map((slide,index)=>uploadSlide(supabase,slide,project.id,index)));
     project.sections=await Promise.all((project.sections||[]).map(async(section,index)=>({...section,image:section.image?await uploadSlide(supabase,section.image,`${project.id}/story`,index):null})));
+    if(project.previewImage)project.previewImage=await uploadSlide(supabase,project.previewImage,`${project.id}/preview`,0);
+    if(project.blocks)project.blocks=await Promise.all(project.blocks.map(async(block,index)=>block.type==='image'?{...block,...await uploadSlide(supabase,block,`${project.id}/article`,index)}:block.type==='carousel'?{...block,slides:await Promise.all((block.slides||[]).map((slide,slideIndex)=>uploadSlide(supabase,slide,`${project.id}/carousel-${index}`,slideIndex)))}:block));
   }
   const {error}=await supabase.from('portfolio_content').upsert({id:'main',payload:data,updated_at:new Date().toISOString()});if(error)throw error;return data;
 }
