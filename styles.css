@@ -537,3 +537,5 @@ body.tg-mini-app .order-fab{bottom:calc(16px + max(env(safe-area-inset-bottom,0p
 /* Express banner cards keep their stack fixed while their depth drift runs at distinct rates. */
 body .is-banner-carousel .slide{animation-name:banner-depth-rest!important}
 @keyframes banner-depth-rest{from{opacity:.996;translate:0 0}to{opacity:1;translate:var(--drift-x,0px) var(--drift-y,0px)}}
+
+.meta-edit-fields label{display:grid;gap:6px;color:#68676c;font-size:10px;font-weight:650}.meta-edit-fields input{width:100%;min-height:42px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:#fff;color:#222;font-size:12px}.meta-edit-fields small{color:#88868d;font-size:9px;font-weight:450;line-height:1.4}
