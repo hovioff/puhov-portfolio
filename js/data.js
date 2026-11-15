@@ -59,6 +59,7 @@ export async function savePortfolio(data){
   }
   const {error}=await supabase.from('portfolio_content').upsert({id:'main',payload:data,updated_at:new Date().toISOString()});if(error)throw error;return data;
 }
+export function displayProjectImageCount(project={}){const raw=project?.slideCountOverride;if(raw!==''&&raw!==null&&raw!==undefined&&Number.isFinite(Number(raw))&&Number(raw)>=0)return Math.floor(Number(raw));return countProjectImages(project);}
 export function countProjectImages(project={}){
   const sources=new Set();let anonymous=0;
   const add=image=>{if(!image)return;if(typeof image==='string'){sources.add(image);return;}if(image.src)sources.add(image.src);else anonymous++;};

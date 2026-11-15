@@ -38,8 +38,9 @@ body .viewer-frame {
   animation: none !important;
   filter: none !important;
 }
-body .carousel-window .track:not(.is-static) { animation: carousel-diagonal var(--duration, 36s) linear infinite !important; will-change: transform; }
-body .project-hero-3d .track:not(.is-static) { animation: carousel-diagonal var(--duration, 36s) linear infinite !important; will-change: transform; }
+body .carousel-window .track:not(.is-static) { animation: carousel-diagonal var(--duration, 36s) linear infinite !important; }
+body .project-hero-3d .track:not(.is-static) { animation: carousel-diagonal var(--duration, 36s) linear infinite !important; }
+body .carousel-window.is-carousel-in-view .track:not(.is-static),body .project-hero-3d.is-carousel-in-view .track:not(.is-static){will-change:transform}
 body .track.is-static { animation: none !important; transform: translateY(var(--base-y, 0px)); }
 
 /* Even, readable work-type tabs; category chips remain the smaller secondary row. */
@@ -114,10 +115,6 @@ body .track.is-static { animation: none !important; transform: translateY(var(--
 .work-grid:not(.is-filtering) { opacity: 1; }
 
 /* Image readiness is explicit: the poster stays until its real image can be shown. */
-body .work-grid.has-content > .work-skeleton {
-  animation: none !important;
-  transition: opacity 180ms ease, visibility 180ms ease !important;
-}
 body img.is-image-loading { opacity: 0 !important; }
 body img.image-ready { opacity: 1; transition: opacity 220ms ease !important; }
 body .carousel-window:not(.carousel-ready):not(.carousel-failed) .track {
@@ -319,7 +316,7 @@ body .work-grid .work-block { animation: catalog-card-soft-in 340ms cubic-bezier
   from { opacity: .35; transform: translate3d(0,6px,0) scale(.995); }
   to { opacity: 1; transform: translate3d(0,0,0) scale(1); }
 }
-.hero3d-window { opacity: 0; transition: opacity 240ms ease-out; }
+.hero3d-window { opacity: 1; }
 .hero3d-window.carousel-ready, .hero3d-window.carousel-failed { opacity: 1; }
 @media (prefers-reduced-motion: reduce) { .hero3d-window { transition: none !important; } }
 
@@ -332,6 +329,11 @@ body .project-hero-3d .slide {
   transform-origin: top left !important;
 }
 @keyframes depth-rest { from { opacity: .996; } to { opacity: 1; } }
+body .carousel-window:not(.is-carousel-in-view) .track,body .carousel-window:not(.is-carousel-in-view) .slide{animation-play-state:paused!important}
+body .project-hero-3d:not(.is-carousel-in-view) .track,body .project-hero-3d:not(.is-carousel-in-view) .slide{animation-play-state:paused!important}
+body .carousel-window.is-carousel-in-view .track,body .project-hero-3d.is-carousel-in-view .track{animation-play-state:running!important}
+body .carousel-window.is-banner-carousel .slide,body .project-hero-3d.is-banner-carousel .slide{animation-name:banner-depth-rest!important}
+@keyframes banner-depth-rest{from{opacity:.996;translate:0 0}to{opacity:1;translate:var(--drift-x,0px) var(--drift-y,0px)}}
 @media (prefers-reduced-motion: reduce) {
   body .carousel-window .slide,
   body .project-hero-3d .slide { animation: none !important; opacity: 1 !important; }
@@ -414,23 +416,7 @@ body.tg-mini-app.project-page .project-hero-3d {
 
 /* Loading shimmer belongs to the carousel media only. Captions and page chrome stay live. */
 body.catalog-page .work-grid.is-loading { min-height: 0 !important; }
-body.catalog-page .work-grid.has-content > .work-skeleton {
-  min-width: 0;
-  overflow: hidden;
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-  box-shadow: none;
-  animation: none !important;
-  opacity: 1;
-  visibility: visible;
-  transition: opacity 220ms ease !important;
-}
-body.catalog-page .work-grid.has-content.is-revealing > .work-skeleton { opacity: 0; }
-body.catalog-page .work-grid .skeleton-media {
-  aspect-ratio: 808 / 632;
-  border-radius: 29px 29px 0 0;
-}
+body.catalog-page .work-grid.is-loading { min-height: 0 !important; }
 .carousel-loading-skeleton {
   position: absolute;
   z-index: 4;
@@ -459,6 +445,8 @@ body.catalog-page .carousel-window.carousel-ready .carousel-loading-skeleton,
 body.catalog-page .carousel-window.carousel-failed .carousel-loading-skeleton,
 body.catalog-page .catalog-static-window.carousel-ready .carousel-loading-skeleton,
 body.catalog-page .catalog-static-window.carousel-failed .carousel-loading-skeleton,
+body.project-page .case-slide-window.carousel-ready .carousel-loading-skeleton,
+body.project-page .catalog-static-window.carousel-ready .carousel-loading-skeleton,
 body.project-page .hero3d-window.carousel-ready .carousel-loading-skeleton,
 body.project-page .hero3d-window.carousel-failed .carousel-loading-skeleton {
   opacity: 0;
