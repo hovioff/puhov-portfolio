@@ -173,7 +173,6 @@ a, button { touch-action: manipulation; }
   }
 }
 
-.project-page .order-fab.is-scroll-hidden { transform: translateY(calc(100% + 24px)); opacity: 0; pointer-events: none; }
 .project-page .order-fab { transition: transform 180ms var(--motion-ease), opacity 180ms ease !important; }
 
 /* The category bar is a one-line horizontal rail; the selector follows at the same pace. */
@@ -287,3 +286,25 @@ body.project-page .project-hero-3d .back-button {
 }
 body.project-page .project-hero-3d .back-button > svg { width: 19px; height: 19px; }
 body.project-page .project-hero-3d .back-button:active { transform: scale(.92) !important; }
+
+/* Reveal motion previews only after the full track has decoded. */
+body .carousel-window .slide img.image-ready,
+body .hero3d-window .slide img.image-ready { animation: none !important; }
+body .project-page .order-fab.is-scroll-hidden { transform: none !important; opacity: 1 !important; pointer-events: auto !important; }
+.photo-count-icon { width: 14px; height: 14px; flex: 0 0 14px; object-fit: contain; }
+
+/* Each project card arrives as one cohesive surface, including its caption. */
+body .work-grid .work-block {
+  animation: project-card-drop 680ms cubic-bezier(.16,1,.3,1) both !important;
+  animation-delay: calc(var(--card-index,0) * 42ms) !important;
+  transform-origin: 50% 0%;
+  backface-visibility: hidden;
+}
+@keyframes project-card-drop {
+  0% { opacity: 0; transform: translate3d(0,-24px,0) scale(.982) rotateX(-2deg); }
+  72% { opacity: 1; transform: translate3d(0,2px,0) scale(1.002) rotateX(0); }
+  100% { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  body .work-grid .work-block { animation: none !important; }
+}

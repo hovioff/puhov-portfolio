@@ -1,6 +1,7 @@
 (() => {
   const params = new URLSearchParams(location.search);
-  const inTelegram = params.has('tgWebAppVersion') || /Telegram/i.test(navigator.userAgent);
+  const hasLaunchData = ['tgWebAppVersion','tgWebAppPlatform','tgWebAppData'].some(key => params.has(key)) || /tgWebAppData=/.test(location.hash);
+  const inTelegram = Boolean(window.Telegram?.WebApp) || hasLaunchData || /Telegram/i.test(navigator.userAgent) || Boolean(window.TelegramWebviewProxy || window.TelegramWebviewProxyProto);
   if (!inTelegram) return;
 
   const boot = () => {
@@ -8,19 +9,23 @@
     if (!app) return;
     document.body?.classList.add('tg-mini-app');
     const feedback = app.HapticFeedback;
-    const hapticsAvailable = Boolean(feedback && typeof feedback.impactOccurred === 'function' && (!app.isVersionAtLeast || app.isVersionAtLeast('6.1')));
+    const hapticsAvailable = Boolean(feedback && (!app.isVersionAtLeast || app.isVersionAtLeast('6.1')) && (typeof feedback.impactOccurred === 'function' || typeof feedback.selectionChanged === 'function' || typeof feedback.notificationOccurred === 'function'));
+    let lastHapticAt = 0;
     window.portfolioHaptic = kind => {
-      if (!hapticsAvailable) return false;
+      const now = Date.now();
+      if (now - lastHapticAt < 45) return false;
+      lastHapticAt = now;
       try {
-        if (kind === 'selection') {
-          if (typeof feedback.selectionChanged !== 'function') return false;
-          feedback.selectionChanged();
-        } else if (kind === 'success' || kind === 'warning' || kind === 'error') {
-          if (typeof feedback.notificationOccurred !== 'function') return false;
-          feedback.notificationOccurred(kind);
-        } else feedback.impactOccurred(kind === 'medium' ? 'medium' : 'light');
-        return true;
-      } catch { return false; }
+        if (hapticsAvailable) {
+          if ((kind === 'success' || kind === 'warning' || kind === 'error') && typeof feedback.notificationOccurred === 'function') feedback.notificationOccurred(kind);
+          else if (kind === 'selection' && typeof feedback.selectionChanged === 'function') feedback.selectionChanged();
+          else if (typeof feedback.impactOccurred === 'function') feedback.impactOccurred(kind === 'medium' ? 'medium' : 'light');
+          else if (typeof feedback.selectionChanged === 'function') feedback.selectionChanged();
+          return true;
+        }
+      } catch {}
+      // Some Android WebViews expose vibration even when Telegram's haptic bridge is unavailable.
+      try { return typeof navigator.vibrate === 'function' && navigator.vibrate(kind === 'medium' ? 16 : 10); } catch { return false; }
     };
     try { app.ready(); } catch {}
     try { app.expand(); } catch {}
@@ -29,14 +34,11 @@
     }
     document.addEventListener('click', event => {
       if (event.detail === 0) return;
-      const control = event.target.closest('button,a,[role="button"]');
+      const control = event.target.closest('button,a,[role="button"],input:not([type="hidden"]),select');
       if (!control || control.disabled || control.getAttribute('aria-disabled') === 'true') return;
-      if (control.matches('.segment,.category-chip')) {
-        if (control.matches('.segment.is-active,.category-chip[aria-pressed="true"]')) return;
-        window.portfolioHaptic('selection');
-      } else if (control.matches('.work-block,.back-button,.admin-row button,.primary-button,.secondary-button,.gallery-item,.article-image-open,.case-slide,.viewer-close,.order-fab,.telegram-button')) {
-        window.portfolioHaptic('light');
-      }
+      const selection = control.matches('.segment,.category-chip,[data-slide-to],input[type="checkbox"],input[type="radio"],select');
+      if (control.matches('.segment.is-active,[data-slide-to].is-active')) return;
+      window.portfolioHaptic(selection ? 'selection' : 'light');
     }, {capture:true,passive:true});
 
     if ((document.body.classList.contains('project-page') || document.body.classList.contains('contact-page')) && app.BackButton) {
