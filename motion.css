@@ -479,3 +479,57 @@ body.admin-page .form-actions .draft-status { flex-basis: 100%; }
   body.admin-page .draft-notice > div { flex-basis: 100%; }
   body.admin-page .draft-notice button { flex: 1; }
 }
+
+/* Fade loaded preview images over the existing image skeleton. */
+body .carousel-window .slide img.image-ready,
+body .hero3d-window .slide img.image-ready { animation: none !important; opacity: 1; }
+body .carousel-window.is-scroll-revealing .slide img.image-ready,
+body .project-hero-3d.is-scroll-revealing .slide img.image-ready {
+  animation: none !important;
+  opacity: 1;
+}
+.order-fab { line-height: 1; text-align: center; }
+.order-fab .order-fab-label {
+  display: block !important;
+  width: auto !important;
+  height: auto !important;
+  margin: 0;
+  border-radius: 0;
+  background: transparent;
+  font-size: inherit;
+  line-height: 1;
+  text-align: center;
+}
+body.project-page .related-work-block .work-type-badge {
+  position: absolute;
+  z-index: 5;
+  top: 12px;
+  left: 12px;
+  max-width: calc(100% - 24px);
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 12px;
+  overflow: hidden;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: #f2f2f4;
+  color: #39383e;
+  box-shadow: 0 3px 14px #17171912;
+  backdrop-filter: blur(12px);
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  pointer-events: none;
+}
+body.project-page .related-work-block .work-type-badge[data-work-type="products"] { background:#fff0e8; border-color:#f3d4c4; color:#814522; }
+body.project-page .related-work-block .work-type-badge[data-work-type="banners"] { background:#edf0ff; border-color:#d8defc; color:#43528a; }
+body.project-page .related-work-block .work-type-badge[data-work-type="vk-groups"] { background:#eaf6f0; border-color:#d2eadd; color:#35684f; }
+@media (max-width:600px) { body.project-page .related-work-block .work-type-badge { top:10px; left:10px; padding:7px 10px; font-size:9px; } }
+body.project-page .related-work-block .carousel-window.carousel-ready .carousel-loading-skeleton,
+body.project-page .related-work-block .carousel-window.carousel-failed .carousel-loading-skeleton { opacity: 0; }
+@media (prefers-reduced-motion: reduce) {
+  body .carousel-window.is-scroll-revealing .slide img.image-ready,
+  body .project-hero-3d.is-scroll-revealing .slide img.image-ready { animation: none !important; filter: none !important; }
+}
