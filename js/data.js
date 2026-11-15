@@ -40,9 +40,10 @@ export async function getPortfolio(){
     return getLocal();
   }
 }
+function dataURLToBlob(value){const comma=value.indexOf(',');if(!value.startsWith('data:')||comma<0)throw new Error('Не удалось прочитать локальное изображение.');const metadata=value.slice(5,comma),payload=value.slice(comma+1),mime=metadata.split(';')[0]||'application/octet-stream';let bytes;if(/(?:^|;)base64(?:;|$)/i.test(metadata)){const binary=atob(payload.replace(/\s/g,''));bytes=new Uint8Array(binary.length);for(let i=0;i<binary.length;i++)bytes[i]=binary.charCodeAt(i);}else bytes=new TextEncoder().encode(decodeURIComponent(payload));return new Blob([bytes],{type:mime});}
 async function uploadSlide(supabase,slide,projectId,index){
   if(!slide.src?.startsWith('data:'))return slide;
-  const response=await fetch(slide.src);const blob=await response.blob();if(!['image/webp','image/png','image/jpeg','image/avif'].includes(blob.type))throw new Error('Неподдерживаемый формат изображения.');const ext=blob.type==='image/png'?'png':blob.type==='image/jpeg'?'jpg':blob.type==='image/avif'?'avif':'webp';const path=`${projectId}/${Date.now()}-${index}.${ext}`;
+  const blob=dataURLToBlob(slide.src);if(!['image/webp','image/png','image/jpeg','image/avif'].includes(blob.type))throw new Error('Неподдерживаемый формат изображения.');const ext=blob.type==='image/png'?'png':blob.type==='image/jpeg'?'jpg':blob.type==='image/avif'?'avif':'webp';const path=`${projectId}/${Date.now()}-${index}.${ext}`;
   const {error}=await supabase.storage.from(SUPABASE_BUCKET).upload(path,blob,{contentType:blob.type,upsert:true});if(error)throw error;
   const {data}=supabase.storage.from(SUPABASE_BUCKET).getPublicUrl(path);return{...slide,src:data.publicUrl};
 }
