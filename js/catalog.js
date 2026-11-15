@@ -16,7 +16,18 @@ function dateValue(value=''){
 }
 let sortedProjects=[];
 const trackRuns=new WeakMap();
-function drawTypes(){tabs.innerHTML='<span class="segment-indicator" aria-hidden="true"></span>'+[{id:'all',name:'Общая лента'},...data.types].map(type=>`<button type="button" class="segment${type.id===activeType?' is-active':''}" data-type="${escapeHTML(type.id)}" aria-pressed="${String(type.id===activeType)}">${escapeHTML(type.name)}</button>`).join('');requestAnimationFrame(()=>{const active=tabs.querySelector('.segment.is-active'),indicator=tabs.querySelector('.segment-indicator');if(!active||!indicator)return;indicator.style.width=`${active.offsetWidth}px`;indicator.style.transform=`translate3d(${active.offsetLeft}px,0,0)`;active.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});});}
+function drawTypes(){
+  tabs.innerHTML='<span class="segment-indicator" aria-hidden="true"></span>'+[{id:'all',name:'Общая лента'},...data.types].map(type=>`<button type="button" class="segment${type.id===activeType?' is-active':''}" data-type="${escapeHTML(type.id)}" aria-pressed="${String(type.id===activeType)}">${escapeHTML(type.name)}</button>`).join('');
+  requestAnimationFrame(()=>moveTypeIndicator(true));
+}
+function moveTypeIndicator(center=false){
+  const active=tabs.querySelector('.segment.is-active'),indicator=tabs.querySelector('.segment-indicator');if(!active||!indicator)return;
+  if(center)active.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});
+  const tabsRect=tabs.getBoundingClientRect(),activeRect=active.getBoundingClientRect();
+  const x=activeRect.left-tabsRect.left+tabs.scrollLeft-tabs.clientLeft;
+  indicator.style.left=`${x}px`;
+  indicator.style.width=`${activeRect.width}px`;
+}
 function drawFilters(){
   const available=activeType==='all'
     ? [...new Set(sortedProjects.map(project=>project.type).filter(Boolean))]
@@ -95,8 +106,10 @@ function draw(){
 }
 function setCatalogLoading(loading){grid.classList.toggle('is-loading',loading);grid.setAttribute('aria-busy',String(loading));}
 let filterTimer;
-function redrawFiltered(animateChoice=true){clearTimeout(filterTimer);grid.classList.toggle('is-filtering',animateChoice);filterTimer=setTimeout(()=>{drawTypes();drawFilters();draw();requestAnimationFrame(()=>grid.classList.remove('is-filtering'));},animateChoice?130:0);}
-tabs.addEventListener('click',event=>{const button=event.target.closest('[data-type]');if(!button||button.dataset.type===activeType)return;activeType=button.dataset.type;activeCategories.clear();redrawFiltered(false);});
+function redrawFiltered(animateChoice=true){clearTimeout(filterTimer);grid.classList.toggle('is-filtering',animateChoice);filterTimer=setTimeout(()=>{drawFilters();draw();requestAnimationFrame(()=>grid.classList.remove('is-filtering'));},animateChoice?130:0);}
+tabs.addEventListener('click',event=>{const button=event.target.closest('[data-type]');if(!button||button.dataset.type===activeType)return;activeType=button.dataset.type;activeCategories.clear();tabs.querySelectorAll('.segment').forEach(segment=>{const selected=segment===button;segment.classList.toggle('is-active',selected);segment.setAttribute('aria-pressed',String(selected));});moveTypeIndicator();redrawFiltered(false);});
+tabs.addEventListener('scroll',()=>moveTypeIndicator(),{passive:true});
+window.addEventListener('resize',()=>moveTypeIndicator(),{passive:true});
 filters.addEventListener('click',event=>{const button=event.target.closest('[data-filter]');if(!button)return;const key=button.dataset.filter;if(activeCategories.has(key))activeCategories.delete(key);else activeCategories.add(key);redrawFiltered(true);});
 setCatalogLoading(true);
 try{data=await getPortfolio();}catch(error){console.error('Не удалось загрузить портфолио:',error);data={types:[],categories:[],projects:[]};}

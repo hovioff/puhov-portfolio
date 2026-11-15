@@ -4,6 +4,8 @@
   const inTelegram = Boolean(window.Telegram?.WebApp) || hasLaunchData || /Telegram/i.test(navigator.userAgent) || Boolean(window.TelegramWebviewProxy || window.TelegramWebviewProxyProto);
   const inlineBack = document.querySelector('#backButton,.contact-back');
   if (!inTelegram) { if (inlineBack) inlineBack.hidden = false; return; }
+  // Mark immediately; Telegram WebViews can expand after first paint and otherwise
+  // briefly composite preserve-3d carousel layers in a different order.
   document.body?.classList.add('tg-mini-app');
 
   const boot = () => {
@@ -29,6 +31,7 @@
       try { return typeof navigator.vibrate === 'function' && navigator.vibrate(kind === 'medium' ? 16 : 10); } catch { return false; }
     };
     try { app.ready(); } catch {}
+    try { app.disableVerticalSwipes?.(); } catch {}
     try { app.expand(); } catch {}
     for (const [method, color] of [['setHeaderColor','#f5f5f7'],['setBackgroundColor','#f5f5f7'],['setBottomBarColor','#f5f5f7']]) {
       try { app[method]?.(color); } catch {}

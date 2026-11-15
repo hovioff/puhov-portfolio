@@ -378,3 +378,34 @@ body.catalog-page #workGrid.is-filtering .work-block { animation: none !importan
 @media (max-width: 600px) {
   body.catalog-page .work-type-badge { top: 10px; left: 10px; padding: 7px 10px 7px 8px; font-size: 9px; }
 }
+
+/* Size each work tab to its label so the dark active surface travels with it. */
+body.catalog-page #typeTabs .segment {
+  flex: 0 0 auto !important;
+  width: max-content !important;
+  min-width: max-content !important;
+  padding-inline: 15px !important;
+}
+body.catalog-page #typeTabs .segment-indicator {
+  transform: none !important;
+  transition: left 460ms cubic-bezier(.22,.72,.18,1), width 340ms cubic-bezier(.22,.72,.18,1) !important;
+  will-change: left, width;
+}
+
+/* Telegram's WKWebView recomposites preserve-3d children during viewport expansion.
+   Keep the intentional diagonal stack, but make its layer order static there. */
+body.tg-mini-app.catalog-page .carousel-window {
+  perspective: none !important;
+  transform-style: flat !important;
+  isolation: isolate !important;
+}
+body.tg-mini-app.catalog-page .carousel-window .track,
+body.tg-mini-app.catalog-page .carousel-window .track-set {
+  transform-style: flat !important;
+}
+body.tg-mini-app.catalog-page .carousel-window .slide {
+  transform: translateY(var(--rise,0px)) rotate(var(--card-angle,-8deg)) scale(var(--depth-scale,1)) !important;
+  transform-style: flat !important;
+  backface-visibility: visible !important;
+  z-index: var(--depth,1) !important;
+}
