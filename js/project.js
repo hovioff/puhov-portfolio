@@ -19,6 +19,7 @@ if(project.hero3D!==false&&(project.slides||[]).length){
     track.style.setProperty('--card-angle','-8deg');track.style.setProperty('--travel-x',`${groupX}px`);track.style.setProperty('--travel-y',`${-groupY}px`);track.style.setProperty('--base-y',`${-9+startX*Math.tan(angle)}px`);track.style.setProperty('--duration',`${Math.hypot(groupX,groupY)/34}s`);track.style.left=`${startX}px`;
     const images=[...track.querySelectorAll('img')];await Promise.all(images.map(img=>new Promise((resolve,reject)=>{if(img.complete){img.naturalWidth?resolve():reject(new Error('Не удалось загрузить изображение шапки'));return;}const timer=setTimeout(()=>reject(new Error('Истекло время загрузки изображения шапки')),12000);img.addEventListener('load',()=>{clearTimeout(timer);resolve();},{once:true});img.addEventListener('error',()=>{clearTimeout(timer);reject(new Error('Не удалось загрузить изображение шапки'));},{once:true});})));
     await Promise.all(images.map(img=>typeof img.decode==='function'?img.decode():Promise.resolve()));
+    if(!viewport.classList.contains('carousel-ready'))await new Promise(resolve=>setTimeout(resolve,1000));
     viewport.classList.add('carousel-ready');
   };
   setup().catch(error=>{console.error('Не удалось подготовить 3D-шапку:',error);track.classList.add('is-static');viewport.classList.add('carousel-failed');});

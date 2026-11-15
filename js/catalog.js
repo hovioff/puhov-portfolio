@@ -4,7 +4,7 @@ const filters=document.querySelector('#filters');
 const tabs=document.querySelector('#typeTabs');
 const empty=document.querySelector('#emptyState');
 let activeType='all';const activeCategories=new Set();let data;
-const typeName=id=>data.types.find(type=>type.id===id)?.name||id;
+const typeName=id=>data.types.find(type=>type.id===id)?.name||({products:'Карточки товаров',banners:'Экспресс-баннеры','vk-groups':'Группы ВК'}[id]||id);
 const categoryName=id=>data.categories.find(category=>category.id===id)?.name||id;
 const monthNames={января:0,февраля:1,марта:2,апреля:3,мая:4,июня:5,июля:6,августа:7,сентября:8,октября:9,ноября:10,декабря:11};
 function dateValue(value=''){
@@ -18,7 +18,11 @@ let sortedProjects=[];
 const trackRuns=new WeakMap();
 function drawTypes(){
   tabs.innerHTML='<span class="segment-indicator" aria-hidden="true"></span>'+[{id:'all',name:'Общая лента'},...data.types].map(type=>`<button type="button" class="segment${type.id===activeType?' is-active':''}" data-type="${escapeHTML(type.id)}" aria-pressed="${String(type.id===activeType)}">${escapeHTML(type.name)}</button>`).join('');
-  requestAnimationFrame(()=>moveTypeIndicator(true));
+  const indicator=tabs.querySelector('.segment-indicator');indicator?.classList.add('is-initializing');
+  requestAnimationFrame(()=>{
+    moveTypeIndicator(true);
+    requestAnimationFrame(()=>indicator?.classList.remove('is-initializing'));
+  });
 }
 function moveTypeIndicator(center=false){
   const active=tabs.querySelector('.segment.is-active'),indicator=tabs.querySelector('.segment-indicator');if(!active||!indicator)return;
@@ -39,11 +43,11 @@ function drawFilters(){
 }
 function card(project,cardIndex=0){
   const slides=project.slides||[];
-  const badge=activeType==='all'?`<span class="work-type-badge">${escapeHTML(typeName(project.type))}</span>`:'';
-  if(project.previewImage?.src)return `<a class="work-block" style="--card-index:${Math.min(cardIndex,8)}" href="project.html?id=${encodeURIComponent(project.id)}" aria-label="Открыть проект «${escapeHTML(project.title)}"><div class="carousel-window catalog-static-window"><img class="catalog-static-preview" src="${escapeHTML(project.previewImage.src)}" alt="${escapeHTML(project.title)}" loading="lazy">${badge}</div><div class="block-caption"><h2 class="block-title">${escapeHTML(project.title)}</h2><span class="slide-count"><b>${slides.length}</b><img class="photo-count-icon" src="assets/photo-icon.png" alt="" aria-hidden="true" width="14" height="14" loading="eager" decoding="async"></span></div></a>`;
+  const badge=activeType==='all'?`<span class="work-type-badge" data-work-type="${escapeHTML(project.type)}">${escapeHTML(typeName(project.type))}</span>`:'';
+  if(project.previewImage?.src)return `<a class="work-block" style="--card-index:${Math.min(cardIndex,8)}" href="project.html?id=${encodeURIComponent(project.id)}" aria-label="Открыть проект «${escapeHTML(project.title)}"><div class="carousel-window catalog-static-window"><span class="carousel-loading-skeleton" aria-hidden="true"></span><img class="catalog-static-preview" src="${escapeHTML(project.previewImage.src)}" alt="${escapeHTML(project.title)}" loading="lazy">${badge}</div><div class="block-caption"><h2 class="block-title">${escapeHTML(project.title)}</h2><span class="slide-count"><b>${slides.length}</b><img class="photo-count-icon" src="assets/photo-icon.png" alt="" aria-hidden="true" width="14" height="14" loading="eager" decoding="async"></span></div></a>`;
   const orderedSlides=slides.length>1?[slides[slides.length-1],...slides.slice(0,-1)]:slides;
   const group=(duplicate=false)=>`<div class="track-set${duplicate?' track-set-repeat':''}"${duplicate?' aria-hidden="true"':''}>${orderedSlides.map((slide,index)=>{const near=index%2===1,drift=near?'-2px':'4.5px',cycle=near?18+(index%3)*2:3.6+(index%3)*.45,loading=duplicate||cardIndex>1||index>1?'lazy':'eager',priority=!duplicate&&cardIndex===0&&index===0?'high':'auto';return`<div class="slide" style="--depth:${index+1};--depth-z:${near?'12px':'-7px'};--depth-yaw:${near?'-1.4deg':'1deg'};--depth-scale:${near?'1.012':'.994'};--shadow-y:${near?'4px':'1px'};--shadow-blur:${near?'9px':'4px'};--shadow-alpha:${near?'.15':'.08'};--float-duration:${cycle}s;--float-delay:0s;--drift-x:${drift};--drift-y:${near?'-0.8px':'0.7px'}"><img src="${escapeHTML(slide.src)}" alt="${duplicate?'':escapeHTML(slide.alt||project.title)}" loading="${loading}" fetchpriority="${priority}" decoding="async"></div>`;}).join('')}</div>`;
-  return `<a class="work-block" style="--card-index:${Math.min(cardIndex,8)}" href="project.html?id=${encodeURIComponent(project.id)}" aria-label="Открыть проект «${escapeHTML(project.title)}"><div class="carousel-window"><div class="track${slides.length<2?' is-static':''}" data-carousel="${escapeHTML(project.id)}">${group()}</div>${badge}</div><div class="block-caption"><h2 class="block-title">${escapeHTML(project.title)}</h2><span class="slide-count"><b>${slides.length}</b><img class="photo-count-icon" src="assets/photo-icon.png" alt="" aria-hidden="true" width="14" height="14" loading="eager" decoding="async"></span></div></a>`;
+  return `<a class="work-block" style="--card-index:${Math.min(cardIndex,8)}" href="project.html?id=${encodeURIComponent(project.id)}" aria-label="Открыть проект «${escapeHTML(project.title)}"><div class="carousel-window"><span class="carousel-loading-skeleton" aria-hidden="true"></span><div class="track${slides.length<2?' is-static':''}" data-carousel="${escapeHTML(project.id)}">${group()}</div>${badge}</div><div class="block-caption"><h2 class="block-title">${escapeHTML(project.title)}</h2><span class="slide-count"><b>${slides.length}</b><img class="photo-count-icon" src="assets/photo-icon.png" alt="" aria-hidden="true" width="14" height="14" loading="eager" decoding="async"></span></div></a>`;
 }
 const cardAngle=-Math.PI*8/180,pixelsPerSecond=34;
 async function prepareTrack(track,project){
@@ -78,6 +82,7 @@ async function prepareTrack(track,project){
   if(trackRuns.get(track)!==run||!track.isConnected)return;
   track.closest('.carousel-window').classList.add('carousel-ready');
 }
+let catalogRevealScheduled=false;
 function revealCatalogWhenReady(){
   if(!grid.classList.contains('has-content'))return;
   const visibleCards=[...grid.querySelectorAll('.work-block')].slice(0,matchMedia('(max-width: 600px)').matches?1:2);
@@ -86,8 +91,19 @@ function revealCatalogWhenReady(){
     if(window?.classList.contains('catalog-static-window'))return !window.querySelector('img.is-image-loading');
     return window?.classList.contains('carousel-ready')||window?.classList.contains('carousel-failed');
   });
-  if(!ready)return;
-  grid.classList.remove('has-content');grid.querySelectorAll('.work-skeleton').forEach(node=>node.remove());setCatalogLoading(false);
+  if(!ready||catalogRevealScheduled)return;
+  catalogRevealScheduled=true;
+  setTimeout(()=>{
+    if(!grid.classList.contains('has-content')){catalogRevealScheduled=false;return;}
+    const stillReady=[...grid.querySelectorAll('.work-block')].slice(0,matchMedia('(max-width: 600px)').matches?1:2).every(card=>{
+      const window=card.querySelector('.carousel-window');
+      if(window?.classList.contains('catalog-static-window'))return !window.querySelector('img.is-image-loading');
+      return window?.classList.contains('carousel-ready')||window?.classList.contains('carousel-failed');
+    });
+    if(!stillReady){catalogRevealScheduled=false;return;}
+    grid.classList.add('is-revealing');
+    setTimeout(()=>{grid.querySelectorAll('.work-skeleton').forEach(node=>node.remove());grid.classList.remove('has-content','is-revealing');setCatalogLoading(false);catalogRevealScheduled=false;},220);
+  },1000);
 }
 let trackObserver;
 function draw(){
@@ -97,7 +113,7 @@ function draw(){
     return activeType==='all'?activeCategories.has(project.type):activeCategories.has(project.category);
   });
   grid.innerHTML=shown.map((project,index)=>card(project,index)).join('');grid.hidden=!shown.length;empty.hidden=!!shown.length;
-  grid.querySelectorAll('img').forEach(img=>{img.classList.add('is-image-loading');const finish=()=>{img.classList.remove('is-image-loading');img.classList.add('image-ready');requestAnimationFrame(revealCatalogWhenReady);};if(img.complete&&img.naturalWidth)finish();else{img.addEventListener('load',finish,{once:true});img.addEventListener('error',()=>{img.classList.remove('is-image-loading');img.classList.add('is-image-error');requestAnimationFrame(revealCatalogWhenReady);},{once:true});setTimeout(()=>{if(img.classList.contains('is-image-loading')){img.classList.remove('is-image-loading');img.classList.add('is-image-error');requestAnimationFrame(revealCatalogWhenReady);}},8000);}});
+  grid.querySelectorAll('img').forEach(img=>{img.classList.add('is-image-loading');const finish=()=>{img.classList.remove('is-image-loading');img.classList.add('image-ready');const media=img.closest('.catalog-static-window');if(media)media.classList.add('carousel-ready');requestAnimationFrame(revealCatalogWhenReady);};if(img.complete&&img.naturalWidth)finish();else{img.addEventListener('load',finish,{once:true});img.addEventListener('error',()=>{img.classList.remove('is-image-loading');img.classList.add('is-image-error');const media=img.closest('.catalog-static-window');if(media)media.classList.add('carousel-failed');requestAnimationFrame(revealCatalogWhenReady);},{once:true});setTimeout(()=>{if(img.classList.contains('is-image-loading')){img.classList.remove('is-image-loading');img.classList.add('is-image-error');const media=img.closest('.catalog-static-window');if(media)media.classList.add('carousel-failed');requestAnimationFrame(revealCatalogWhenReady);}},8000);}});
   trackObserver?.disconnect();
   const tracks=[...grid.querySelectorAll('[data-carousel]')];
   const startTrack=track=>{const project=shown.find(item=>item.id===track.dataset.carousel);if(project)prepareTrack(track,project).catch(error=>{console.error('Не удалось подготовить карусель:',error);track.classList.add('is-static');track.closest('.carousel-window')?.classList.add('carousel-failed');}).finally(revealCatalogWhenReady);};
