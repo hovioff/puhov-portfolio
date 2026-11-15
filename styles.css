@@ -539,3 +539,10 @@ body .is-banner-carousel .slide{animation-name:banner-depth-rest!important}
 @keyframes banner-depth-rest{from{opacity:.996;translate:0 0}to{opacity:1;translate:var(--drift-x,0px) var(--drift-y,0px)}}
 
 .meta-edit-fields label{display:grid;gap:6px;color:#68676c;font-size:10px;font-weight:650}.meta-edit-fields input{width:100%;min-height:42px;padding:10px 12px;border:1px solid var(--line);border-radius:12px;background:#fff;color:#222;font-size:12px}.meta-edit-fields small{color:#88868d;font-size:9px;font-weight:450;line-height:1.4}
+
+
+/* Keep project duration in one clear line and balance headings naturally. */
+.project-meta .meta-duration-pill{display:flex;align-items:center;justify-content:center;min-width:0;white-space:nowrap}
+.project-meta .meta-duration-pill strong{font-size:clamp(13px,3.7vw,17px);white-space:nowrap}
+.case-article-title,.project-intro h1,.block-title,.project-story-section h2,.article-rich h2,.article-rich h3{text-wrap:balance}
+.article-rich p,.project-description,.project-story-section p{text-wrap:pretty}

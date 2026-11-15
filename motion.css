@@ -533,3 +533,37 @@ body.project-page .related-work-block .carousel-window.carousel-failed .carousel
   body .carousel-window.is-scroll-revealing .slide img.image-ready,
   body .project-hero-3d.is-scroll-revealing .slide img.image-ready { animation: none !important; filter: none !important; }
 }
+
+/* Images outside the screen recede into the page surface, then clear as they enter. */
+body img.image-ready,
+body .carousel-window .slide img.image-ready,
+body .hero3d-window .slide img.image-ready,
+body .project-gallery img.image-ready,
+body .case-slide-window img.image-ready,
+body .article-image-block img.image-ready,
+body .article-image img.image-ready,
+body .related-work-block img.image-ready,
+body .catalog-static-window img.image-ready {
+  transition: opacity 520ms cubic-bezier(.2,.75,.25,1), filter 520ms cubic-bezier(.2,.75,.25,1) !important;
+}
+body img.image-ready.is-out-of-view,
+body .carousel-window .slide img.image-ready.is-out-of-view,
+body .hero3d-window .slide img.image-ready.is-out-of-view,
+body .project-gallery img.image-ready.is-out-of-view,
+body .case-slide-window img.image-ready.is-out-of-view,
+body .article-image-block img.image-ready.is-out-of-view,
+body .article-image img.image-ready.is-out-of-view,
+body .related-work-block img.image-ready.is-out-of-view,
+body .catalog-static-window img.image-ready.is-out-of-view {
+  opacity: .2 !important;
+  filter: blur(9px) saturate(.68) !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  body img.image-ready,
+  body .carousel-window .slide img.image-ready,
+  body .hero3d-window .slide img.image-ready,
+  body .project-gallery img.image-ready,
+  body .case-slide-window img.image-ready,
+  body .article-image-block img.image-ready,
+  body .article-image img.image-ready { transition: none !important; }
+}

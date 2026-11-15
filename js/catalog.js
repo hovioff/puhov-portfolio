@@ -1,4 +1,5 @@
 import {getPortfolio,escapeHTML,displayProjectImageCount} from './data.js?v=20261115-06';
+import {polishTypography} from './typography.js?v=20261115-01';
 const grid=document.querySelector('#workGrid');
 const filters=document.querySelector('#filters');
 const tabs=document.querySelector('#typeTabs');
@@ -7,6 +8,9 @@ let activeType='all';const activeCategories=new Set();let data;
 const typeName=id=>data.types.find(type=>type.id===id)?.name||({products:'Карточки товаров',banners:'Экспресс-баннеры','vk-groups':'Группы ВК'}[id]||id);
 const categoryName=id=>data.categories.find(category=>category.id===id)?.name||id;
 const threeDSkeleton='<span class="carousel-loading-skeleton" aria-hidden="true"></span>';
+const scrollImageObserver='IntersectionObserver'in window?new IntersectionObserver(entries=>entries.forEach(entry=>entry.target.classList.toggle('is-out-of-view',!entry.isIntersecting)),{threshold:.025}):null;
+function observeScrollImage(img){scrollImageObserver?.observe(img);}
+
 const monthNames={января:0,январь:0,янв:0,февраля:1,февраль:1,фев:1,марта:2,март:2,мар:2,апреля:3,апрель:3,апр:3,мая:4,май:4,июня:5,июнь:5,июн:5,июля:6,июль:6,июл:6,августа:7,август:7,авг:7,сентября:8,сентябрь:8,сен:8,октября:9,октябрь:9,окт:9,ноября:10,ноябрь:10,ноя:10,декабря:11,декабрь:11,дек:11};
 function dateValue(value=''){
   const raw=String(value).trim(),lower=raw.toLocaleLowerCase('ru');
@@ -22,7 +26,7 @@ function dateValue(value=''){
   const year=raw.match(/(?:19|20)\d{2}/);return year?new Date(+year[0],0,1).getTime():0;
 }
 let sortedProjects=[];let projectsById=new Map();
-const trackRuns=new WeakMap();const imageObservers=new WeakMap();const activeImageObservers=new Set();
+const trackRuns=new WeakMap();const imageObservers=new WeakMap();const activeImageObservers=new Set();const imageLoadGuards=new WeakMap();
 function drawTypes(){
   tabs.innerHTML='<span class="segment-indicator" aria-hidden="true"></span>'+[{id:'all',name:'Общая лента'},...data.types].map(type=>`<button type="button" class="segment${type.id===activeType?' is-active':''}" data-type="${escapeHTML(type.id)}" aria-pressed="${String(type.id===activeType)}">${escapeHTML(type.name)}</button>`).join('');
   const indicator=tabs.querySelector('.segment-indicator');indicator?.classList.add('is-initializing');
@@ -61,7 +65,8 @@ function card(project,cardIndex=0){
 const cardAngle=-Math.PI*8/180,pixelsPerSecond=34;
 const revealedCarousels=new WeakSet();
 function revealCarouselOnEntry(viewport){if(!viewport||revealedCarousels.has(viewport)||!viewport.classList.contains('carousel-ready'))return;revealedCarousels.add(viewport);viewport.classList.add('is-scroll-revealing');}
-function watchCatalogImage(img){if(img.dataset.catalogImageWatched==='true')return;img.dataset.catalogImageWatched='true';img.classList.add('is-image-loading');const media=img.closest('.catalog-static-window'),finish=()=>{img.classList.remove('is-image-loading','is-image-error');img.classList.add('image-ready');if(media&&img.matches('.catalog-static-preview'))media.classList.add('carousel-ready');},fail=()=>{img.classList.remove('is-image-loading');img.classList.add('is-image-error');if(media&&img.matches('.catalog-static-preview'))media.classList.add('carousel-failed');};if(img.complete){img.naturalWidth?finish():fail();return;}let timer=setTimeout(fail,12000);img.addEventListener('load',()=>{clearTimeout(timer);finish();},{once:true});img.addEventListener('error',()=>{clearTimeout(timer);fail();},{once:true});}
+function watchCatalogImage(img){observeScrollImage(img);if(img.dataset.catalogImageWatched==='true')return;img.dataset.catalogImageWatched='true';img.classList.add('is-image-loading');const media=img.closest('.catalog-static-window');let timer=0;const finish=()=>{clearTimeout(timer);timer=0;img.classList.remove('is-image-loading','is-image-error');img.classList.add('image-ready');if(media&&img.matches('.catalog-static-preview'))media.classList.add('carousel-ready');},fail=()=>{clearTimeout(timer);timer=0;img.classList.remove('is-image-loading');img.classList.add('is-image-error');if(media&&img.matches('.catalog-static-preview'))media.classList.add('carousel-failed');},armTimeout=()=>{if(!timer&&!img.complete)timer=setTimeout(()=>{timer=0;img.naturalWidth?finish():fail();},30000);};imageLoadGuards.set(img,armTimeout);if(img.complete&&img.naturalWidth){finish();return;}if(img.complete&&img.loading!=='lazy'){fail();return;}if(img.loading!=='lazy')armTimeout();img.addEventListener('load',finish,{once:true});img.addEventListener('error',fail,{once:true});}
+function requestCatalogImage(img){img.loading='eager';imageLoadGuards.get(img)?.();}
 async function prepareTrack(track,project){
   const run=(trackRuns.get(track)||0)+1;trackRuns.set(track,run);
   const ordered=project.slides.length>1?[project.slides.at(-1),...project.slides.slice(0,-1)]:project.slides;
@@ -89,13 +94,13 @@ async function prepareTrack(track,project){
   const baseY=-overscan/2+10+startX*Math.tan(cardAngle);
   track.style.setProperty('--card-angle','-8deg');track.style.setProperty('--travel-x',`${groupX}px`);track.style.setProperty('--travel-y',`${travelY}px`);track.style.setProperty('--base-y',`${baseY}px`);track.style.setProperty('--duration',`${distance/pixelsPerSecond}s`);track.style.left=`${startX}px`;
   imageObservers.get(track)?.disconnect();
-  const imageObserver=new IntersectionObserver(entries=>entries.forEach(entry=>{if(!entry.isIntersecting)return;entry.target.loading='eager';imageObserver.unobserve(entry.target);}),{root:viewport,rootMargin:'180px 0px'});
+  const imageObserver=new IntersectionObserver(entries=>entries.forEach(entry=>{if(!entry.isIntersecting)return;requestCatalogImage(entry.target);imageObserver.unobserve(entry.target);}),{root:viewport,rootMargin:'180px 0px'});
   imageObservers.set(track,imageObserver);activeImageObservers.add(imageObserver);
   const allImages=[...track.querySelectorAll('.slide img')];allImages.forEach(img=>{watchCatalogImage(img);if(!img.complete||!img.naturalWidth)imageObserver.observe(img);});
   const baseImages=[...base.querySelectorAll('.slide img')],visibleCount=Math.min(baseImages.length,Math.max(3,Math.ceil(viewportWidth/Math.max(1,widths[0]*.75))+1));
-  baseImages.forEach((img,index)=>{img.loading=index<visibleCount?'eager':'lazy';});
+  baseImages.forEach((img,index)=>{if(index<visibleCount)requestCatalogImage(img);else img.loading='lazy';});
   const criticalImages=baseImages.slice(0,visibleCount);
-  await Promise.all(criticalImages.map(img=>new Promise((resolve,reject)=>{if(img.complete){img.naturalWidth?resolve():reject(new Error('Изображение карусели недоступно'));return;}const timer=setTimeout(()=>reject(new Error('Таймаут загрузки видимых изображений')),8000);img.addEventListener('load',()=>{clearTimeout(timer);resolve();},{once:true});img.addEventListener('error',()=>{clearTimeout(timer);reject(new Error('Изображение карусели недоступно'));},{once:true});})));
+  await Promise.all(criticalImages.map(img=>new Promise((resolve,reject)=>{if(img.complete){img.naturalWidth?resolve():reject(new Error('Изображение карусели недоступно'));return;}const timer=setTimeout(()=>reject(new Error('Таймаут загрузки видимых изображений')),30000);img.addEventListener('load',()=>{clearTimeout(timer);resolve();},{once:true});img.addEventListener('error',()=>{clearTimeout(timer);reject(new Error('Изображение карусели недоступно'));},{once:true});})));
   await Promise.all(criticalImages.map(img=>typeof img.decode==='function'?img.decode():Promise.resolve()));
   if(trackRuns.get(track)!==run||!track.isConnected)return;
   const window=track.closest('.carousel-window');window.classList.add('carousel-ready');revealCarouselOnEntry(window);
@@ -111,6 +116,7 @@ function draw(){
     return activeType==='all'?activeCategories.has(project.type):activeCategories.has(project.category);
   });
   grid.innerHTML=shown.map((project,index)=>card(project,index)).join('');grid.hidden=!shown.length;empty.hidden=!!shown.length;
+  polishTypography(grid);
   grid.querySelectorAll('.catalog-static-preview,.photo-count-icon,.track img').forEach(watchCatalogImage);
   const tracks=[...grid.querySelectorAll('[data-carousel]')];
   if('IntersectionObserver'in window){visibilityObserver=new IntersectionObserver(entries=>entries.forEach(entry=>{entry.target.classList.toggle('is-carousel-in-view',entry.isIntersecting);if(entry.isIntersecting)revealCarouselOnEntry(entry.target);}),{rootMargin:'0px'});tracks.forEach(track=>visibilityObserver.observe(track.closest('.carousel-window')));}else tracks.forEach(track=>{track.closest('.carousel-window')?.classList.add('is-carousel-in-view');revealCarouselOnEntry(track.closest('.carousel-window'));});
