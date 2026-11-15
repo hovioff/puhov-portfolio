@@ -1,10 +1,11 @@
 /* Motion language: quiet, tactile, and tied to user actions. Cards and carousel remain owned by styles.css. */
 :root{--motion-fast:180ms;--motion-base:280ms;--motion-slow:420ms;--motion-ease:cubic-bezier(.22,.68,.18,1)}
 @view-transition{navigation:auto}
-::view-transition-old(root){animation:site-fade-out 140ms ease both}
-::view-transition-new(root){animation:site-fade-in 240ms ease both}
-@keyframes site-fade-out{to{opacity:0}}
-@keyframes site-fade-in{from{opacity:0}to{opacity:1}}
+::view-transition-group(root){isolation:isolate;overflow:clip}
+::view-transition-old(root){z-index:0;animation:layer-page-away .34s cubic-bezier(.22,.68,.18,1) both}
+::view-transition-new(root){z-index:1;animation:layer-page-over .38s cubic-bezier(.2,.75,.25,1) both;box-shadow:0 10px 36px rgba(20,20,24,.16)}
+@keyframes layer-page-away{to{transform:translateX(-4%) scale(.975);filter:brightness(.82);opacity:.78}}
+@keyframes layer-page-over{from{transform:translateX(28px) scale(.988);opacity:.88}to{transform:translateX(0) scale(1);opacity:1}}
 /* Remove accumulated page and section entrance effects; they caused visible jumps. */
 .catalog-shell,.project-shell,.admin-shell,.contact-shell,.portfolio-notice,.segmented,.filters,.search,.project-intro,.project-intro>*,.project-gallery,.project-gallery>*,.case-article,.case-article>*,.contact-hero,.contact-hero>*,.contact-header,.order-fab{animation:none!important;filter:none!important}
 /* Native-like selection feedback without scale, bounce, or hover-only behavior. */
@@ -24,7 +25,11 @@
 @keyframes viewer-fade-in{from{opacity:0}to{opacity:1}}
 @keyframes viewer-fade-out{to{opacity:0}}
 .viewer-count,.viewer-close{animation:none!important}
-@media(prefers-reduced-motion:reduce){::view-transition-old(root),::view-transition-new(root){animation:none!important}.segment,.category-chip,.back-button,.contact-back,.viewer-close,.order-fab,.telegram-button,.primary-button,.secondary-button,.work-grid,.case-slide-track,.case-slider-dots button,.viewer-frame{transition:none!important;animation:none!important}}
+@media(prefers-reduced-motion:reduce){::view-transition-old(root),::view-transition-new(root){animation:none!important;filter:none!important}.segment,.category-chip,.back-button,.contact-back,.viewer-close,.order-fab,.telegram-button,.primary-button,.secondary-button,.work-grid,.case-slide-track,.case-slider-dots button,.viewer-frame{transition:none!important;animation:none!important}}
 
 /* Drag-to-dismiss feedback for the full-screen photo viewer. */
 #viewerFrame{will-change:transform,opacity;transition:transform .22s cubic-bezier(.2,.7,.25,1),opacity .22s ease}
+
+#viewerRetry{position:absolute;z-index:4;left:50%;top:50%;transform:translate(-50%,-50%);padding:11px 16px;border:1px solid #ffffff40;border-radius:999px;background:#ffffffeb;color:#171719;font-family:inherit;font-size:13px;font-weight:600;line-height:1}
+#viewerImage.is-image-error~#viewerRetry{display:block}
+#viewerRetry[hidden]{display:none!important}

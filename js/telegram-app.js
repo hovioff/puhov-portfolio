@@ -14,21 +14,26 @@
     app.setBottomBarColor?.('#f5f5f7');
 
     const feedback = app.HapticFeedback;
+    const hapticsAvailable = Boolean(feedback && typeof feedback.impactOccurred === 'function' && (!app.isVersionAtLeast || app.isVersionAtLeast('6.1')));
     window.portfolioHaptic = kind => {
+      if (!hapticsAvailable) return false;
       try {
-        if (kind === 'selection') feedback?.selectionChanged();
-        else feedback?.impactOccurred('light');
-      } catch {}
+        if (kind === 'selection') feedback.selectionChanged();
+        else if (kind === 'success' || kind === 'warning' || kind === 'error') feedback.notificationOccurred(kind);
+        else feedback.impactOccurred(kind === 'medium' ? 'medium' : 'light');
+        return true;
+      } catch { return false; }
     };
-
-    document.addEventListener('pointerdown', event => {
-      if (event.pointerType !== 'touch') return;
+    document.addEventListener('click', event => {
+      if (event.detail === 0) return;
       const control = event.target.closest('button,a,[role="button"]');
       if (!control || control.disabled || control.getAttribute('aria-disabled') === 'true') return;
-      if (control.matches('.segment,.category-chip')) {
-        if (control.matches('.segment[aria-pressed="true"],.category-chip[aria-pressed="true"],[data-slide-to].is-active')) return;
+      if (control.matches('.segment,.category-chip,[data-slide-to]')) {
+        if (control.matches('.segment.is-active,.category-chip[aria-pressed="true"],[data-slide-to].is-active')) return;
         window.portfolioHaptic('selection');
-      } else if (!control.matches('.case-slide,.viewer-arrow')) window.portfolioHaptic('light');
+      } else if (control.matches('.gallery-item,.article-image-open,.case-slide,.viewer-close,.order-fab,.telegram-button')) {
+        window.portfolioHaptic('light');
+      }
     }, {capture:true,passive:true});
 
     if ((document.body.classList.contains('project-page') || document.body.classList.contains('contact-page')) && app.BackButton) {
