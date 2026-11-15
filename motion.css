@@ -468,3 +468,26 @@ body.project-page .hero3d-window { opacity: 1; }
   .carousel-loading-skeleton,
   .carousel-loading-skeleton::after { animation: none !important; }
 }
+
+/* Local draft controls in the desktop admin editor. */
+body.admin-page .draft-notice {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 14px;
+  padding: 13px 14px;
+  border: 1px solid #d8e8dc;
+  border-radius: 16px;
+  background: #f1f8f3;
+}
+body.admin-page .draft-notice > div { display: grid; flex: 1; gap: 4px; min-width: 0; }
+body.admin-page .draft-notice strong { font-size: 12px; }
+body.admin-page .draft-notice small,
+body.admin-page .draft-status { color: #77767c; font-size: 10px; line-height: 1.4; }
+body.admin-page .draft-notice button { min-height: 36px; }
+body.admin-page .form-actions .draft-status { flex-basis: 100%; }
+@media (max-width: 620px) {
+  body.admin-page .draft-notice { flex-wrap: wrap; }
+  body.admin-page .draft-notice > div { flex-basis: 100%; }
+  body.admin-page .draft-notice button { flex: 1; }
+}
