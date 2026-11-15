@@ -1,7 +1,7 @@
 import {SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,SUPABASE_BUCKET} from './supabase-config.js';
 
 export const DEFAULT_DATA = {
-  types:[{id:'products',name:'Карточки товаров'},{id:'banners',name:'Экспресс-баннеры'}],
+  types:[{id:'products',name:'Карточки товаров'},{id:'banners',name:'Экспресс-баннеры'},{id:'vk-groups',name:'Группы ВК'}],
   categories:[{id:'animals',typeId:'products',name:'Товары для животных'},{id:'tech',typeId:'products',name:'Техника'},{id:'other',typeId:'products',name:'Другое'}],
   projects: [{
     id: 'meatbone', type: 'products', category: 'animals', title: 'Мясное печенье для собак',
@@ -19,7 +19,7 @@ export async function getSupabase(){
   return clientPromise;
 }
 function clone(value){return JSON.parse(JSON.stringify(value));}
-function normalise(data){const next=clone(data||DEFAULT_DATA);next.types=Array.isArray(next.types)&&next.types.length?next.types:clone(DEFAULT_DATA.types);next.categories=Array.isArray(next.categories)&&next.categories.length?next.categories:clone(DEFAULT_DATA.categories);next.projects=Array.isArray(next.projects)?next.projects:[];return next;}
+function normalise(data){const next=clone(data||DEFAULT_DATA);next.types=Array.isArray(next.types)?next.types:[];for(const type of DEFAULT_DATA.types)if(!next.types.some(item=>item.id===type.id))next.types.push(clone(type));if(!next.types.length)next.types=clone(DEFAULT_DATA.types);next.categories=Array.isArray(next.categories)&&next.categories.length?next.categories:clone(DEFAULT_DATA.categories);next.projects=Array.isArray(next.projects)?next.projects:[];return next;}
 function openDatabase(){return new Promise((resolve,reject)=>{const request=indexedDB.open(DB_NAME,1);request.onupgradeneeded=()=>request.result.createObjectStore('content');request.onsuccess=()=>resolve(request.result);request.onerror=()=>reject(request.error);});}
 async function getLocal(){try{const db=await openDatabase();const saved=await new Promise((resolve,reject)=>{const request=db.transaction('content','readonly').objectStore('content').get('portfolio');request.onsuccess=()=>resolve(request.result);request.onerror=()=>reject(request.error);});db.close();return normalise(saved||DEFAULT_DATA);}catch{return normalise(DEFAULT_DATA);}}
 async function mapLimit(items,limit,mapper){const results=new Array(items.length);let next=0;await Promise.all(Array.from({length:Math.min(limit,items.length)},async()=>{while(true){const index=next++;if(index>=items.length)return;results[index]=await mapper(items[index],index);}}));return results;}

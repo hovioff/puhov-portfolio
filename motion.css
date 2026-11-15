@@ -1,35 +1,289 @@
-/* Motion language: quiet, tactile, and tied to user actions. Cards and carousel remain owned by styles.css. */
-:root{--motion-fast:180ms;--motion-base:280ms;--motion-slow:420ms;--motion-ease:cubic-bezier(.22,.68,.18,1)}
-@view-transition{navigation:auto}
-::view-transition-group(root){isolation:isolate;overflow:clip}
-::view-transition-old(root){z-index:0;animation:layer-page-away .34s cubic-bezier(.22,.68,.18,1) both}
-::view-transition-new(root){z-index:1;animation:layer-page-over .38s cubic-bezier(.2,.75,.25,1) both;box-shadow:0 10px 36px rgba(20,20,24,.16)}
-@keyframes layer-page-away{to{transform:translateX(-4%) scale(.975);filter:brightness(.82);opacity:.78}}
-@keyframes layer-page-over{from{transform:translateX(28px) scale(.988);opacity:.88}to{transform:translateX(0) scale(1);opacity:1}}
-/* Remove accumulated page and section entrance effects; they caused visible jumps. */
-.catalog-shell,.project-shell,.admin-shell,.contact-shell,.portfolio-notice,.segmented,.filters,.search,.project-intro,.project-intro>*,.project-gallery,.project-gallery>*,.case-article,.case-article>*,.contact-hero,.contact-hero>*,.contact-header,.order-fab{animation:none!important;filter:none!important}
-/* Native-like selection feedback without scale, bounce, or hover-only behavior. */
-.segment,.category-chip{transition:background-color var(--motion-base) var(--motion-ease),color var(--motion-base) ease,border-color var(--motion-base) ease,box-shadow var(--motion-base) ease!important}
-.segment.is-active{box-shadow:inset 0 0 0 1px #ffffff20,0 2px 8px #17171912}
-.segment:active,.category-chip:active,.back-button:active,.contact-back:active,.viewer-close:active,.order-fab:active,.telegram-button:active,.primary-button:active,.secondary-button:active{transform:none!important;filter:brightness(.94)}
-.segment,.category-chip,.back-button,.contact-back,.viewer-close,.order-fab,.telegram-button,.primary-button,.secondary-button{transition:background-color var(--motion-fast) ease,color var(--motion-fast) ease,border-color var(--motion-fast) ease,box-shadow var(--motion-fast) ease,filter var(--motion-fast) ease!important}
-/* Filtering fades content in place instead of moving the entire grid. */
-.work-grid,.work-grid.is-filtering{transform:none!important;filter:none!important;transition:opacity 140ms ease!important}
-.work-grid.is-filtering{opacity:.35}
-/* Gallery movement is continuous; image viewer only fades, never pops or zooms. */
-.case-slide-track{transition:transform var(--motion-slow) var(--motion-ease)!important}
-.case-slider-dots button{transition:width var(--motion-base) var(--motion-ease),background-color var(--motion-fast) ease!important}
-.viewer.open,.viewer.closing{animation:none!important}
-.viewer.open .viewer-frame{animation:viewer-fade-in 220ms ease both!important}
-.viewer.closing .viewer-frame{animation:viewer-fade-out 160ms ease both!important}
-@keyframes viewer-fade-in{from{opacity:0}to{opacity:1}}
-@keyframes viewer-fade-out{to{opacity:0}}
-.viewer-count,.viewer-close{animation:none!important}
-@media(prefers-reduced-motion:reduce){::view-transition-old(root),::view-transition-new(root){animation:none!important;filter:none!important}.segment,.category-chip,.back-button,.contact-back,.viewer-close,.order-fab,.telegram-button,.primary-button,.secondary-button,.work-grid,.case-slide-track,.case-slider-dots button,.viewer-frame{transition:none!important;animation:none!important}}
+/* A single quiet motion system for the Telegram mini app and its web fallback. */
+:root {
+  --motion-press: 110ms;
+  --motion-state: 220ms;
+  --motion-route: 280ms;
+  --motion-ease: cubic-bezier(.2, .75, .25, 1);
+  --motion-out: cubic-bezier(.16, 1, .3, 1);
+}
 
-/* Drag-to-dismiss feedback for the full-screen photo viewer. */
-#viewerFrame{will-change:transform,opacity;transition:transform .22s cubic-bezier(.2,.7,.25,1),opacity .22s ease}
+/* Retire the stacked entrance effects and perpetual drift from older passes. */
+body .catalog-shell,
+body .project-shell,
+body .admin-shell,
+body .contact-shell,
+body .portfolio-notice,
+body .segmented,
+body .filters,
+body .search,
+body .project-intro,
+body .project-intro > *,
+body .project-gallery,
+body .project-gallery > *,
+body .case-article,
+body .case-article > *,
+body .contact-hero,
+body .contact-hero > *,
+body .contact-header,
+body .order-fab,
+body .work-grid .work-block,
+body .work-grid .work-block .carousel-window,
+body .carousel-window .track-set,
+body .carousel-window .slide,
+body .project-hero-3d .slide,
+body .admin-section,
+body .admin-row,
+body .viewer,
+body .viewer-frame {
+  animation: none !important;
+  filter: none !important;
+}
+body .carousel-window .track:not(.is-static) { animation: carousel-diagonal var(--duration, 36s) linear infinite !important; will-change: transform; }
+body .project-hero-3d .track:not(.is-static) { animation: carousel-diagonal var(--duration, 36s) linear infinite !important; will-change: transform; }
+body .track.is-static { animation: none !important; transform: translateY(var(--base-y, 0px)); }
 
-#viewerRetry{position:absolute;z-index:4;left:50%;top:50%;transform:translate(-50%,-50%);padding:11px 16px;border:1px solid #ffffff40;border-radius:999px;background:#ffffffeb;color:#171719;font-family:inherit;font-size:13px;font-weight:600;line-height:1}
-#viewerImage.is-image-error~#viewerRetry{display:block}
-#viewerRetry[hidden]{display:none!important}
+/* Even, readable work-type tabs; category chips remain the smaller secondary row. */
+#typeTabs {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  gap: 4px;
+  min-height: 52px;
+  padding: 4px;
+  overflow: hidden;
+}
+#typeTabs .segment-indicator {
+  top: 4px;
+  bottom: 4px;
+  border-radius: 999px;
+  transition: transform var(--motion-state) var(--motion-out);
+}
+#typeTabs .segment {
+  z-index: 1;
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 44px;
+  padding: 5px clamp(4px, 1.8vw, 10px);
+  font-size: 12px;
+  line-height: 1.12;
+  letter-spacing: -.015em;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  text-wrap: balance;
+}
+.filters { gap: 8px; min-height: 44px; align-items: center; }
+.category-chip { min-height: 34px; padding: 0 12px; font-size: 10px; }
+
+/* Press, selection, and filter feedback. No hover lift on touch screens. */
+.segment,
+.category-chip,
+.back-button,
+.contact-back,
+.viewer-close,
+.order-fab,
+.telegram-button,
+.primary-button,
+.secondary-button,
+.admin-row button,
+.case-slider-dots button,
+.work-block {
+  transition: transform var(--motion-press) var(--motion-ease),
+    color var(--motion-state) ease,
+    background-color var(--motion-state) ease,
+    border-color var(--motion-state) ease,
+    box-shadow var(--motion-state) ease,
+    opacity var(--motion-state) ease !important;
+}
+.segment:active,
+.category-chip:active,
+.back-button:active,
+.contact-back:active,
+.viewer-close:active,
+.order-fab:active,
+.telegram-button:active,
+.primary-button:active,
+.secondary-button:active,
+.admin-row button:active,
+.case-slider-dots button:active,
+.work-block:active {
+  transform: scale(.975) !important;
+  filter: none !important;
+}
+#typeTabs .segment-indicator { box-shadow: 0 2px 7px #1717191c; }
+.work-grid.is-filtering { opacity: .72 !important; transition: opacity 120ms ease !important; }
+.work-grid:not(.is-filtering) { opacity: 1; }
+
+/* Image readiness is explicit: the poster stays until its real image can be shown. */
+body .work-grid.has-content > .work-skeleton {
+  animation: none !important;
+  transition: opacity 180ms ease, visibility 180ms ease !important;
+}
+body img.is-image-loading { opacity: 0 !important; }
+body img.image-ready { opacity: 1; transition: opacity 220ms ease !important; }
+body .carousel-window:not(.carousel-ready):not(.carousel-failed) .track {
+  visibility: hidden;
+}
+body .carousel-window.carousel-ready .track { visibility: visible; }
+body .carousel-window.carousel-failed { display: grid; place-items: center; }
+
+/* One restrained photo-viewer transition; gestures update directly under the finger. */
+.viewer.open { animation: viewer-veil-in 180ms ease-out both !important; }
+.viewer.closing { animation: viewer-veil-out 140ms ease-in both !important; }
+.viewer.open .viewer-frame { animation: viewer-frame-in 220ms var(--motion-out) both !important; }
+.viewer.closing .viewer-frame { animation: viewer-frame-out 150ms ease-in both !important; }
+#viewerFrame { transition: none !important; will-change: auto; }
+.case-slide-track { transition: transform 260ms var(--motion-out) !important; }
+.case-slider-dots button { transition: background-color 160ms ease, transform var(--motion-state) var(--motion-out) !important; }
+@keyframes viewer-veil-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes viewer-veil-out { to { opacity: 0; } }
+@keyframes viewer-frame-in { from { opacity: .7; transform: translateY(7px) scale(.99); } to { opacity: 1; transform: none; } }
+@keyframes viewer-frame-out { to { opacity: 0; transform: translateY(3px) scale(.995); } }
+
+/* Navigation continuity is brief and falls back to ordinary navigation. */
+@view-transition { navigation: auto; }
+::view-transition-old(root) { animation: route-out 150ms ease-in both; }
+::view-transition-new(root) { animation: route-in var(--motion-route) var(--motion-out) both; }
+@keyframes route-out { to { opacity: .78; transform: translateX(-5px); } }
+@keyframes route-in { from { opacity: .78; transform: translateX(9px); } to { opacity: 1; transform: none; } }
+
+:where(button, a, input, select, [tabindex]):focus-visible {
+  outline: 2px solid #171719;
+  outline-offset: 3px;
+}
+html, body { overscroll-behavior-x: none; }
+a, button { touch-action: manipulation; }
+
+@media (max-width: 600px) {
+  #typeTabs { min-height: 54px; }
+  #typeTabs .segment { font-size: 12px; }
+  .work-grid { grid-template-columns: minmax(0, 1fr) !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root), ::view-transition-new(root),
+  .viewer.open, .viewer.closing, .viewer.open .viewer-frame, .viewer.closing .viewer-frame {
+    animation: none !important;
+  }
+  body .carousel-window .track, body .project-hero-3d .track { animation-play-state: paused !important; }
+  #typeTabs .segment-indicator,
+  .segment, .category-chip, .back-button, .contact-back, .viewer-close,
+  .order-fab, .telegram-button, .primary-button, .secondary-button,
+  .admin-row button, .case-slide-track, .case-slider-dots button,
+  .work-grid, .work-block, .work-block * {
+    transition-duration: 1ms !important;
+  }
+}
+
+.project-page .order-fab.is-scroll-hidden { transform: translateY(calc(100% + 24px)); opacity: 0; pointer-events: none; }
+.project-page .order-fab { transition: transform 180ms var(--motion-ease), opacity 180ms ease !important; }
+
+/* The category bar is a one-line horizontal rail; the selector follows at the same pace. */
+#typeTabs { overflow-x: auto; overflow-y: hidden; scrollbar-width: none; scroll-behavior: smooth; overscroll-behavior-inline: contain; }
+#typeTabs::-webkit-scrollbar { display: none; }
+#typeTabs .segment { flex: 0 0 auto; width: max-content; min-width: max-content; white-space: nowrap; padding-inline: 15px; scroll-snap-align: center; }
+#typeTabs .segment-indicator { transition: transform 280ms cubic-bezier(.22,.68,.18,1), width 180ms ease; }
+
+/* Separate cards drift at deliberately different rates to add depth to the autoplay loop. */
+body .carousel-window .slide,
+body .project-hero-3d .slide {
+  animation: slide-float var(--float-duration,8s) ease-in-out infinite alternate !important;
+  animation-delay: var(--float-delay,0s) !important;
+  filter: drop-shadow(0 var(--shadow-y,2px) var(--shadow-blur,5px) rgba(18,18,22,var(--shadow-alpha,.12))) !important;
+}
+.project-page .project-shell { padding-top: 0 !important; }
+.project-page .project-hero-3d { height: clamp(200px,38svh,420px); min-height: 0; margin-top: 0; }
+@media (prefers-reduced-motion: reduce) {
+  body .carousel-window .slide, body .project-hero-3d .slide { animation-play-state: paused !important; }
+}
+
+/* Ambient motion keeps the primary actions alive while idle. */
+.notice-mark { position: relative; animation: notice-breathe 2.8s ease-in-out infinite; }
+@keyframes notice-breathe {
+  0%,100% { transform: scale(1); box-shadow: 0 0 0 5px #e7773718; }
+  50% { transform: scale(1.08); box-shadow: 0 0 0 8px #e7773708; }
+}
+body .order-fab { position: fixed; isolation: isolate; overflow: hidden; transform: translateZ(0); animation: order-glow 3s ease-in-out infinite; }
+body .contact-hero .telegram-button {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  transform: translateZ(0);
+  animation: telegram-glow 3.4s ease-in-out infinite;
+  box-shadow: 0 8px 22px #229ed92b, 0 0 0 0 #229ed925;
+}
+body .order-fab::after,
+body .contact-hero .telegram-button::after {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  top: -45%;
+  bottom: -45%;
+  left: -55%;
+  width: 42%;
+  border-radius: inherit;
+  background: linear-gradient(105deg, transparent, #ffffff38 48%, transparent);
+  transform: skewX(-18deg);
+  animation: action-sheen 5.4s cubic-bezier(.2,.65,.3,1) infinite;
+  pointer-events: none;
+}
+body .contact-hero .telegram-button > * { position: relative; z-index: 1; }
+@keyframes action-sheen {
+  0% { left: -55%; opacity: 0; }
+  5% { opacity: .7; }
+  25% { left: 125%; opacity: .42; }
+  32%,100% { left: 125%; opacity: 0; }
+}
+@keyframes order-glow {
+  0%,100% { box-shadow: 0 10px 32px #17171935, 0 0 0 0 #17171900; }
+  50% { box-shadow: 0 12px 34px #1717193b, 0 0 0 6px #17171908; }
+}
+@keyframes telegram-glow {
+  0%,100% { box-shadow: 0 8px 22px #229ed92b, 0 0 0 0 #229ed900; }
+  50% { box-shadow: 0 10px 26px #229ed936, 0 0 0 6px #229ed90b; }
+}
+body .order-fab:active,
+body .contact-hero .telegram-button:active {
+  transform: scale(.96) translateY(1px) !important;
+  filter: brightness(.94) !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  .notice-mark,
+  body .order-fab,
+  body .contact-hero .telegram-button,
+  body .order-fab::after,
+  body .contact-hero .telegram-button::after { animation: none !important; }
+}
+
+/* Minimal back affordance: invisible button chrome, generous touch target. */
+body .back-button,
+body .contact-back {
+  width: 44px;
+  height: 44px;
+  min-height: 44px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  color: #171719;
+  transition: opacity 140ms ease, transform 140ms cubic-bezier(.2,.75,.25,1) !important;
+}
+body .back-button > svg,
+body .contact-back > svg { width: 22px; height: 22px; display: block; }
+body .back-button:active,
+body .contact-back:active { transform: scale(.9) !important; opacity: .62; }
+
+/* The project hero keeps a quiet circular back control; other pages stay bare. */
+body.project-page .project-hero-3d .back-button {
+  width: 42px;
+  height: 42px;
+  min-height: 42px;
+  border: 1px solid #ffffffd9;
+  border-radius: 50%;
+  background: #ffffffd9;
+  box-shadow: 0 2px 10px #17171912;
+  backdrop-filter: blur(12px);
+}
+body.project-page .project-hero-3d .back-button > svg { width: 19px; height: 19px; }
+body.project-page .project-hero-3d .back-button:active { transform: scale(.92) !important; }
