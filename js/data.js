@@ -59,4 +59,12 @@ export async function savePortfolio(data){
   }
   const {error}=await supabase.from('portfolio_content').upsert({id:'main',payload:data,updated_at:new Date().toISOString()});if(error)throw error;return data;
 }
+export function countProjectImages(project={}){
+  const sources=new Set();let anonymous=0;
+  const add=image=>{if(!image)return;if(typeof image==='string'){sources.add(image);return;}if(image.src)sources.add(image.src);else anonymous++;};
+  (project.slides||[]).forEach(add);
+  (project.blocks||[]).forEach(block=>{if(block.type==='image')add(block);else if(block.type==='carousel')(block.slides||[]).forEach(add);});
+  (project.sections||[]).forEach(section=>add(section.image));
+  return sources.size+anonymous;
+}
 export function escapeHTML(value=''){return String(value).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
