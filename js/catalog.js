@@ -15,6 +15,7 @@ function dateValue(value=''){
   return numeric?new Date(+numeric[3],+numeric[2]-1,+numeric[1]).getTime():0;
 }
 let sortedProjects=[];
+const trackRuns=new WeakMap();
 function drawTypes(){tabs.innerHTML='<span class="segment-indicator" aria-hidden="true"></span>'+[{id:'all',name:'Общая лента'},...data.types].map(type=>`<button type="button" class="segment${type.id===activeType?' is-active':''}" data-type="${escapeHTML(type.id)}" aria-pressed="${String(type.id===activeType)}">${escapeHTML(type.name)}</button>`).join('');requestAnimationFrame(()=>{const active=tabs.querySelector('.segment.is-active'),indicator=tabs.querySelector('.segment-indicator');if(!active||!indicator)return;indicator.style.width=`${active.offsetWidth}px`;indicator.style.transform=`translate3d(${active.offsetLeft}px,0,0)`;active.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});});}
 function drawFilters(){
   const available=[...new Set(sortedProjects.filter(project=>activeType==='all'||project.type===activeType).map(project=>project.category).filter(Boolean))];
@@ -31,6 +32,7 @@ function card(project,cardIndex=0){
 }
 const cardAngle=-Math.PI*8/180,pixelsPerSecond=34;
 async function prepareTrack(track,project){
+  const run=(trackRuns.get(track)||0)+1;trackRuns.set(track,run);
   const ordered=project.slides.length>1?[project.slides.at(-1),...project.slides.slice(0,-1)]:project.slides;
   const viewport=track.parentElement,overscan=18,viewportWidth=viewport.clientWidth,viewportHeight=viewport.clientHeight;
   // Every portfolio preview uses the agreed 808:632 canvas; object-fit:cover fills it without gaps.
@@ -58,6 +60,7 @@ async function prepareTrack(track,project){
   if(cardIndex<2)images.forEach(img=>{img.loading='eager';});
   await Promise.all(images.map(img=>new Promise((resolve,reject)=>{if(img.complete){img.naturalWidth?resolve():reject(new Error('Изображение карусели недоступно'));return;}const timer=setTimeout(()=>reject(new Error('Таймаут загрузки изображения карусели')),12000);img.addEventListener('load',()=>{clearTimeout(timer);resolve();},{once:true});img.addEventListener('error',()=>{clearTimeout(timer);reject(new Error('Изображение карусели недоступно'));},{once:true});})));
   await Promise.all(images.map(img=>typeof img.decode==='function'?img.decode():Promise.resolve()));
+  if(trackRuns.get(track)!==run||!track.isConnected)return;
   track.closest('.carousel-window').classList.add('carousel-ready');
 }
 function revealCatalogWhenReady(){
@@ -91,4 +94,7 @@ setCatalogLoading(true);
 try{data=await getPortfolio();}catch(error){console.error('Не удалось загрузить портфолио:',error);data={types:[],categories:[],projects:[]};}
 sortedProjects=[...data.projects].sort((a,b)=>dateValue(b.date)-dateValue(a.date));const loadingCards=[...grid.querySelectorAll('.work-skeleton')].map(node=>node.cloneNode(true));drawTypes();drawFilters();draw();if(data.projects.length&&loadingCards.length){grid.prepend(...loadingCards);grid.classList.add('has-content');requestAnimationFrame(revealCatalogWhenReady);}else setCatalogLoading(false);
 if(!data.projects.length){empty.textContent='Не удалось загрузить проекты. Проверьте подключение и обновите страницу.';empty.hidden=false;grid.hidden=true;setCatalogLoading(false);}
-let resizeTimer;window.addEventListener('resize',()=>{clearTimeout(resizeTimer);resizeTimer=setTimeout(draw,180);});
+let resizeTimer;window.addEventListener('resize',()=>{clearTimeout(resizeTimer);resizeTimer=setTimeout(()=>{
+  const visible=sortedProjects.filter(project=>(activeType==='all'||project.type===activeType)&&(!activeCategories.size||activeCategories.has(project.category)));
+  grid.querySelectorAll('[data-carousel]').forEach(track=>{const project=visible.find(item=>item.id===track.dataset.carousel);if(!project)return;const viewport=track.closest('.carousel-window');if(!viewport.classList.contains('carousel-ready'))viewport.classList.remove('carousel-failed');prepareTrack(track,project).catch(error=>{console.error('Не удалось перестроить карусель:',error);track.classList.add('is-static');viewport.classList.add('carousel-failed');}).finally(revealCatalogWhenReady);});
+},180);},{passive:true});

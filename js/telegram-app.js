@@ -2,12 +2,13 @@
   const params = new URLSearchParams(location.search);
   const hasLaunchData = ['tgWebAppVersion','tgWebAppPlatform','tgWebAppData'].some(key => params.has(key)) || /tgWebAppData=/.test(location.hash);
   const inTelegram = Boolean(window.Telegram?.WebApp) || hasLaunchData || /Telegram/i.test(navigator.userAgent) || Boolean(window.TelegramWebviewProxy || window.TelegramWebviewProxyProto);
-  if (!inTelegram) return;
+  const inlineBack = document.querySelector('#backButton,.contact-back');
+  if (!inTelegram) { if (inlineBack) inlineBack.hidden = false; return; }
+  document.body?.classList.add('tg-mini-app');
 
   const boot = () => {
     const app = window.Telegram?.WebApp;
-    if (!app) return;
-    document.body?.classList.add('tg-mini-app');
+    if (!app) { if (inlineBack) inlineBack.hidden = false; document.body?.classList.remove('tg-mini-app'); return; }
     const feedback = app.HapticFeedback;
     const hapticsAvailable = Boolean(feedback && (!app.isVersionAtLeast || app.isVersionAtLeast('6.1')) && (typeof feedback.impactOccurred === 'function' || typeof feedback.selectionChanged === 'function' || typeof feedback.notificationOccurred === 'function'));
     let lastHapticAt = 0;
@@ -42,18 +43,20 @@
     }, {capture:true,passive:true});
 
     if ((document.body.classList.contains('project-page') || document.body.classList.contains('contact-page')) && app.BackButton) {
+      if (inlineBack) inlineBack.hidden = true;
       app.BackButton.show();
       app.BackButton.onClick(() => {
         const close = document.querySelector('#viewerClose');
         if (document.querySelector('#viewer.open')) close?.click();
         else location.href = 'index.html';
       });
-    } else app.BackButton?.hide();
+    } else { if (inlineBack) inlineBack.hidden = false; app.BackButton?.hide(); }
   };
 
   const script = document.createElement('script');
   script.src = 'https://telegram.org/js/telegram-web-app.js?65';
   script.async = true;
   script.onload = boot;
+  script.onerror = () => { if (inlineBack) inlineBack.hidden = false; document.body?.classList.remove('tg-mini-app'); };
   document.head.append(script);
 })();

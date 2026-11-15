@@ -268,7 +268,6 @@ a,button{touch-action:manipulation}
 .order-fab{bottom:max(18px,env(safe-area-inset-bottom,0px),var(--tg-content-safe-area-inset-bottom,0px))}
 .contact-shell{padding-top:calc(22px + max(env(safe-area-inset-top,0px),var(--tg-content-safe-area-inset-top,0px)));padding-bottom:calc(26px + max(env(safe-area-inset-bottom,0px),var(--tg-content-safe-area-inset-bottom,0px)))}
 .work-block:active,.order-fab:active,.telegram-button:active,.segment:active,.category-chip:active,.primary-button:active,.secondary-button:active,.back-button:active,.icon-button:active,.viewer-close:active,.admin-row button:active{transform:scale(.985);transition-duration:.14s}
-body.tg-mini-app.project-page #backButton{display:none}
 @media(hover:hover){.work-block:hover,.order-fab:hover,.telegram-button:hover,.segment:hover,.category-chip:hover,.primary-button:hover,.secondary-button:hover,.admin-row button:hover,.contact-back:hover span:first-child{transform:none;box-shadow:initial}}
 .work-grid{transition:opacity .16s ease,transform .16s ease}
 .work-grid.is-filtering{opacity:.45;transform:translateY(2px)}
