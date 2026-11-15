@@ -323,3 +323,58 @@ body .work-grid .work-block { animation: project-card-drop 680ms cubic-bezier(.1
 .hero3d-window { opacity: 0; transition: opacity 240ms ease-out; }
 .hero3d-window.carousel-ready, .hero3d-window.carousel-failed { opacity: 1; }
 @media (prefers-reduced-motion: reduce) { .hero3d-window { transition: none !important; } }
+
+/* Lock each card's 3D transform and stacking order before the carousel is revealed. */
+body .carousel-window .slide,
+body .project-hero-3d .slide {
+  animation: depth-rest var(--float-duration,8s) ease-in-out var(--float-delay,0s) infinite alternate !important;
+  transform: translateY(var(--rise,0px)) rotate(var(--card-angle,-8deg)) translateZ(var(--depth-z,0px)) rotateY(var(--depth-yaw,0deg)) scale(var(--depth-scale,1)) !important;
+  z-index: var(--depth,1) !important;
+  transform-origin: top left !important;
+}
+@keyframes depth-rest { from { opacity: .996; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) {
+  body .carousel-window .slide,
+  body .project-hero-3d .slide { animation: none !important; opacity: 1 !important; }
+}
+
+/* In the all-work feed, quietly label each preview by its work type. */
+body.catalog-page .work-type-badge {
+  position: absolute;
+  z-index: 5;
+  top: 12px;
+  left: 12px;
+  max-width: calc(100% - 24px);
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 8px 12px 8px 10px;
+  overflow: hidden;
+  border: 1px solid #ffffffd9;
+  border-radius: 999px;
+  background: #fffffff0;
+  color: #252528;
+  box-shadow: 0 3px 14px #17171916;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  pointer-events: none;
+}
+body.catalog-page .work-type-badge::before {
+  width: 6px;
+  height: 6px;
+  flex: 0 0 6px;
+  border-radius: 50%;
+  background: #ff7045;
+  content: "";
+}
+body.catalog-page .category-chip { animation: none !important; }
+body.catalog-page .category-chip:active { transform: scale(.96) !important; }
+body.catalog-page #workGrid.is-filtering .work-block { animation: none !important; }
+@media (max-width: 600px) {
+  body.catalog-page .work-type-badge { top: 10px; left: 10px; padding: 7px 10px 7px 8px; font-size: 9px; }
+}

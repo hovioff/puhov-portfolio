@@ -18,17 +18,21 @@ let sortedProjects=[];
 const trackRuns=new WeakMap();
 function drawTypes(){tabs.innerHTML='<span class="segment-indicator" aria-hidden="true"></span>'+[{id:'all',name:'Общая лента'},...data.types].map(type=>`<button type="button" class="segment${type.id===activeType?' is-active':''}" data-type="${escapeHTML(type.id)}" aria-pressed="${String(type.id===activeType)}">${escapeHTML(type.name)}</button>`).join('');requestAnimationFrame(()=>{const active=tabs.querySelector('.segment.is-active'),indicator=tabs.querySelector('.segment-indicator');if(!active||!indicator)return;indicator.style.width=`${active.offsetWidth}px`;indicator.style.transform=`translate3d(${active.offsetLeft}px,0,0)`;active.scrollIntoView({behavior:'smooth',block:'nearest',inline:'center'});});}
 function drawFilters(){
-  const available=[...new Set(sortedProjects.filter(project=>activeType==='all'||project.type===activeType).map(project=>project.category).filter(Boolean))];
+  const available=activeType==='all'
+    ? [...new Set(sortedProjects.map(project=>project.type).filter(Boolean))]
+    : [...new Set(sortedProjects.filter(project=>project.type===activeType).map(project=>project.category).filter(Boolean))];
   for(const key of activeCategories)if(!available.includes(key))activeCategories.delete(key);
-  filters.innerHTML=available.map(key=>`<button class="category-chip" type="button" data-category="${escapeHTML(key)}" aria-pressed="${String(activeCategories.has(key))}">${escapeHTML(categoryName(key))}</button>`).join('');
+  filters.innerHTML=available.map(key=>`<button class="category-chip" type="button" data-filter="${escapeHTML(key)}" aria-pressed="${String(activeCategories.has(key))}">${escapeHTML(activeType==='all'?typeName(key):categoryName(key))}</button>`).join('');
+  filters.setAttribute('aria-label',activeType==='all'?'Фильтры по типу работ':'Подкатегории');
   filters.hidden=!available.length;
 }
 function card(project,cardIndex=0){
   const slides=project.slides||[];
-  if(project.previewImage?.src)return `<a class="work-block" style="--card-index:${Math.min(cardIndex,8)}" href="project.html?id=${encodeURIComponent(project.id)}" aria-label="Открыть проект «${escapeHTML(project.title)}"><div class="carousel-window catalog-static-window"><img class="catalog-static-preview" src="${escapeHTML(project.previewImage.src)}" alt="${escapeHTML(project.title)}" loading="lazy"></div><div class="block-caption"><h2 class="block-title">${escapeHTML(project.title)}</h2><span class="slide-count"><b>${slides.length}</b><img class="photo-count-icon" src="assets/photo-icon.png" alt="" aria-hidden="true" width="14" height="14" loading="eager" decoding="async"></span></div></a>`;
+  const badge=activeType==='all'?`<span class="work-type-badge">${escapeHTML(typeName(project.type))}</span>`:'';
+  if(project.previewImage?.src)return `<a class="work-block" style="--card-index:${Math.min(cardIndex,8)}" href="project.html?id=${encodeURIComponent(project.id)}" aria-label="Открыть проект «${escapeHTML(project.title)}"><div class="carousel-window catalog-static-window"><img class="catalog-static-preview" src="${escapeHTML(project.previewImage.src)}" alt="${escapeHTML(project.title)}" loading="lazy">${badge}</div><div class="block-caption"><h2 class="block-title">${escapeHTML(project.title)}</h2><span class="slide-count"><b>${slides.length}</b><img class="photo-count-icon" src="assets/photo-icon.png" alt="" aria-hidden="true" width="14" height="14" loading="eager" decoding="async"></span></div></a>`;
   const orderedSlides=slides.length>1?[slides[slides.length-1],...slides.slice(0,-1)]:slides;
   const group=(duplicate=false)=>`<div class="track-set${duplicate?' track-set-repeat':''}"${duplicate?' aria-hidden="true"':''}>${orderedSlides.map((slide,index)=>{const near=index%2===1,drift=near?'-2px':'4.5px',cycle=near?18+(index%3)*2:3.6+(index%3)*.45,loading=duplicate||cardIndex>1||index>1?'lazy':'eager',priority=!duplicate&&cardIndex===0&&index===0?'high':'auto';return`<div class="slide" style="--depth:${index+1};--depth-z:${near?'12px':'-7px'};--depth-yaw:${near?'-1.4deg':'1deg'};--depth-scale:${near?'1.012':'.994'};--shadow-y:${near?'4px':'1px'};--shadow-blur:${near?'9px':'4px'};--shadow-alpha:${near?'.15':'.08'};--float-duration:${cycle}s;--float-delay:0s;--drift-x:${drift};--drift-y:${near?'-0.8px':'0.7px'}"><img src="${escapeHTML(slide.src)}" alt="${duplicate?'':escapeHTML(slide.alt||project.title)}" loading="${loading}" fetchpriority="${priority}" decoding="async"></div>`;}).join('')}</div>`;
-  return `<a class="work-block" style="--card-index:${Math.min(cardIndex,8)}" href="project.html?id=${encodeURIComponent(project.id)}" aria-label="Открыть проект «${escapeHTML(project.title)}"><div class="carousel-window"><div class="track${slides.length<2?' is-static':''}" data-carousel="${escapeHTML(project.id)}">${group()}</div></div><div class="block-caption"><h2 class="block-title">${escapeHTML(project.title)}</h2><span class="slide-count"><b>${slides.length}</b><img class="photo-count-icon" src="assets/photo-icon.png" alt="" aria-hidden="true" width="14" height="14" loading="eager" decoding="async"></span></div></a>`;
+  return `<a class="work-block" style="--card-index:${Math.min(cardIndex,8)}" href="project.html?id=${encodeURIComponent(project.id)}" aria-label="Открыть проект «${escapeHTML(project.title)}"><div class="carousel-window"><div class="track${slides.length<2?' is-static':''}" data-carousel="${escapeHTML(project.id)}">${group()}</div>${badge}</div><div class="block-caption"><h2 class="block-title">${escapeHTML(project.title)}</h2><span class="slide-count"><b>${slides.length}</b><img class="photo-count-icon" src="assets/photo-icon.png" alt="" aria-hidden="true" width="14" height="14" loading="eager" decoding="async"></span></div></a>`;
 }
 const cardAngle=-Math.PI*8/180,pixelsPerSecond=34;
 async function prepareTrack(track,project){
@@ -76,7 +80,11 @@ function revealCatalogWhenReady(){
 }
 let trackObserver;
 function draw(){
-  const shown=sortedProjects.filter(project=>(activeType==='all'||project.type===activeType)&&(!activeCategories.size||activeCategories.has(project.category)));
+  const shown=sortedProjects.filter(project=>{
+    if(activeType!=='all'&&project.type!==activeType)return false;
+    if(!activeCategories.size)return true;
+    return activeType==='all'?activeCategories.has(project.type):activeCategories.has(project.category);
+  });
   grid.innerHTML=shown.map((project,index)=>card(project,index)).join('');grid.hidden=!shown.length;empty.hidden=!!shown.length;
   grid.querySelectorAll('img').forEach(img=>{img.classList.add('is-image-loading');const finish=()=>{img.classList.remove('is-image-loading');img.classList.add('image-ready');requestAnimationFrame(revealCatalogWhenReady);};if(img.complete&&img.naturalWidth)finish();else{img.addEventListener('load',finish,{once:true});img.addEventListener('error',()=>{img.classList.remove('is-image-loading');img.classList.add('is-image-error');requestAnimationFrame(revealCatalogWhenReady);},{once:true});setTimeout(()=>{if(img.classList.contains('is-image-loading')){img.classList.remove('is-image-loading');img.classList.add('is-image-error');requestAnimationFrame(revealCatalogWhenReady);}},8000);}});
   trackObserver?.disconnect();
@@ -87,9 +95,9 @@ function draw(){
 }
 function setCatalogLoading(loading){grid.classList.toggle('is-loading',loading);grid.setAttribute('aria-busy',String(loading));}
 let filterTimer;
-function redrawFiltered(){clearTimeout(filterTimer);grid.classList.add('is-filtering');filterTimer=setTimeout(()=>{drawTypes();drawFilters();draw();requestAnimationFrame(()=>grid.classList.remove('is-filtering'));},130);}
-tabs.addEventListener('click',event=>{const button=event.target.closest('[data-type]');if(!button||button.dataset.type===activeType)return;activeType=button.dataset.type;activeCategories.clear();redrawFiltered();});
-filters.addEventListener('click',event=>{const button=event.target.closest('[data-category]');if(!button)return;const key=button.dataset.category;if(activeCategories.has(key))activeCategories.delete(key);else activeCategories.add(key);redrawFiltered();});
+function redrawFiltered(animateChoice=true){clearTimeout(filterTimer);grid.classList.toggle('is-filtering',animateChoice);filterTimer=setTimeout(()=>{drawTypes();drawFilters();draw();requestAnimationFrame(()=>grid.classList.remove('is-filtering'));},animateChoice?130:0);}
+tabs.addEventListener('click',event=>{const button=event.target.closest('[data-type]');if(!button||button.dataset.type===activeType)return;activeType=button.dataset.type;activeCategories.clear();redrawFiltered(false);});
+filters.addEventListener('click',event=>{const button=event.target.closest('[data-filter]');if(!button)return;const key=button.dataset.filter;if(activeCategories.has(key))activeCategories.delete(key);else activeCategories.add(key);redrawFiltered(true);});
 setCatalogLoading(true);
 try{data=await getPortfolio();}catch(error){console.error('Не удалось загрузить портфолио:',error);data={types:[],categories:[],projects:[]};}
 sortedProjects=[...data.projects].sort((a,b)=>dateValue(b.date)-dateValue(a.date));const loadingCards=[...grid.querySelectorAll('.work-skeleton')].map(node=>node.cloneNode(true));drawTypes();drawFilters();draw();if(data.projects.length&&loadingCards.length){grid.prepend(...loadingCards);grid.classList.add('has-content');requestAnimationFrame(revealCatalogWhenReady);}else setCatalogLoading(false);
