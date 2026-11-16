@@ -567,3 +567,17 @@ body .catalog-static-window img.image-ready.is-out-of-view {
   body .article-image-block img.image-ready,
   body .article-image img.image-ready { transition: none !important; }
 }
+
+
+/* Keep the scroll-fog subtle in Telegram's GPU-constrained WebView. */
+body.tg-mini-app img.image-ready.is-out-of-view,
+body.tg-mini-app .carousel-window .slide img.image-ready.is-out-of-view,
+body.tg-mini-app .hero3d-window .slide img.image-ready.is-out-of-view {
+  filter: blur(2px) saturate(.82) !important;
+  opacity: .34 !important;
+  transition: opacity 360ms ease !important;
+}
+
+body.catalog-page .carousel-window.has-lqip:not(.carousel-ready) .carousel-loading-skeleton,
+body.project-page .hero3d-window.has-lqip:not(.carousel-ready) .carousel-loading-skeleton,
+body.project-page .case-slide-window.has-lqip:not(.carousel-ready) .carousel-loading-skeleton { opacity:.22; }

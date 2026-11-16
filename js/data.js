@@ -26,7 +26,7 @@ export async function getAdminDraft(){try{const db=await openDatabase();const va
 export async function saveAdminDraft(draft){const db=await openDatabase();await new Promise((resolve,reject)=>{const tx=db.transaction('content','readwrite');tx.objectStore('content').put(draft,'admin-draft');tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);tx.onabort=()=>reject(tx.error);});db.close();return draft;}
 export async function deleteAdminDraft(){const db=await openDatabase();await new Promise((resolve,reject)=>{const tx=db.transaction('content','readwrite');tx.objectStore('content').delete('admin-draft');tx.oncomplete=resolve;tx.onerror=()=>reject(tx.error);tx.onabort=()=>reject(tx.error);});db.close();}
 async function mapLimit(items,limit,mapper){const results=new Array(items.length);let next=0;await Promise.all(Array.from({length:Math.min(limit,items.length)},async()=>{while(true){const index=next++;if(index>=items.length)return;results[index]=await mapper(items[index],index);}}));return results;}
-export async function getPortfolio(){
+export async function getPortfolio({onFallback}={}){
   if(!cloudEnabled)return getLocal();
   try{
     const url=new URL(`${SUPABASE_URL}/rest/v1/portfolio_content`);
@@ -37,6 +37,7 @@ export async function getPortfolio(){
     return normalise(rows[0]?.payload||await getLocal());
   }catch(error){
     console.warn('Could not load the cloud portfolio; showing the local fallback.',error);
+    onFallback?.(error);
     return getLocal();
   }
 }
