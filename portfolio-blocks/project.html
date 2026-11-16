@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f5f5f7">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net https://telegram.org; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob: https://hkfubiqsepanqtuosfty.supabase.co; connect-src 'self' https://hkfubiqsepanqtuosfty.supabase.co https://cdn.jsdelivr.net; font-src 'self' data:; object-src 'none'; base-uri 'self'; form-action 'self'; upgrade-insecure-requests">
+  <meta name="referrer" content="no-referrer"><meta name="description" content="Проект в портфолио Кирилла Пухова">
+  <title>Проект — Пухов Кирилл</title><link rel="stylesheet" href="styles.css?v=20261116-43"><script defer src="js/telegram-app.js?v=20261116-08"></script><script type="module" src="js/project.js?v=20261116-55"></script>
+  <link rel="stylesheet" href="motion.css?v=20261116-41">
+  <link rel="preload" href="assets/fonts/onest-cyrillic.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="preload" href="assets/fonts/onest-latin.woff2" as="font" type="font/woff2" crossorigin>
+</head>
+<body class="project-page">
+  <div class="site-scroll-veil" aria-hidden="true"></div>
+  <main class="project-shell" id="projectShell">
+    <section class="project-hero-3d" id="projectHero" aria-label="Непрерывная 3D-лента проекта" hidden>
+      <div class="hero3d-window"><span class="carousel-loading-skeleton" aria-hidden="true"></span><div class="track" data-project-carousel></div></div>
+      <a class="back-button" id="backButton" href="index.html" hidden aria-label="Назад к работам"><svg viewBox="0 0 24 24" aria-hidden="true" focusable="false"><path d="M19 12H5m7 7-7-7 7-7" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+    </section>
+    <header class="project-intro" hidden><h1 id="projectTitle"></h1><p class="project-description" id="projectDescription"></p>
+      <div class="project-meta"><div class="meta-pill"><span>Дата создания</span><strong id="projectDate"></strong></div><div class="meta-pill meta-duration-pill"><span>Выполнено</span><strong id="projectDuration"></strong></div></div>
+    </header>
+    <section class="project-gallery" id="gallery" aria-label="Изображения проекта" aria-busy="true" hidden></section>
+  </main>
+  <div class="viewer" id="viewer" aria-hidden="true" role="dialog" aria-modal="true" aria-label="Галерея проекта" tabindex="-1">
+    <span class="viewer-count" id="viewerCount">01 / 05</span>
+    <button class="viewer-close" id="viewerClose" type="button" aria-label="Закрыть">×</button>
+    <div class="viewer-frame" id="viewerFrame"><img id="viewerImage" alt=""><button id="viewerRetry" type="button" hidden>Повторить загрузку</button></div>
+  </div>
+  <a class="order-fab" href="contact.html" aria-label="Заказать дизайн"><span class="order-fab-label">Заказать дизайн</span></a>
+</body>
+</html>

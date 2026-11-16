@@ -1,0 +1,556 @@
+/* A single quiet motion system for the Telegram mini app and its web fallback. */
+:root {
+  --motion-press: 110ms;
+  --motion-state: 220ms;
+  --motion-route: 280ms;
+  --motion-ease: cubic-bezier(.2, .75, .25, 1);
+  --motion-out: cubic-bezier(.16, 1, .3, 1);
+}
+
+/* Retire the stacked entrance effects and perpetual drift from older passes. */
+body .catalog-shell,
+body .project-shell,
+body .admin-shell,
+body .contact-shell,
+body .portfolio-notice,
+body .segmented,
+body .filters,
+body .search,
+body .project-intro,
+body .project-intro > *,
+body .project-gallery,
+body .project-gallery > *,
+body .case-article,
+body .case-article > *,
+body .contact-hero,
+body .contact-hero > *,
+body .contact-header,
+body .order-fab,
+body .work-grid .work-block,
+body .work-grid .work-block .carousel-window,
+body .carousel-window .track-set,
+body .carousel-window .slide,
+body .project-hero-3d .slide,
+body .admin-section,
+body .admin-row,
+body .viewer,
+body .viewer-frame {
+  animation: none !important;
+  filter: none !important;
+}
+body .carousel-window .track:not(.is-static) { animation: carousel-diagonal var(--duration, 36s) linear infinite !important; }
+body .project-hero-3d .track:not(.is-static) { animation: carousel-diagonal var(--duration, 36s) linear infinite !important; }
+body .carousel-window.is-carousel-in-view .track:not(.is-static),body .project-hero-3d.is-carousel-in-view .track:not(.is-static){will-change:transform}
+body .track.is-static { animation: none !important; transform: translateY(var(--base-y, 0px)); }
+
+/* Even, readable work-type tabs; category chips remain the smaller secondary row. */
+#typeTabs {
+  position: relative;
+  display: flex;
+  align-items: stretch;
+  gap: 4px;
+  min-height: 52px;
+  padding: 4px;
+  overflow: hidden;
+}
+#typeTabs .segment-indicator {
+  top: 4px;
+  bottom: 4px;
+  border-radius: 999px;
+  transition: transform var(--motion-state) var(--motion-out);
+}
+#typeTabs .segment {
+  z-index: 1;
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 44px;
+  padding: 5px clamp(4px, 1.8vw, 10px);
+  font-size: 12px;
+  line-height: 1.12;
+  letter-spacing: -.015em;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  text-wrap: balance;
+}
+.filters { gap: 8px; min-height: 44px; align-items: center; }
+.category-chip { min-height: 34px; padding: 0 12px; font-size: 10px; }
+
+/* Press, selection, and filter feedback. No hover lift on touch screens. */
+.segment,
+.category-chip,
+.back-button,
+.contact-back,
+.viewer-close,
+.order-fab,
+.telegram-button,
+.primary-button,
+.secondary-button,
+.admin-row button,
+.case-slider-dots button,
+.work-block {
+  transition: transform var(--motion-press) var(--motion-ease),
+    color var(--motion-state) ease,
+    background-color var(--motion-state) ease,
+    border-color var(--motion-state) ease,
+    box-shadow var(--motion-state) ease,
+    opacity var(--motion-state) ease !important;
+}
+.segment:active,
+.category-chip:active,
+.back-button:active,
+.contact-back:active,
+.viewer-close:active,
+.order-fab:active,
+.telegram-button:active,
+.primary-button:active,
+.secondary-button:active,
+.admin-row button:active,
+.case-slider-dots button:active,
+.work-block:active {
+  transform: scale(.975) !important;
+  filter: none !important;
+}
+#typeTabs .segment-indicator { box-shadow: 0 2px 7px #1717191c; }
+.work-grid.is-filtering { opacity: .72 !important; transition: opacity 120ms ease !important; }
+.work-grid:not(.is-filtering) { opacity: 1; }
+
+/* Image readiness is explicit: the poster stays until its real image can be shown. */
+body img.is-image-loading { opacity: 0 !important; }
+body img.image-ready { opacity: 1; transition: opacity 220ms ease !important; }
+body .carousel-window:not(.carousel-ready):not(.carousel-failed) .track {
+  visibility: hidden;
+}
+body .carousel-window.carousel-ready .track { visibility: visible; }
+body .carousel-window.carousel-failed { display: grid; place-items: center; }
+
+/* One restrained photo-viewer transition; gestures update directly under the finger. */
+.viewer.open { animation: viewer-veil-in 180ms ease-out both !important; }
+.viewer.closing { animation: viewer-veil-out 140ms ease-in both !important; }
+.viewer.open .viewer-frame { animation: viewer-frame-in 220ms var(--motion-out) both !important; }
+.viewer.closing .viewer-frame { animation: viewer-frame-out 150ms ease-in both !important; }
+#viewerFrame { transition: none !important; will-change: auto; }
+.case-slide-track { transition: transform 260ms var(--motion-out) !important; }
+.case-slider-dots button { transition: background-color 160ms ease, transform var(--motion-state) var(--motion-out) !important; }
+@keyframes viewer-veil-in { from { opacity: 0; } to { opacity: 1; } }
+@keyframes viewer-veil-out { to { opacity: 0; } }
+@keyframes viewer-frame-in { from { opacity: .7; transform: translateY(7px) scale(.99); } to { opacity: 1; transform: none; } }
+@keyframes viewer-frame-out { to { opacity: 0; transform: translateY(3px) scale(.995); } }
+
+/* Navigation continuity is brief and falls back to ordinary navigation. */
+@view-transition { navigation: auto; }
+::view-transition-old(root) { animation: route-out 150ms ease-in both; }
+::view-transition-new(root) { animation: route-in var(--motion-route) var(--motion-out) both; }
+@keyframes route-out { to { opacity: .78; transform: translateX(-5px); } }
+@keyframes route-in { from { opacity: .78; transform: translateX(9px); } to { opacity: 1; transform: none; } }
+
+:where(button, a, input, select, [tabindex]):focus-visible {
+  outline: 2px solid #171719;
+  outline-offset: 3px;
+}
+html, body { overscroll-behavior-x: none; }
+a, button { touch-action: manipulation; }
+
+@media (max-width: 600px) {
+  #typeTabs { min-height: 54px; }
+  #typeTabs .segment { font-size: 12px; }
+  .work-grid { grid-template-columns: minmax(0, 1fr) !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root), ::view-transition-new(root),
+  .viewer.open, .viewer.closing, .viewer.open .viewer-frame, .viewer.closing .viewer-frame {
+    animation: none !important;
+  }
+  body .carousel-window .track, body .project-hero-3d .track { animation-play-state: paused !important; }
+  #typeTabs .segment-indicator,
+  .segment, .category-chip, .back-button, .contact-back, .viewer-close,
+  .order-fab, .telegram-button, .primary-button, .secondary-button,
+  .admin-row button, .case-slide-track, .case-slider-dots button,
+  .work-grid, .work-block, .work-block * {
+    transition-duration: 1ms !important;
+  }
+}
+
+.project-page .order-fab { transition: transform 180ms var(--motion-ease), opacity 180ms ease !important; }
+
+/* The category bar is a one-line horizontal rail; the selector follows at the same pace. */
+#typeTabs { overflow-x: auto; overflow-y: hidden; scrollbar-width: none; scroll-behavior: smooth; overscroll-behavior-inline: contain; }
+#typeTabs::-webkit-scrollbar { display: none; }
+#typeTabs .segment { flex: 0 0 auto; width: max-content; min-width: max-content; white-space: nowrap; padding-inline: 15px; scroll-snap-align: center; }
+#typeTabs .segment-indicator { transition: transform 280ms cubic-bezier(.22,.68,.18,1), width 180ms ease; }
+
+/* Separate cards drift at deliberately different rates to add depth to the autoplay loop. */
+body .carousel-window .slide,
+body .project-hero-3d .slide {
+  animation: slide-float var(--float-duration,8s) ease-in-out infinite alternate !important;
+  animation-delay: var(--float-delay,0s) !important;
+  filter: drop-shadow(0 var(--shadow-y,2px) var(--shadow-blur,5px) rgba(18,18,22,var(--shadow-alpha,.12))) !important;
+}
+.project-page .project-shell { padding-top: 0 !important; }
+.project-page .project-hero-3d { height: clamp(200px,38svh,420px); min-height: 0; margin-top: 0; }
+@media (prefers-reduced-motion: reduce) {
+  body .carousel-window .slide, body .project-hero-3d .slide { animation-play-state: paused !important; }
+}
+
+/* Ambient motion keeps the primary actions alive while idle. */
+.notice-mark { position: relative; animation: notice-breathe 2.8s ease-in-out infinite; }
+@keyframes notice-breathe {
+  0%,100% { transform: scale(1); box-shadow: 0 0 0 5px #e7773718; }
+  50% { transform: scale(1.08); box-shadow: 0 0 0 8px #e7773708; }
+}
+body .order-fab { position: fixed; isolation: isolate; overflow: hidden; transform: translateZ(0); animation: order-glow 3s ease-in-out infinite; }
+body .contact-hero .telegram-button {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  transform: translateZ(0);
+  animation: telegram-glow 3.4s ease-in-out infinite;
+  box-shadow: 0 8px 22px #229ed92b, 0 0 0 0 #229ed925;
+}
+body .order-fab::after,
+body .contact-hero .telegram-button::after {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  top: -45%;
+  bottom: -45%;
+  left: -55%;
+  width: 42%;
+  border-radius: inherit;
+  background: linear-gradient(105deg, transparent, #ffffff38 48%, transparent);
+  transform: skewX(-18deg);
+  animation: action-sheen 5.4s cubic-bezier(.2,.65,.3,1) infinite;
+  pointer-events: none;
+}
+body .contact-hero .telegram-button > * { position: relative; z-index: 1; }
+@keyframes action-sheen {
+  0% { left: -55%; opacity: 0; }
+  5% { opacity: .7; }
+  25% { left: 125%; opacity: .42; }
+  32%,100% { left: 125%; opacity: 0; }
+}
+@keyframes order-glow {
+  0%,100% { box-shadow: 0 10px 32px #17171935, 0 0 0 0 #17171900; }
+  50% { box-shadow: 0 12px 34px #1717193b, 0 0 0 6px #17171908; }
+}
+@keyframes telegram-glow {
+  0%,100% { box-shadow: 0 8px 22px #229ed92b, 0 0 0 0 #229ed900; }
+  50% { box-shadow: 0 10px 26px #229ed936, 0 0 0 6px #229ed90b; }
+}
+body .order-fab:active,
+body .contact-hero .telegram-button:active {
+  transform: scale(.96) translateY(1px) !important;
+  filter: brightness(.94) !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  .notice-mark,
+  body .order-fab,
+  body .contact-hero .telegram-button,
+  body .order-fab::after,
+  body .contact-hero .telegram-button::after { animation: none !important; }
+}
+
+/* Minimal back affordance: invisible button chrome, generous touch target. */
+body .back-button,
+body .contact-back {
+  width: 44px;
+  height: 44px;
+  min-height: 44px;
+  padding: 0;
+  display: grid;
+  place-items: center;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+  color: #171719;
+  transition: opacity 140ms ease, transform 140ms cubic-bezier(.2,.75,.25,1) !important;
+}
+body .back-button > svg,
+body .contact-back > svg { width: 22px; height: 22px; display: block; }
+body .back-button:active,
+body .contact-back:active { transform: scale(.9) !important; opacity: .62; }
+
+/* The project hero keeps a quiet circular back control; other pages stay bare. */
+body.project-page .project-hero-3d .back-button {
+  width: 42px;
+  height: 42px;
+  min-height: 42px;
+  border: 1px solid #ffffffd9;
+  border-radius: 50%;
+  background: #ffffffd9;
+  box-shadow: 0 2px 10px #17171912;
+  
+}
+body.project-page .project-hero-3d .back-button > svg { width: 19px; height: 19px; }
+body.project-page .project-hero-3d .back-button:active { transform: scale(.92) !important; }
+
+/* Reveal motion previews only after the full track has decoded. */
+body .carousel-window .slide img.image-ready,
+body .hero3d-window .slide img.image-ready { animation: none !important; }
+body .project-page .order-fab.is-scroll-hidden { transform: none !important; opacity: 1 !important; pointer-events: auto !important; }
+.photo-count-icon { width: 14px; height: 14px; flex: 0 0 14px; object-fit: contain; }
+
+/* Each project card arrives as one cohesive surface, including its caption. */
+body .work-grid .work-block {
+  animation: project-card-drop 680ms cubic-bezier(.16,1,.3,1) both !important;
+  animation-delay: calc(var(--card-index,0) * 42ms) !important;
+  transform-origin: 50% 0%;
+  backface-visibility: hidden;
+}
+@keyframes project-card-drop {
+  0% { opacity: 0; transform: translate3d(0,-24px,0) scale(.982) rotateX(-2deg); }
+  72% { opacity: 1; transform: translate3d(0,2px,0) scale(1.002) rotateX(0); }
+  100% { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  body .work-grid .work-block { animation: none !important; }
+}
+
+/* Keep the mobile portfolio geometry stable while Telegram expands its viewport. */
+@media (max-width: 900px) {
+  body.catalog-page .work-grid { grid-template-columns: minmax(0,1fr) !important; }
+}
+body.tg-mini-app.catalog-page .work-grid { grid-template-columns: minmax(0,1fr) !important; }
+body .work-grid .work-block { animation: catalog-card-soft-in 340ms cubic-bezier(.2,.75,.25,1) both !important; }
+@keyframes catalog-card-soft-in {
+  from { opacity: .35; transform: translate3d(0,6px,0) scale(.995); }
+  to { opacity: 1; transform: translate3d(0,0,0) scale(1); }
+}
+.hero3d-window { opacity: 1; }
+.hero3d-window.carousel-ready, .hero3d-window.carousel-failed { opacity: 1; }
+@media (prefers-reduced-motion: reduce) { .hero3d-window { transition: none !important; } }
+
+/* Lock each card's 3D transform and stacking order before the carousel is revealed. */
+body .carousel-window .slide,
+body .project-hero-3d .slide {
+  animation: depth-rest var(--float-duration,8s) ease-in-out var(--float-delay,0s) infinite alternate !important;
+  transform: translateY(var(--rise,0px)) rotate(var(--card-angle,-8deg)) translateZ(var(--depth-z,0px)) rotateY(var(--depth-yaw,0deg)) scale(var(--depth-scale,1)) !important;
+  z-index: var(--depth,1) !important;
+  transform-origin: top left !important;
+}
+@keyframes depth-rest { from { opacity: .996; translate: 0 0; } to { opacity: 1; translate: var(--drift-x,4px) var(--drift-y,.7px); } }
+body .carousel-window:not(.is-carousel-in-view) .track,body .carousel-window:not(.is-carousel-in-view) .slide{animation-play-state:paused!important}
+body .project-hero-3d:not(.is-carousel-in-view) .track,body .project-hero-3d:not(.is-carousel-in-view) .slide{animation-play-state:paused!important}
+body .carousel-window.is-carousel-in-view .track,body .project-hero-3d.is-carousel-in-view .track{animation-play-state:running!important}
+body .carousel-window.is-banner-carousel .slide,body .project-hero-3d.is-banner-carousel .slide{animation-name:banner-depth-rest!important}
+@keyframes banner-depth-rest{from{opacity:.996;translate:0 0}to{opacity:1;translate:var(--drift-x,0px) var(--drift-y,0px)}}
+@media (prefers-reduced-motion: reduce) {
+  body .carousel-window .slide,
+  body .project-hero-3d .slide { animation: none !important; opacity: 1 !important; }
+}
+
+/* In the all-work feed, quietly label each preview by its work type. */
+body.catalog-page .work-type-badge {
+  position: absolute;
+  z-index: 5;
+  top: 12px;
+  left: 12px;
+  max-width: calc(100% - 24px);
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 12px;
+  overflow: hidden;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: #f2f2f4;
+  color: #39383e;
+  box-shadow: 0 3px 14px #17171912;
+  
+  
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  pointer-events: none;
+}
+body.catalog-page .work-type-badge[data-work-type="products"] { background: #fff0e8; border-color: #f3d4c4; color: #814522; }
+body.catalog-page .work-type-badge[data-work-type="banners"] { background: #edf0ff; border-color: #d8defc; color: #43528a; }
+body.catalog-page .work-type-badge[data-work-type="vk-groups"] { background: #eaf6f0; border-color: #d2eadd; color: #35684f; }
+body.catalog-page .category-chip { animation: none !important; }
+body.catalog-page .category-chip:active { transform: scale(.96) !important; }
+body.catalog-page #workGrid.is-filtering .work-block { animation: none !important; }
+@media (max-width: 600px) {
+  body.catalog-page .work-type-badge { top: 10px; left: 10px; padding: 7px 10px; font-size: 9px; }
+}
+
+/* Size each work tab to its label so the dark active surface travels with it. */
+body.catalog-page #typeTabs .segment {
+  flex: 0 0 auto !important;
+  width: max-content !important;
+  min-width: max-content !important;
+  padding-inline: 15px !important;
+}
+body.catalog-page #typeTabs .segment-indicator {
+  width: clamp(86px, 25vw, 104px);
+  transform: none !important;
+  transition: left 460ms cubic-bezier(.22,.72,.18,1), width 340ms cubic-bezier(.22,.72,.18,1) !important;
+  will-change: left, width;
+}
+body.catalog-page #typeTabs .segment-indicator.is-initializing { transition: none !important; }
+
+/* Telegram's WKWebView recomposites preserve-3d children during viewport expansion.
+   Keep the intentional diagonal stack, but make its layer order static there. */
+body.tg-mini-app.catalog-page .carousel-window {
+  perspective: none !important;
+  transform-style: flat !important;
+  isolation: isolate !important;
+}
+body.tg-mini-app.catalog-page .carousel-window .track,
+body.tg-mini-app.catalog-page .carousel-window .track-set {
+  transform-style: flat !important;
+}
+body.tg-mini-app.catalog-page .carousel-window .slide {
+  transform: translateY(var(--rise,0px)) rotate(var(--card-angle,-8deg)) scale(var(--depth-scale,1)) !important;
+  transform-style: flat !important;
+  backface-visibility: visible !important;
+  z-index: var(--depth,1) !important;
+}
+
+/* Let the project cover continue behind Telegram's chrome, while keeping
+   controls below Telegram's header and the device status area. */
+body.tg-mini-app.project-page .project-shell { padding-top: 0 !important; }
+body.tg-mini-app.project-page .project-hero-3d {
+  margin-top: calc(-1 * max(env(safe-area-inset-top,0px),var(--tg-content-safe-area-inset-top,0px),var(--tg-safe-area-inset-top,0px))) !important;
+}
+
+/* Loading shimmer belongs to the carousel media only. Captions and page chrome stay live. */
+body.catalog-page .work-grid.is-loading { min-height: 0 !important; }
+body.catalog-page .work-grid.is-loading { min-height: 0 !important; }
+.carousel-loading-skeleton {
+  position: absolute;
+  z-index: 4;
+  inset: 0;
+  display: block;
+  overflow: hidden;
+  border-radius: inherit;
+  background: linear-gradient(105deg,#ececf0 22%,#f7f7f9 38%,#ececf0 62%);
+  background-size: 260% 100%;
+  animation: carousel-loading-sheen 1.25s linear infinite;
+  opacity: 1;
+  transition: opacity 260ms ease;
+  pointer-events: none;
+}
+.carousel-loading-skeleton::after {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(110deg,transparent 35%,#ffffff45 50%,transparent 65%);
+  content: "";
+  transform: translateX(-100%);
+  animation: carousel-loading-glint 1.8s ease-in-out infinite;
+}
+@keyframes carousel-loading-sheen { to { background-position-x: -130%; } }
+@keyframes carousel-loading-glint { to { transform: translateX(100%); } }
+body.catalog-page .carousel-window.carousel-ready .carousel-loading-skeleton,
+body.catalog-page .carousel-window.carousel-failed .carousel-loading-skeleton,
+body.catalog-page .catalog-static-window.carousel-ready .carousel-loading-skeleton,
+body.catalog-page .catalog-static-window.carousel-failed .carousel-loading-skeleton,
+body.project-page .case-slide-window.carousel-ready .carousel-loading-skeleton,
+body.project-page .catalog-static-window.carousel-ready .carousel-loading-skeleton,
+body.project-page .hero3d-window.carousel-ready .carousel-loading-skeleton,
+body.project-page .hero3d-window.carousel-failed .carousel-loading-skeleton {
+  opacity: 0;
+}
+body.project-page .hero3d-window { opacity: 1; }
+@media (prefers-reduced-motion: reduce) {
+  .carousel-loading-skeleton,
+  .carousel-loading-skeleton::after { animation: none !important; }
+}
+
+/* Local draft controls in the desktop admin editor. */
+body.admin-page .draft-notice {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin: 0 0 14px;
+  padding: 13px 14px;
+  border: 1px solid #d8e8dc;
+  border-radius: 16px;
+  background: #f1f8f3;
+}
+body.admin-page .draft-notice > div { display: grid; flex: 1; gap: 4px; min-width: 0; }
+body.admin-page .draft-notice strong { font-size: 12px; }
+body.admin-page .draft-notice small,
+body.admin-page .draft-status { color: #77767c; font-size: 10px; line-height: 1.4; }
+body.admin-page .draft-notice button { min-height: 36px; }
+body.admin-page .form-actions .draft-status { flex-basis: 100%; }
+@media (max-width: 620px) {
+  body.admin-page .draft-notice { flex-wrap: wrap; }
+  body.admin-page .draft-notice > div { flex-basis: 100%; }
+  body.admin-page .draft-notice button { flex: 1; }
+}
+
+/* Fade loaded preview images over the existing image skeleton. */
+body .carousel-window .slide img.image-ready,
+body .hero3d-window .slide img.image-ready { animation: none !important; opacity: 1; }
+body .carousel-window.is-scroll-revealing .slide img.image-ready,
+body .project-hero-3d.is-scroll-revealing .slide img.image-ready {
+  animation: none !important;
+  opacity: 1;
+}
+.order-fab { line-height: 1; text-align: center; }
+.order-fab .order-fab-label {
+  display: block !important;
+  width: auto !important;
+  height: auto !important;
+  margin: 0;
+  border-radius: 0;
+  background: transparent;
+  font-size: inherit;
+  line-height: 1;
+  text-align: center;
+}
+body.project-page .related-work-block .work-type-badge {
+  position: absolute;
+  z-index: 5;
+  top: 12px;
+  left: 12px;
+  max-width: calc(100% - 24px);
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 12px;
+  overflow: hidden;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  background: #f2f2f4;
+  color: #39383e;
+  box-shadow: 0 3px 14px #17171912;
+  
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  pointer-events: none;
+}
+body.project-page .related-work-block .work-type-badge[data-work-type="products"] { background:#fff0e8; border-color:#f3d4c4; color:#814522; }
+body.project-page .related-work-block .work-type-badge[data-work-type="banners"] { background:#edf0ff; border-color:#d8defc; color:#43528a; }
+body.project-page .related-work-block .work-type-badge[data-work-type="vk-groups"] { background:#eaf6f0; border-color:#d2eadd; color:#35684f; }
+@media (max-width:600px) { body.project-page .related-work-block .work-type-badge { top:10px; left:10px; padding:7px 10px; font-size:9px; } }
+body.project-page .related-work-block .carousel-window.carousel-ready .carousel-loading-skeleton,
+body.project-page .related-work-block .carousel-window.carousel-failed .carousel-loading-skeleton { opacity: 0; }
+@media (prefers-reduced-motion: reduce) {
+  body .carousel-window.is-scroll-revealing .slide img.image-ready,
+  body .project-hero-3d.is-scroll-revealing .slide img.image-ready { animation: none !important; filter: none !important; }
+}
+
+/* Images outside the screen recede into the page surface, then clear as they enter. */
+body img.image-ready,
+body .carousel-window .slide img.image-ready,
+body .hero3d-window .slide img.image-ready,body .project-gallery img.image-ready,body .case-slide-window img.image-ready,body .article-image-block img.image-ready,body .article-image img.image-ready,body .related-work-block img.image-ready,body .catalog-static-window img.image-ready{opacity:1!important;filter:none!important;transition:none!important}
+@media (prefers-reduced-motion: reduce) {
+  body img.image-ready,
+  body .carousel-window .slide img.image-ready,
+  body .hero3d-window .slide img.image-ready,
+  body .project-gallery img.image-ready,
+  body .case-slide-window img.image-ready,
+  body .article-image-block img.image-ready,
+  body .article-image img.image-ready { transition: none !important; }
+}
+
+
+/* Scroll reveal uses a background-colored overlay, keeping the image fully rendered. */
+
+body.catalog-page .carousel-window.has-lqip:not(.carousel-ready) .carousel-loading-skeleton,
+body.project-page .hero3d-window.has-lqip:not(.carousel-ready) .carousel-loading-skeleton,
+body.project-page .case-slide-window.has-lqip:not(.carousel-ready) .carousel-loading-skeleton { opacity:.22; }
