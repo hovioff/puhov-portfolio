@@ -72,3 +72,4 @@
   script.onerror = () => { if (inlineBack) inlineBack.hidden = false; document.body?.classList.remove('tg-mini-app'); };
   document.head.append(script);
 })();
+

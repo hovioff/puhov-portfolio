@@ -279,7 +279,7 @@ body.project-page .project-hero-3d .back-button {
   border-radius: 50%;
   background: #ffffffd9;
   box-shadow: 0 2px 10px #17171912;
-  backdrop-filter: blur(12px);
+  
 }
 body.project-page .project-hero-3d .back-button > svg { width: 19px; height: 19px; }
 body.project-page .project-hero-3d .back-button:active { transform: scale(.92) !important; }
@@ -355,8 +355,8 @@ body.catalog-page .work-type-badge {
   background: #f2f2f4;
   color: #39383e;
   box-shadow: 0 3px 14px #17171912;
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
+  
+  
   font-size: 10px;
   font-weight: 700;
   line-height: 1;
@@ -515,7 +515,7 @@ body.project-page .related-work-block .work-type-badge {
   background: #f2f2f4;
   color: #39383e;
   box-shadow: 0 3px 14px #17171912;
-  backdrop-filter: blur(12px);
+  
   font-size: 10px;
   font-weight: 700;
   line-height: 1;
@@ -537,27 +537,7 @@ body.project-page .related-work-block .carousel-window.carousel-failed .carousel
 /* Images outside the screen recede into the page surface, then clear as they enter. */
 body img.image-ready,
 body .carousel-window .slide img.image-ready,
-body .hero3d-window .slide img.image-ready,
-body .project-gallery img.image-ready,
-body .case-slide-window img.image-ready,
-body .article-image-block img.image-ready,
-body .article-image img.image-ready,
-body .related-work-block img.image-ready,
-body .catalog-static-window img.image-ready {
-  transition: opacity 520ms cubic-bezier(.2,.75,.25,1), filter 520ms cubic-bezier(.2,.75,.25,1) !important;
-}
-body img.image-ready.is-out-of-view,
-body .carousel-window .slide img.image-ready.is-out-of-view,
-body .hero3d-window .slide img.image-ready.is-out-of-view,
-body .project-gallery img.image-ready.is-out-of-view,
-body .case-slide-window img.image-ready.is-out-of-view,
-body .article-image-block img.image-ready.is-out-of-view,
-body .article-image img.image-ready.is-out-of-view,
-body .related-work-block img.image-ready.is-out-of-view,
-body .catalog-static-window img.image-ready.is-out-of-view {
-  opacity: .2 !important;
-  filter: blur(9px) saturate(.68) !important;
-}
+body .hero3d-window .slide img.image-ready,body .project-gallery img.image-ready,body .case-slide-window img.image-ready,body .article-image-block img.image-ready,body .article-image img.image-ready,body .related-work-block img.image-ready,body .catalog-static-window img.image-ready{opacity:1!important;filter:none!important;transition:none!important}
 @media (prefers-reduced-motion: reduce) {
   body img.image-ready,
   body .carousel-window .slide img.image-ready,
@@ -569,14 +549,7 @@ body .catalog-static-window img.image-ready.is-out-of-view {
 }
 
 
-/* Keep the scroll-fog subtle in Telegram's GPU-constrained WebView. */
-body.tg-mini-app img.image-ready.is-out-of-view,
-body.tg-mini-app .carousel-window .slide img.image-ready.is-out-of-view,
-body.tg-mini-app .hero3d-window .slide img.image-ready.is-out-of-view {
-  filter: blur(2px) saturate(.82) !important;
-  opacity: .34 !important;
-  transition: opacity 360ms ease !important;
-}
+/* Scroll reveal uses a background-colored overlay, keeping the image fully rendered. */
 
 body.catalog-page .carousel-window.has-lqip:not(.carousel-ready) .carousel-loading-skeleton,
 body.project-page .hero3d-window.has-lqip:not(.carousel-ready) .carousel-loading-skeleton,

@@ -31,7 +31,7 @@ export async function getPortfolio({onFallback}={}){
   try{
     const url=new URL(`${SUPABASE_URL}/rest/v1/portfolio_content`);
     url.searchParams.set('select','payload');url.searchParams.set('id','eq.main');
-    const response=await fetch(url,{headers:{apikey:SUPABASE_PUBLISHABLE_KEY,Authorization:`Bearer ${SUPABASE_PUBLISHABLE_KEY}`,Accept:'application/json'},cache:'no-store',signal:AbortSignal.timeout(9000)});
+    const response=await fetch(url,{headers:{apikey:SUPABASE_PUBLISHABLE_KEY,Authorization:`Bearer ${SUPABASE_PUBLISHABLE_KEY}`,Accept:'application/json'},cache:'no-store',signal:AbortSignal.timeout(5000)});
     if(!response.ok)throw new Error(`Supabase read failed (${response.status})`);
     const rows=await response.json();
     return normalise(rows[0]?.payload||await getLocal());
@@ -43,10 +43,9 @@ export async function getPortfolio({onFallback}={}){
 }
 function dataURLToBlob(value){const comma=value.indexOf(',');if(!value.startsWith('data:')||comma<0)throw new Error('Не удалось прочитать локальное изображение.');const metadata=value.slice(5,comma),payload=value.slice(comma+1),mime=metadata.split(';')[0]||'application/octet-stream';let bytes;if(/(?:^|;)base64(?:;|$)/i.test(metadata)){const binary=atob(payload.replace(/\s/g,''));bytes=new Uint8Array(binary.length);for(let i=0;i<binary.length;i++)bytes[i]=binary.charCodeAt(i);}else bytes=new TextEncoder().encode(decodeURIComponent(payload));return new Blob([bytes],{type:mime});}
 async function uploadSlide(supabase,slide,projectId,index){
-  if(!slide.src?.startsWith('data:'))return slide;
-  const blob=dataURLToBlob(slide.src);if(!['image/webp','image/png','image/jpeg','image/avif'].includes(blob.type))throw new Error('Неподдерживаемый формат изображения.');const ext=blob.type==='image/png'?'png':blob.type==='image/jpeg'?'jpg':blob.type==='image/avif'?'avif':'webp';const path=`${projectId}/${Date.now()}-${index}.${ext}`;
-  const {error}=await supabase.storage.from(SUPABASE_BUCKET).upload(path,blob,{contentType:blob.type,upsert:true});if(error)throw error;
-  const {data}=supabase.storage.from(SUPABASE_BUCKET).getPublicUrl(path);return{...slide,src:data.publicUrl};
+  const upload=async(value,suffix)=>{if(!value?.startsWith('data:'))return value;const blob=dataURLToBlob(value);if(!['image/webp','image/png','image/jpeg','image/avif'].includes(blob.type))throw new Error('Неподдерживаемый формат изображения.');const ext=blob.type==='image/png'?'png':blob.type==='image/jpeg'?'jpg':blob.type==='image/avif'?'avif':'webp',path=`${projectId}/${Date.now()}-${index}-${suffix}.${ext}`;const{error}=await supabase.storage.from(SUPABASE_BUCKET).upload(path,blob,{contentType:blob.type,upsert:true});if(error)throw error;return supabase.storage.from(SUPABASE_BUCKET).getPublicUrl(path).data.publicUrl;};
+  if(!slide.src?.startsWith('data:')){if(!slide.previewSrc?.startsWith('data:'))return slide;return{...slide,previewSrc:await upload(slide.previewSrc,'small')};}
+  return{...slide,src:await upload(slide.src,'full'),previewSrc:await upload(slide.previewSrc,'small')};
 }
 export async function savePortfolio(data){
   data=normalise(data);

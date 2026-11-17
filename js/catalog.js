@@ -1,4 +1,4 @@
-import {getPortfolio,escapeHTML,displayProjectImageCount} from './data.js?v=20261116-07';
+import {getPortfolio,escapeHTML,displayProjectImageCount,countProjectImages} from './data.js?v=20261116-07';
 import {polishTypography} from './typography.js?v=20261115-01';
 const grid=document.querySelector('#workGrid');
 const filters=document.querySelector('#filters');
@@ -6,6 +6,29 @@ const tabs=document.querySelector('#typeTabs');
 const empty=document.querySelector('#emptyState');
 const searchInput=document.querySelector('#projectSearch');
 const loadingMessage=document.querySelector('#catalogLoading');
+let searchToggle=null;
+const searchPanel=document.querySelector('#catalogSearchPanel');
+const portfolioSlideCount=document.querySelector('#portfolioSlideCount');
+const portfolioSlideWord=document.querySelector('#portfolioSlideWord');
+function animateSlideCount(el,target){
+  const value=Math.max(0,Number(target)||0),digits=String(value),storedValue=el.dataset.value,old=storedValue===undefined?'':storedValue;
+  const startWidth=Math.max(digits.length,old.length);
+  el.setAttribute('aria-label',digits);
+  el.style.setProperty('--odometer-width',`${startWidth}ch`);
+  el.dataset.maxDigits=String(startWidth);el.dataset.value=String(value);
+  if(el.dataset.rendered===digits)return;
+  el.dataset.rendered=digits;
+  const padded=digits.padStart(startWidth,' '),previous=old.padStart(startWidth,'0');
+  el.replaceChildren(...[...padded].map((char,index)=>{
+    const digit=document.createElement('span');digit.className='odometer-digit';digit.setAttribute('aria-hidden','true');
+    const wheel=document.createElement('span');wheel.className='odometer-wheel';
+    wheel.innerHTML=[...'01234567890123456789'].map(number=>`<span>${number}</span>`).join('');digit.append(wheel);
+    const targetDigit=char===' '?0:Number(char),startDigit=previous[index]===' '?0:Number(previous[index]);
+    const start=10+startDigit,end=10+targetDigit;wheel.style.transform=`translateY(-${start}em)`;
+    requestAnimationFrame(()=>wheel.animate([{transform:`translateY(-${start}em)`},{transform:`translateY(-${end}em)`}],{duration:720+index*35,delay:index*35,easing:'cubic-bezier(.2,.75,.25,1)',fill:'forwards'}));
+    return digit;
+  }));
+}
 const CATALOG_STATE_KEY='puhov-portfolio:catalog-state';
 const RETURN_TO_CATALOG_KEY='puhov-portfolio:return-to-catalog';
 function readCatalogState(){try{return JSON.parse(sessionStorage.getItem(CATALOG_STATE_KEY)||'{}');}catch{return{};}}
@@ -15,8 +38,10 @@ function saveCatalogState(){try{sessionStorage.setItem(CATALOG_STATE_KEY,JSON.st
 const typeName=id=>data.types.find(type=>type.id===id)?.name||({products:'Карточки товаров',banners:'Экспресс-баннеры','vk-groups':'Группы ВК'}[id]||id);
 const categoryName=id=>data.categories.find(category=>category.id===id)?.name||id;
 const threeDSkeleton='<span class="carousel-loading-skeleton" aria-hidden="true"></span>';
-const scrollImageObserver='IntersectionObserver'in window?new IntersectionObserver(entries=>entries.forEach(entry=>entry.target.classList.toggle('is-out-of-view',!entry.isIntersecting)),{threshold:.025}):null;
-function observeScrollImage(img){scrollImageObserver?.observe(img);}
+function observeScrollImage(){}
+const veil=document.querySelector('.site-scroll-veil');let veilFrame=0,veilY=50,veilTarget=50,lastScrollY=window.scrollY,veilRestTimer=0;
+function updateScrollVeil(){if(!veil)return;veilY+=(veilTarget-veilY)*.2;veil.style.setProperty('--veil-y',`${veilY.toFixed(2)}%`);if(Math.abs(veilTarget-veilY)>.06)veilFrame=requestAnimationFrame(updateScrollVeil);else veilFrame=0;}
+window.addEventListener('scroll',()=>{const y=window.scrollY,delta=y-lastScrollY;lastScrollY=y;veilTarget=Math.max(8,Math.min(92,veilTarget+delta/Math.max(1,window.innerHeight)*70));clearTimeout(veilRestTimer);veilRestTimer=setTimeout(()=>{veilTarget=50;if(!veilFrame)veilFrame=requestAnimationFrame(updateScrollVeil);},240);if(!veilFrame)veilFrame=requestAnimationFrame(updateScrollVeil);},{passive:true});
 
 const monthNames={января:0,январь:0,янв:0,февраля:1,февраль:1,фев:1,марта:2,март:2,мар:2,апреля:3,апрель:3,апр:3,мая:4,май:4,июня:5,июнь:5,июн:5,июля:6,июль:6,июл:6,августа:7,август:7,авг:7,сентября:8,сентябрь:8,сен:8,октября:9,октябрь:9,окт:9,ноября:10,ноябрь:10,ноя:10,декабря:11,декабрь:11,дек:11};
 function dateValue(value=''){
@@ -35,7 +60,8 @@ function dateValue(value=''){
 let sortedProjects=[];let projectsById=new Map();
 const trackRuns=new WeakMap();const imageObservers=new WeakMap();const activeImageObservers=new Set();const imageLoadGuards=new WeakMap();
 function drawTypes(){
-  tabs.innerHTML='<span class="segment-indicator" aria-hidden="true"></span>'+[{id:'all',name:'Общая лента'},...data.types].map(type=>`<button type="button" class="segment${type.id===activeType?' is-active':''}" data-type="${escapeHTML(type.id)}" aria-pressed="${String(type.id===activeType)}">${escapeHTML(type.name)}</button>`).join('');
+  tabs.innerHTML='<span class="segment-indicator" aria-hidden="true"></span><button type="button" class="segment search-toggle" id="searchToggle" aria-label="Открыть поиск" aria-expanded="false" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.8" cy="10.8" r="6.3"></circle><path d="m16 16 4.2 4.2"></path></svg></button>'+[{id:'all',name:'Общая лента'},...data.types].map(type=>`<button type="button" class="segment${type.id===activeType?' is-active':''}" data-type="${escapeHTML(type.id)}" aria-pressed="${String(type.id===activeType)}">${escapeHTML(type.name)}</button>`).join('');
+  searchToggle=tabs.querySelector('#searchToggle');
   const indicator=tabs.querySelector('.segment-indicator');indicator?.classList.add('is-initializing');
   requestAnimationFrame(()=>{
     moveTypeIndicator(true);
@@ -60,18 +86,25 @@ function drawFilters(){
   filters.hidden=!available.length;
 }
 function safePlaceholder(value=''){return /^data:image\/(?:webp|png);base64,[A-Za-z0-9+/=]+$/.test(value)?escapeHTML(value):'';}
-function formatCatalogDate(value=''){const timestamp=dateValue(value);return timestamp?new Intl.DateTimeFormat('ru-RU',{day:'numeric',month:'short',year:'numeric'}).format(timestamp):String(value||'');}
+const SEARCH_GROUPS=[['карточка','карточки','товар','товары','маркетплейс','wildberries','ozon'],['баннер','баннеры','экспресс','авито','avito'],['группа','группы','сообщество','вк','vk'],['сайт','лендинг','веб','web','website'],['дизайн','дизайнер','оформление','визуал']];
+const SEARCH_STOP=new Set(['для','это','как','что','при','над','под','про','из','на','по','в','и','с','к','от']);
+const KEYBOARD_LAYOUTS=[["qwertyuiop[]asdfghjkl;'zxcvbnm,./","йцукенгшщзхъфывапролджэячсмитьбю."],["йцукенгшщзхъфывапролджэячсмитьбю.","qwertyuiop[]asdfghjkl;'zxcvbnm,./"]];
+function normalizeSearch(value=''){return String(value).toLocaleLowerCase('ru').replace(/ё/g,'е').replace(/[^a-zа-я0-9]+/gi,' ').trim();}
+function stemSearchToken(token){return token.replace(/(иями|ями|ами|ией|ого|ему|ыми|ими|ая|яя|ое|ее|ые|ие|ой|ый|ий|ом|ем|ам|ям|ах|ях|ов|ев|ей|ы|и|а|я|у|ю|е|о)$/,'').slice(0,3)||token;}
+function keyboardVariant(value){return KEYBOARD_LAYOUTS.map(([from,to])=>[...value].map(char=>{const i=from.indexOf(char);return i<0?char:to[i];}).join(''));}
+function tokenDistanceOne(a,b){if(a===b)return true;if(Math.abs(a.length-b.length)>1||Math.min(a.length,b.length)<5)return false;let i=0,j=0,edits=0;while(i<a.length&&j<b.length){if(a[i]===b[j]){i++;j++;continue;}if(++edits>1)return false;if(a.length>b.length)i++;else if(b.length>a.length)j++;else{i++;j++;}}return edits+(i<a.length||j<b.length?1:0)<=1;}
+function expandSearchTerm(token){const variants=new Set([token,stemSearchToken(token),...keyboardVariant(token)]);for(const group of SEARCH_GROUPS)if(group.includes(token)||group.some(item=>stemSearchToken(item)===stemSearchToken(token)))for(const item of group)variants.add(item);return [...variants].filter(Boolean);}
+function searchScore(project,query){if(!query)return 1;const fields=[project.title,categoryName(project.category),typeName(project.type)].map(normalizeSearch).join(' '),haystack=normalizeSearch(fields),words=[...new Set(haystack.split(/\s+/).filter(Boolean))],terms=normalizeSearch(query).split(/\s+/).filter(word=>word&&!SEARCH_STOP.has(word));if(!terms.length)return haystack.includes(normalizeSearch(query))?1:0;let score=0;for(const term of terms){const expanded=expandSearchTerm(term);let best=0;for(const word of words){if(expanded.includes(word)){best=Math.max(best,word===term?8:5);continue;}if(expanded.some(candidate=>candidate.length>=3&&word.startsWith(candidate)))best=Math.max(best,4);else if(expanded.some(candidate=>tokenDistanceOne(candidate,word)))best=Math.max(best,2);}if(!best)return 0;score+=best;}if(haystack.includes(normalizeSearch(query)))score+=8;return score;}
 function card(project,cardIndex=0){
   const slides=project.slides||[];
-  const badge='';
-  const mainCarousel=project.blocks?.find(block=>block.type==='carousel'),isAvito=mainCarousel?.format==='avito';
-  const aspect=isAvito?'4 / 3':project.type==='banners'?'1280 / 920':'808 / 632';
-  const meta=`<div class="block-meta"><span class="work-type-badge" data-work-type="${escapeHTML(project.type)}">${escapeHTML(typeName(project.type))}</span>${project.date?`<time>${escapeHTML(formatCatalogDate(project.date))}</time>`:''}</div>`;
-  if(project.previewImage?.src)return `<a class="work-block" style="--card-index:${Math.min(cardIndex,8)}" href="project.html?id=${encodeURIComponent(project.id)}" aria-label="Открыть проект «${escapeHTML(project.title)}"><div class="carousel-window catalog-static-window" style="--carousel-aspect:${aspect}"><span class="carousel-loading-skeleton" aria-hidden="true"></span><img class="catalog-static-preview" src="${escapeHTML(project.previewImage.src)}" data-placeholder="${safePlaceholder(project.previewImage.placeholder)}" alt="${escapeHTML(project.title)}" loading="lazy">${badge}</div><div class="block-caption"><div class="block-copy"><h2 class="block-title">${escapeHTML(project.title)}</h2>${meta}</div><span class="slide-count"><b>${displayProjectImageCount(project)}</b><img class="photo-count-icon" src="assets/photo-icon.png" alt="" aria-hidden="true" width="14" height="14" loading="eager" decoding="async"></span></div></a>`;
+  const badge=activeType==='all'?`<span class="work-type-badge" data-work-type="${escapeHTML(project.type)}">${escapeHTML(typeName(project.type))}</span>`:'';
+  const mainCarousel=project.blocks?.find(block=>block.type==='carousel'),isSquare=mainCarousel?.format==='square'||mainCarousel?.format==='avito';
+  const aspect=isSquare?'1 / 1':project.type==='banners'?'1280 / 920':'808 / 632';
+  if(project.previewImage?.src)return `<a class="work-block" style="--card-index:${Math.min(cardIndex,8)}" href="project.html?id=${encodeURIComponent(project.id)}" aria-label="Открыть проект «${escapeHTML(project.title)}"><div class="carousel-window catalog-static-window" style="--carousel-aspect:${aspect}"><img class="catalog-static-preview" src="${escapeHTML(project.previewImage.previewSrc||project.previewImage.src)}" data-placeholder="${safePlaceholder(project.previewImage.placeholder)}" alt="${escapeHTML(project.title)}" loading="lazy">${badge}</div><div class="block-caption"><div class="block-copy"><h2 class="block-title">${escapeHTML(project.title)}</h2></div><span class="slide-count"><b>${displayProjectImageCount(project)}</b><img class="photo-count-icon" src="assets/photo-icon.png" alt="" aria-hidden="true" width="14" height="14" loading="eager" decoding="async"></span></div></a>`;
   const orderedSlides=slides.length>1?[slides[slides.length-1],...slides.slice(0,-1)]:slides;
-  if(!slides.length)return `<a class="work-block" style="--card-index:${Math.min(cardIndex,8)}" href="project.html?id=${encodeURIComponent(project.id)}"><div class="carousel-window catalog-static-window" style="--carousel-aspect:${aspect}"></div><div class="block-caption"><div class="block-copy"><h2 class="block-title">${escapeHTML(project.title)}</h2>${meta}</div><span class="slide-count"><b>${displayProjectImageCount(project)}</b></span></div></a>`;
-  const group=(duplicate=false)=>`<div class="track-set${duplicate?' track-set-repeat':''}"${duplicate?' aria-hidden="true"':''}>${orderedSlides.map((slide,index)=>{const near=index%2===1,wide=project.type==='banners',progress=index/Math.max(1,orderedSlides.length-1),drift=wide?(near?'-5px':'8px'):`-${2+progress*16}px`,cycle=54-progress*48,loading=duplicate||index>2?'lazy':'eager',priority=!duplicate&&cardIndex===0&&index===0?'high':'auto';return`<div class="slide" style="--depth:${index+1};--reveal-order:${index+(duplicate?slides.length:0)};--depth-z:${wide?(near?'12px':'-7px'):(near?'16px':'-9px')};--depth-yaw:${near?'-1.4deg':'1deg'};--depth-scale:${wide?(near?'1.012':'.994'):(near?'1.022':'.986')};--shadow-y:${wide?(near?'4px':'1px'):(near?'5px':'2px')};--shadow-blur:${wide?(near?'9px':'4px'):(near?'11px':'6px')};--shadow-alpha:${wide?(near?'.15':'.08'):(near?'.18':'.11')};--float-duration:${cycle}s;--float-delay:0s;animation-duration:${cycle}s!important;--drift-x:${drift};--drift-y:${wide?(near?'-0.8px':'0.7px'):`${.4+progress*3.6}px`}"><img src="${escapeHTML(slide.src)}" data-placeholder="${safePlaceholder(slide.placeholder)}" alt="${duplicate?'':escapeHTML(slide.alt||project.title)}" loading="${loading}" fetchpriority="${priority}" decoding="async"></div>`;}).join('')}</div>`;
-  return `<a class="work-block" style="--card-index:${Math.min(cardIndex,8)}" href="project.html?id=${encodeURIComponent(project.id)}" aria-label="Открыть проект «${escapeHTML(project.title)}"><div class="carousel-window${project.type==='banners'?' is-banner-carousel':''}${isAvito?' is-avito-carousel':''}" style="--carousel-aspect:${aspect}">${threeDSkeleton}<div class="track${slides.length<2?' is-static':''}" data-carousel="${escapeHTML(project.id)}">${group()}</div>${badge}</div><div class="block-caption"><div class="block-copy"><h2 class="block-title">${escapeHTML(project.title)}</h2>${meta}</div><span class="slide-count"><b>${displayProjectImageCount(project)}</b><img class="photo-count-icon" src="assets/photo-icon.png" alt="" aria-hidden="true" width="14" height="14" loading="eager" decoding="async"></span></div></a>`;
+  if(!slides.length)return `<a class="work-block" style="--card-index:${Math.min(cardIndex,8)}" href="project.html?id=${encodeURIComponent(project.id)}"><div class="carousel-window catalog-static-window" style="--carousel-aspect:${aspect}"></div><div class="block-caption"><div class="block-copy"><h2 class="block-title">${escapeHTML(project.title)}</h2></div><span class="slide-count"><b>${displayProjectImageCount(project)}</b></span></div></a>`;
+  const group=(duplicate=false)=>`<div class="track-set${duplicate?' track-set-repeat':''}"${duplicate?' aria-hidden="true"':''}>${orderedSlides.map((slide,index)=>{const near=index%2===1,wide=project.type==='banners',progress=index/Math.max(1,orderedSlides.length-1),drift=wide?(near?'-5px':'8px'):`-${2+progress*16}px`,cycle=54-progress*48,loading=duplicate||index>2?'lazy':'eager',priority=!duplicate&&cardIndex===0&&index===0?'high':'auto';return`<div class="slide" style="--depth:${index+1};--reveal-order:${index+(duplicate?slides.length:0)};--depth-z:${wide?(near?'12px':'-7px'):(near?'16px':'-9px')};--depth-yaw:${near?'-1.4deg':'1deg'};--depth-scale:${wide?(near?'1.012':'.994'):(near?'1.022':'.986')};--shadow-y:${wide?(near?'4px':'1px'):(near?'5px':'2px')};--shadow-blur:${wide?(near?'9px':'4px'):(near?'11px':'6px')};--shadow-alpha:${wide?(near?'.15':'.08'):(near?'.18':'.11')};--float-duration:${cycle}s;--float-delay:0s;animation-duration:${cycle}s!important;--drift-x:${drift};--drift-y:${wide?(near?'-0.8px':'0.7px'):`${.4+progress*3.6}px`}"><img src="${escapeHTML(slide.previewSrc||slide.src)}" data-placeholder="${safePlaceholder(slide.placeholder)}" alt="${duplicate?'':escapeHTML(slide.alt||project.title)}" loading="${loading}" fetchpriority="${priority}" decoding="async"></div>`;}).join('')}</div>`;
+  return `<a class="work-block" style="--card-index:${Math.min(cardIndex,8)}" href="project.html?id=${encodeURIComponent(project.id)}" aria-label="Открыть проект «${escapeHTML(project.title)}"><div class="carousel-window${project.type==='banners'?' is-banner-carousel':''}${isSquare?' is-square-carousel':''}" style="--carousel-aspect:${aspect}">${threeDSkeleton}<div class="track${slides.length<2?' is-static':''}" data-carousel="${escapeHTML(project.id)}">${group()}</div>${badge}</div><div class="block-caption"><div class="block-copy"><h2 class="block-title">${escapeHTML(project.title)}</h2></div><span class="slide-count"><b>${displayProjectImageCount(project)}</b><img class="photo-count-icon" src="assets/photo-icon.png" alt="" aria-hidden="true" width="14" height="14" loading="eager" decoding="async"></span></div></a>`;
 }
 const cardAngle=-Math.PI*8/180,pixelsPerSecond=34;
 const revealedCarousels=new WeakSet();
@@ -82,10 +115,10 @@ async function prepareTrack(track,project){
   const run=(trackRuns.get(track)||0)+1;trackRuns.set(track,run);
   const ordered=project.slides.length>1?[project.slides.at(-1),...project.slides.slice(0,-1)]:project.slides;
   if(!ordered.length){track.closest('.carousel-window')?.classList.add('carousel-ready');return;}
-  const viewport=track.parentElement,isBanner=project.type==='banners',overlap=isBanner?46:32,overscan=isBanner?54:18,viewportWidth=viewport.clientWidth,viewportHeight=viewport.clientHeight;
+  const viewport=track.parentElement,isBanner=project.type==='banners',isSquare=project.blocks?.some(block=>block.type==='carousel'&&(block.format==='square'||block.format==='avito')),overlap=isBanner?46:32,overscan=isBanner?54:18,viewportWidth=viewport.clientWidth,viewportHeight=viewport.clientHeight;
   // Every portfolio preview uses the agreed 808:632 canvas; object-fit:cover fills it without gaps.
   const h=viewportHeight+viewportWidth*Math.tan(Math.abs(cardAngle))+18;
-  const widths=ordered.map((slide,index)=>{const image=track.querySelectorAll('.slide img')[index];const w=Number(slide.width)||image?.naturalWidth||808;const h0=Number(slide.height)||image?.naturalHeight||632;return h*(w/h0);});
+  const widths=ordered.map((slide,index)=>{const image=track.querySelectorAll('.slide img')[index];const w=Number(slide.width)||image?.naturalWidth||808;const h0=Number(slide.height)||image?.naturalHeight||632;return h*(isSquare?1:w/h0);});
   const advances=widths.map(width=>Math.max(1,width-overlap)),stepX=advances.map(advance=>advance*Math.cos(cardAngle)),stepY=advances.map(advance=>advance*Math.sin(cardAngle));
   const groupX=stepX.reduce((sum,step)=>sum+step,0),groupY=stepY.reduce((sum,step)=>sum+step,0);
   const base=track.querySelector('.track-set');
@@ -123,13 +156,14 @@ function draw(){
   trackObserver?.disconnect();visibilityObserver?.disconnect();trackQueue.length=0;activeImageObservers.forEach(observer=>observer.disconnect());activeImageObservers.clear();
   const query=activeSearch.trim().toLocaleLowerCase('ru');
   const shown=sortedProjects.filter(project=>{
-    if(query&&!String(project.title||'').toLocaleLowerCase('ru').includes(query))return false;
+    if(query&&!searchScore(project,query))return false;
     if(activeType!=='all'&&project.type!==activeType)return false;
     if(!activeCategories.size)return true;
     return activeType==='all'?activeCategories.has(project.type):activeCategories.has(project.category);
   });
   grid.innerHTML=shown.map((project,index)=>card(project,index)).join('');grid.hidden=!shown.length;empty.hidden=!!shown.length;
   polishTypography(grid);
+  if(portfolioSlideCount){const total=sortedProjects.reduce((sum,item)=>sum+countProjectImages(item),0);animateSlideCount(portfolioSlideCount,total);if(portfolioSlideWord){const n=total%100,unit=total%10;portfolioSlideWord.textContent=unit===1&&n!==11?'слайд':unit>=2&&unit<=4&&(n<12||n>14)?'слайда':'слайдов';}}
   grid.querySelectorAll('.catalog-static-preview,.photo-count-icon,.track img').forEach(watchCatalogImage);
   const tracks=[...grid.querySelectorAll('[data-carousel]')];
   if('IntersectionObserver'in window){visibilityObserver=new IntersectionObserver(entries=>entries.forEach(entry=>{entry.target.classList.toggle('is-carousel-in-view',entry.isIntersecting);if(entry.isIntersecting)revealCarouselOnEntry(entry.target);}),{rootMargin:'0px'});tracks.forEach(track=>visibilityObserver.observe(track.closest('.carousel-window')));}else tracks.forEach(track=>{track.closest('.carousel-window')?.classList.add('is-carousel-in-view');revealCarouselOnEntry(track.closest('.carousel-window'));});
@@ -137,21 +171,23 @@ function draw(){
   if('IntersectionObserver'in window){trackObserver=new IntersectionObserver(entries=>entries.forEach(entry=>{if(entry.isIntersecting){trackObserver.unobserve(entry.target);startTrack(entry.target);}}),{rootMargin:'480px 0px'});tracks.forEach(track=>trackObserver.observe(track));}else tracks.forEach(startTrack);
   empty.textContent=query?'По этому запросу ничего не найдено.':'В этой категории пока нет проектов.';
 }
-function setCatalogLoading(loading){grid.classList.toggle('is-loading',loading);grid.setAttribute('aria-busy',String(loading));if(loadingMessage)loadingMessage.hidden=!loading;}
+function setCatalogLoading(loading){grid.classList.toggle('is-loading',loading);grid.setAttribute('aria-busy',String(loading));if(loadingMessage)loadingMessage.hidden=true;}
 let filterFrame=0;
 function redrawFiltered(){cancelAnimationFrame(filterFrame);filterFrame=requestAnimationFrame(()=>{drawFilters();draw();});}
-tabs.addEventListener('click',event=>{const button=event.target.closest('[data-type]');if(!button||button.dataset.type===activeType)return;activeType=button.dataset.type;activeCategories.clear();saveCatalogState();tabs.querySelectorAll('.segment').forEach(segment=>{const selected=segment===button;segment.classList.toggle('is-active',selected);segment.setAttribute('aria-pressed',String(selected));});moveTypeIndicator();redrawFiltered(false);});
+function selectSearchTab(selected){tabs.querySelectorAll('[data-type]').forEach(button=>{const active=!selected&&button.dataset.type===activeType;button.classList.toggle('is-active',active);button.setAttribute('aria-pressed',String(active));});searchToggle?.classList.toggle('is-active',selected);searchToggle?.setAttribute('aria-pressed',String(selected));searchToggle?.setAttribute('aria-expanded',String(selected));searchToggle?.setAttribute('aria-label',selected?'Закрыть поиск':'Открыть поиск');filters.hidden=selected||!filters.children.length;moveTypeIndicator();}
+tabs.addEventListener('click',event=>{const searchButton=event.target.closest('#searchToggle');if(searchButton){const opening=!searchPanel.classList.contains('is-open');setSearchOpen(opening);selectSearchTab(opening);return;}const button=event.target.closest('[data-type]');if(!button)return;if(searchPanel.classList.contains('is-open')){setSearchOpen(false);selectSearchTab(false);}if(button.dataset.type===activeType)return;activeType=button.dataset.type;activeCategories.clear();saveCatalogState();tabs.querySelectorAll('[data-type]').forEach(segment=>{const selected=segment===button;segment.classList.toggle('is-active',selected);segment.setAttribute('aria-pressed',String(selected));});moveTypeIndicator();redrawFiltered(false);});
 tabs.addEventListener('scroll',()=>moveTypeIndicator(),{passive:true});
 window.addEventListener('resize',()=>moveTypeIndicator(),{passive:true});
 filters.addEventListener('click',event=>{const button=event.target.closest('[data-filter]');if(!button)return;const key=button.dataset.filter;if(activeCategories.has(key))activeCategories.delete(key);else activeCategories.add(key);saveCatalogState();redrawFiltered(true);});
+function setSearchOpen(open,focus=true){if(!searchPanel)return;searchPanel.classList.toggle('is-open',open);searchPanel.inert=!open;searchPanel.setAttribute('aria-hidden',String(!open));if(open&&focus)searchInput?.focus({preventScroll:true});else if(!open&&activeSearch){activeSearch='';if(searchInput)searchInput.value='';saveCatalogState();redrawFiltered();}}
 let searchTimer=0;if(searchInput){searchInput.value=activeSearch;searchInput.addEventListener('input',()=>{activeSearch=searchInput.value;saveCatalogState();clearTimeout(searchTimer);searchTimer=setTimeout(()=>redrawFiltered(),110);});}
-window.addEventListener('keydown',event=>{if((event.metaKey||event.ctrlKey)&&event.key.toLowerCase()==='k'){event.preventDefault();searchInput?.focus();}});
+window.addEventListener('keydown',event=>{if((event.metaKey||event.ctrlKey)&&event.key.toLowerCase()==='k'){event.preventDefault();setSearchOpen(true);selectSearchTab(true);}if(event.key==='Escape'&&searchPanel?.classList.contains('is-open')){setSearchOpen(false);selectSearchTab(false);}});
 grid.addEventListener('click',event=>{if(!event.target.closest('.work-block[href]'))return;saveCatalogState();try{sessionStorage.setItem(RETURN_TO_CATALOG_KEY,'1');}catch{}});
 window.addEventListener('pagehide',saveCatalogState);
 setCatalogLoading(true);
 let fallbackError=null;try{data=await getPortfolio({onFallback:error=>fallbackError=error});}catch(error){console.error('Не удалось загрузить портфолио:',error);fallbackError=error;data={types:[],categories:[],projects:[]};}
 if(activeType!=='all'&&!data.types.some(type=>type.id===activeType))activeType='all';
-sortedProjects=[...data.projects].sort((a,b)=>dateValue(b.date)-dateValue(a.date)||String(a.id).localeCompare(String(b.id)));projectsById=new Map(sortedProjects.map(project=>[project.id,project]));drawTypes();drawFilters();draw();setCatalogLoading(false);if(searchInput)searchInput.value=activeSearch;
+sortedProjects=[...data.projects].sort((a,b)=>dateValue(b.date)-dateValue(a.date)||String(a.id).localeCompare(String(b.id)));projectsById=new Map(sortedProjects.map(project=>[project.id,project]));drawTypes();drawFilters();draw();setCatalogLoading(false);if(searchInput){searchInput.value=activeSearch;if(activeSearch){setSearchOpen(true,false);selectSearchTab(true);requestAnimationFrame(()=>moveTypeIndicator(true));}}
 if(!data.projects.length){empty.textContent=fallbackError?'Не удалось загрузить проекты. Проверьте подключение и попробуйте ещё раз.':'Проекты скоро появятся.';empty.hidden=false;grid.hidden=true;setCatalogLoading(false);}
 if(fallbackError)window.portfolioError?.('Не удалось обновить портфолио. Показана доступная сохранённая версия.');
 try{if(sessionStorage.getItem(RETURN_TO_CATALOG_KEY)==='1'){sessionStorage.removeItem(RETURN_TO_CATALOG_KEY);const saved=readCatalogState();requestAnimationFrame(()=>requestAnimationFrame(()=>window.scrollTo({top:Number(saved.scrollY)||0,behavior:'auto'})));}}catch{}
