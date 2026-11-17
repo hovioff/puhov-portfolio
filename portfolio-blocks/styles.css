@@ -728,3 +728,448 @@ body .slide.is-scroll-fogged::after,body .catalog-static-window.is-scroll-fogged
 body .catalog-static-window,body .project-gallery .gallery-item,body .case-slide-window,body .article-image-open,body .article-image{animation:none!important;background:transparent!important}
 @media(prefers-reduced-motion:reduce){.site-scroll-veil{transition:none!important}}
 
+
+/* Contact brief flow: mode switcher, process steps, and Telegram handoff modal. */
+body.contact-page{display:block;min-height:100vh;background:radial-gradient(circle at 80% 0%,#fffaf6 0,#f5f5f7 35%,#f5f5f7 100%)}
+body.contact-page .contact-shell{display:block;min-height:100vh;width:min(100%,920px);margin:0 auto;padding:calc(20px + env(safe-area-inset-top,0px)) clamp(16px,4vw,30px) calc(42px + env(safe-area-inset-bottom,0px))}
+body.contact-page .contact-header{display:flex;align-items:center;gap:14px;margin:0 0 24px}
+body.contact-page .contact-header-label{color:#99979d;font-size:10px;font-weight:760;letter-spacing:.15em}
+body.contact-page .contact-back{width:42px;height:42px;display:grid;place-items:center;border-radius:50%;background:#fff;color:#171719;box-shadow:0 4px 14px rgba(25,25,30,.06)}
+body.contact-page .contact-back svg{width:20px;height:20px}
+body.contact-page .contact-card{width:100%;max-width:760px;margin:0 auto;padding:clamp(26px,6vw,58px);border:1px solid rgba(255,255,255,.9);border-radius:32px;background:#fff;box-shadow:0 20px 70px rgba(25,25,30,.08);text-align:left}
+body.contact-page .contact-kicker,body.contact-page .contact-section-kicker{margin:0 0 14px;color:var(--accent);font-size:9px;font-weight:780;letter-spacing:.16em}
+body.contact-page .contact-card h1{max-width:650px;margin:0 0 15px;text-align:left;font-size:clamp(36px,7.5vw,64px);line-height:.98;letter-spacing:-.07em}
+body.contact-page .contact-lead{max-width:590px;margin:0 0 25px;color:#77767c;font-size:clamp(14px,2vw,16px);line-height:1.55;text-align:left}
+.contact-switch{display:grid;grid-template-columns:1fr 1fr;gap:4px;margin:0 0 15px;padding:4px;border-radius:17px;background:#ededf0}
+.contact-switch-button{min-height:44px;padding:0 12px;border:0;border-radius:13px;background:transparent;color:#77767c;font-size:12px;font-weight:700;cursor:pointer}
+.contact-switch-button.is-active{background:#171719;color:#fff;box-shadow:0 4px 12px rgba(23,23,25,.12)}
+.contact-points{display:flex;flex-wrap:wrap;gap:7px;margin:0 0 25px}
+.contact-points span{padding:8px 11px;border-radius:999px;background:#f3f3f5;color:#5f5e64;font-size:10px;font-weight:650}
+body.contact-page .contact-form{display:grid;gap:8px;margin-bottom:48px}
+body.contact-page .contact-form label{color:#3e3d42;font-size:12px;font-weight:720}
+body.contact-page .contact-form textarea{min-height:72px;height:72px;padding:13px 15px;border:1px solid #e3e2e7;border-radius:16px;background:#fbfbfc;color:#171719;font-size:13px;line-height:1.5;resize:vertical;outline-color:var(--accent)}
+.contact-form-hint{margin:0 0 5px;color:#99979d;font-size:10px}
+.contact-submit{min-height:52px;width:max-content;max-width:100%;padding:0 18px;border:0;border-radius:999px;background:#171719;color:#fff;font-size:13px;font-weight:720;cursor:pointer}
+.contact-submit span{margin-left:14px;color:#f39a68;font-size:18px}
+.contact-process{padding-top:28px;border-top:1px solid rgba(23,23,25,.09)}
+.contact-process-heading h2{max-width:420px;margin:0 0 20px;font-size:clamp(24px,5vw,36px);line-height:1;letter-spacing:-.055em}
+.process-list{display:grid;gap:0;margin:0;padding:0;list-style:none}
+.process-list li{display:grid;grid-template-columns:38px 1fr;gap:12px;padding:15px 0;border-top:1px solid rgba(23,23,25,.07)}
+.process-list li:last-child{border-bottom:1px solid rgba(23,23,25,.07)}
+.process-list b{color:var(--accent);font-size:11px;font-variant-numeric:tabular-nums}
+.process-list span{display:grid;gap:5px}.process-list strong{font-size:13px;line-height:1.25}.process-list small{color:#85838a;font-size:11px;line-height:1.45}
+.contact-modal[hidden]{display:none}.contact-modal{position:fixed;z-index:10010;inset:0;display:grid;place-items:center;padding:18px;opacity:0;visibility:hidden;transition:opacity .22s ease,visibility .22s ease}.contact-modal.is-open{opacity:1;visibility:visible}.contact-modal-backdrop{position:absolute;inset:0;background:rgba(23,23,25,.42)}.contact-modal-card{position:relative;width:min(100%,480px);padding:30px;border-radius:27px;background:#fff;box-shadow:0 24px 80px rgba(23,23,25,.2);transform:translateY(10px) scale(.98);transition:transform .25s cubic-bezier(.2,.8,.2,1)}.contact-modal.is-open .contact-modal-card{transform:none}.contact-modal-close{position:absolute;top:13px;right:13px;width:34px;height:34px;border:0;border-radius:50%;background:#f0f0f2;color:#55545a;font-size:22px;line-height:1;cursor:pointer}.contact-modal-card h2{margin:0 0 10px;font-size:clamp(27px,7vw,38px);line-height:1;letter-spacing:-.06em}.contact-modal-card>p:not(.contact-section-kicker){margin:0 0 17px;color:#77767c;font-size:13px;line-height:1.5}.contact-message-preview{max-height:130px;overflow:auto;margin:0 0 19px;padding:13px 14px;border-radius:14px;background:#f4f4f6;color:#45444a;font-size:12px;line-height:1.5;white-space:pre-wrap}.contact-modal .telegram-button{width:100%;text-decoration:none}
+body.contact-modal-open{overflow:hidden}
+@media(max-width:600px){body.contact-page .contact-shell{padding-inline:14px}body.contact-page .contact-card{padding:27px 18px;border-radius:26px}.contact-switch-button{font-size:11px;padding-inline:7px}.contact-submit{width:100%}.contact-modal-card{padding:27px 20px}}
+@media(prefers-reduced-motion:reduce){.contact-modal,.contact-modal-card{transition:none!important}}
+
+
+/* Small usability polish: clear keyboard focus without changing the 3D cards. */
+body.catalog-page :where(.work-block,#typeTabs .segment,.category-chip,.search-toggle,.order-fab):focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+
+
+/* Contact page visual direction: editorial full-page layout, not a floating modal. */
+body.contact-page{background:#f5f5f7;overflow-x:hidden}
+body.contact-page::before{content:"";position:fixed;z-index:-1;inset:0;background:linear-gradient(115deg,transparent 0 48%,rgba(229,106,40,.07) 48.1%,transparent 48.4%),radial-gradient(circle at 88% 8%,#fff9f4 0,transparent 31%);pointer-events:none}
+body.contact-page .contact-shell{width:min(100%,1180px);padding:26px clamp(20px,5vw,72px) 70px}
+body.contact-page .contact-header{max-width:1050px;margin:0 auto 72px;justify-content:space-between}
+body.contact-page .contact-header-label{letter-spacing:.18em}
+body.contact-page .contact-card{max-width:1050px;padding:0;margin:0 auto;border:0;border-radius:0;background:transparent;box-shadow:none}
+body.contact-page .contact-kicker{display:flex;align-items:center;gap:12px;margin-bottom:20px}
+body.contact-page .contact-kicker::before{content:"";width:38px;height:2px;background:var(--accent);animation:contact-line-pulse 2.8s ease-in-out infinite}
+@keyframes contact-line-pulse{0%,100%{transform:scaleX(.7);transform-origin:left;opacity:.55}50%{transform:scaleX(1);opacity:1}}
+body.contact-page .contact-card h1{max-width:860px;font-size:clamp(48px,9vw,112px);line-height:.9;letter-spacing:-.085em}
+body.contact-page .contact-lead{max-width:610px;margin-bottom:34px;font-size:clamp(15px,2vw,19px);line-height:1.5}
+.contact-switch{width:min(100%,520px);margin-bottom:20px;background:#e8e8ec;border:1px solid rgba(23,23,25,.04)}
+.contact-switch-button{font-size:12px}
+.contact-switch-button.is-active{background:var(--accent);box-shadow:0 5px 15px rgba(229,106,40,.24)}
+.contact-points{gap:8px;margin-bottom:25px}.contact-points span{background:#fff;border:1px solid rgba(23,23,25,.06)}
+body.contact-page .contact-form{width:min(100%,590px);margin-bottom:86px;gap:8px}
+body.contact-page .contact-form textarea{background:#fff;border-color:rgba(23,23,25,.12);border-radius:12px}
+.contact-submit{position:relative;overflow:hidden;background:var(--ink);box-shadow:0 10px 25px rgba(23,23,25,.14);transition:transform .2s,box-shadow .2s}
+.contact-submit::after{content:"";position:absolute;inset:-60% auto -60% -30%;width:25%;background:rgba(255,255,255,.24);transform:rotate(18deg);animation:contact-button-shine 3.8s ease-in-out infinite}
+@keyframes contact-button-shine{0%,58%{left:-35%;opacity:0}68%{opacity:1}86%,100%{left:130%;opacity:0}}
+.contact-submit:hover{transform:translateY(-2px);box-shadow:0 14px 30px rgba(23,23,25,.2)}
+.contact-process{display:grid;grid-template-columns:minmax(230px,.8fr) minmax(0,1.5fr);gap:clamp(30px,7vw,110px);padding-top:0;border-top:0}
+.contact-process-heading{position:sticky;top:28px;align-self:start}
+.contact-process-heading h2{font-size:clamp(28px,4.5vw,58px);line-height:.94;letter-spacing:-.07em}
+.process-list{counter-reset:process}
+.process-list li{grid-template-columns:52px 1fr;min-height:105px;padding:22px 0;border-top:1px solid rgba(23,23,25,.12);animation:process-float 5s ease-in-out infinite}
+.process-list li:nth-child(2){animation-delay:-1.1s}.process-list li:nth-child(3){animation-delay:-2.2s}.process-list li:nth-child(4){animation-delay:-3.3s}.process-list li:nth-child(5){animation-delay:-4.4s}
+@keyframes process-float{0%,100%{transform:translateX(0)}50%{transform:translateX(5px)}}
+.process-list li:last-child{border-bottom:1px solid rgba(23,23,25,.12)}
+.process-list b{font-size:12px}.process-list strong{font-size:15px}.process-list small{max-width:510px;font-size:12px}
+.contact-modal-card{border:1px solid rgba(255,255,255,.8)}
+@media(max-width:700px){body.contact-page .contact-header{margin-bottom:54px}body.contact-page .contact-card h1{font-size:clamp(45px,14vw,75px)}body.contact-page .contact-process{grid-template-columns:1fr;gap:22px}.contact-process-heading{position:static}.contact-process-heading h2{max-width:300px}.process-list li{min-height:0;padding:17px 0}}
+@media(prefers-reduced-motion:reduce){body.contact-page .contact-kicker::before,.contact-submit::after,.process-list li{animation:none!important}.contact-submit:hover{transform:none}}
+
+
+/* Contact refinements: match the portfolio's monochrome, rounded visual language. */
+body.contact-page{--contact-accent:#171719;background:#f5f5f7}
+body.contact-page::before{background:radial-gradient(ellipse at 50% -15%,#fff 0,rgba(255,255,255,.55) 27%,transparent 62%)}
+body.contact-page .contact-header{margin-bottom:58px}
+body.contact-page .contact-header-label{display:none}
+body.contact-page .contact-back{width:48px;height:48px;border-radius:50%;box-shadow:0 4px 16px rgba(23,23,25,.07);transition:transform .2s ease,box-shadow .2s ease}
+body.contact-page .contact-back:hover{transform:translateX(-3px);box-shadow:0 8px 22px rgba(23,23,25,.11)}
+body.contact-page .contact-card h1{max-width:790px;font-size:clamp(43px,8.4vw,94px);line-height:.94;letter-spacing:-.075em}
+body.contact-page .contact-lead{max-width:560px}
+.contact-switch{border-radius:999px;padding:5px;background:#e9e9ed}
+.contact-switch-button{border-radius:999px;transition:background .28s,color .28s,transform .2s}
+.contact-switch-button.is-active{background:#171719;box-shadow:0 5px 18px rgba(23,23,25,.16)}
+.contact-points span{border-radius:999px;background:rgba(255,255,255,.78);box-shadow:0 3px 12px rgba(23,23,25,.035)}
+body.contact-page .contact-form textarea{min-height:72px;height:72px;max-height:100px;border-radius:22px;padding:14px 18px}
+.contact-submit{min-height:54px;border-radius:999px;background:#171719;box-shadow:0 8px 24px rgba(23,23,25,.14)}
+.contact-submit::after{display:none}
+.contact-submit:hover{transform:translateY(-2px);box-shadow:0 12px 30px rgba(23,23,25,.2)}
+.contact-process{grid-template-columns:minmax(210px,.75fr) minmax(0,1.45fr);gap:clamp(28px,7vw,100px);align-items:start;margin-top:0;padding:clamp(24px,4vw,42px);border:1px solid rgba(23,23,25,.045);border-radius:38px;background:#fff;box-shadow:0 16px 48px rgba(23,23,25,.055)}
+.contact-process-heading{position:sticky;top:30px}
+.contact-process-heading h2{max-width:260px;margin:0 0 13px;font-size:clamp(29px,4vw,46px);letter-spacing:-.065em;text-transform:none}
+.contact-process-heading>p{max-width:250px;margin:0;color:#85838a;font-size:12px;line-height:1.55}
+.process-progress{height:5px;overflow:hidden;margin-top:28px;border-radius:999px;background:#ededf0}
+.process-progress span{display:block;width:20%;height:100%;border-radius:inherit;background:#171719;transition:width .6s cubic-bezier(.2,.8,.2,1)}
+.process-list{gap:9px;perspective:1000px}
+.process-list li{position:relative;display:grid;grid-template-columns:46px 1fr 26px;gap:12px;align-items:center;min-height:78px;padding:16px 19px;border:1px solid rgba(23,23,25,.055);border-radius:26px;background:#f7f7f8;animation:process-card-drift 7s ease-in-out infinite;transition:background .32s ease,border-color .32s ease,box-shadow .32s ease,transform .32s cubic-bezier(.2,.8,.2,1)}
+.process-list li:nth-child(2){animation-delay:-1.4s}.process-list li:nth-child(3){animation-delay:-2.8s}.process-list li:nth-child(4){animation-delay:-4.2s}.process-list li:nth-child(5){animation-delay:-5.6s}
+@keyframes process-card-drift{0%,100%{transform:translateY(0)}50%{transform:translateY(-2px)}}
+.process-list li::before{content:"";position:absolute;inset:9px auto 9px 0;width:3px;border-radius:0 999px 999px 0;background:#171719;transform:scaleY(0);transition:transform .3s cubic-bezier(.2,.8,.2,1)}
+.process-list li.is-active,.process-list li:hover,.process-list li:focus-visible{z-index:1;border-color:rgba(23,23,25,.12);background:#fff;box-shadow:0 12px 30px rgba(23,23,25,.08);transform:translateX(5px) translateY(-2px)}
+.process-list li.is-active::before,.process-list li:hover::before,.process-list li:focus-visible::before{transform:scaleY(1)}
+.process-list b{color:#a2a0a5;font-size:11px;transition:color .25s}.process-list li.is-active b,.process-list li:hover b{color:#171719}
+.process-list span{gap:4px}.process-list strong{font-size:13px;line-height:1.25}.process-list small{max-width:480px;color:#85838a;font-size:10px;line-height:1.45}
+.process-list i{display:grid;place-items:center;width:26px;height:26px;border-radius:50%;background:#ededf0;color:#77767c;font-size:13px;font-style:normal;opacity:0;transform:translate(-3px,3px);transition:opacity .2s,transform .2s}
+.process-list li.is-active i,.process-list li:hover i,.process-list li:focus-visible i{opacity:1;transform:none}
+.contact-modal-card{width:min(100%,500px);padding:clamp(28px,6vw,42px);border:0;border-radius:38px;background:#f7f7f8;box-shadow:0 28px 90px rgba(23,23,25,.24);text-align:center}
+.contact-modal-close{top:15px;right:15px;width:40px;height:40px;border-radius:50%}
+.contact-modal-card h2{max-width:350px;margin:8px auto 12px;font-size:clamp(32px,7vw,46px);letter-spacing:-.065em}
+.contact-modal-card>p:not(.contact-section-kicker){max-width:340px;margin:0 auto 22px;color:#77767c;font-size:14px;line-height:1.5}
+.contact-message-preview{max-height:150px;border-radius:24px;background:#fff;text-align:left}
+.contact-modal .telegram-button{min-height:56px;border-radius:999px;background:#171719;box-shadow:0 9px 24px rgba(23,23,25,.16)}
+@media(max-width:700px){body.contact-page .contact-header{margin-bottom:42px}.contact-process{grid-template-columns:1fr;gap:23px;padding:22px 16px;border-radius:30px}.contact-process-heading{position:static}.contact-process-heading h2{max-width:none}.contact-process-heading>p{max-width:360px}.process-progress{margin-top:18px}.process-list li{grid-template-columns:36px 1fr 22px;gap:9px;min-height:72px;padding:13px 12px;border-radius:22px}.process-list strong{font-size:12px}.process-list small{font-size:10px}}
+@media(prefers-reduced-motion:reduce){.process-list li,.process-progress span,.contact-back{animation:none!important;transition:none!important}}
+
+
+/* Telegram Mini App pass: tap-first motion, stable composition, and a stronger entrance. */
+body.contact-page .contact-card h1{font-size:clamp(52px,9.6vw,112px);min-height:2.02em;display:flex;align-items:flex-start;animation:contact-title-in .72s cubic-bezier(.16,1,.3,1) both}
+body.contact-page .contact-card h1.is-changing{animation:contact-title-change .42s cubic-bezier(.2,.8,.2,1) both}
+@keyframes contact-title-in{from{opacity:0;transform:translateY(18px);letter-spacing:-.12em}to{opacity:1;transform:none;letter-spacing:-.075em}}
+@keyframes contact-title-change{from{opacity:.35;transform:translateY(7px)}to{opacity:1;transform:none}}
+body.contact-page .contact-lead{min-height:3.1em;display:flex;align-items:flex-start;animation:contact-copy-in .7s .1s cubic-bezier(.16,1,.3,1) both}
+body.contact-page .contact-points{min-height:38px;align-content:flex-start}
+@keyframes contact-copy-in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.contact-switch-button:active,.contact-submit:active,.process-list li:active{transform:scale(.97)}
+.contact-submit{animation:contact-cta-breathe 3.2s ease-in-out infinite}
+@keyframes contact-cta-breathe{0%,100%{box-shadow:0 8px 24px rgba(23,23,25,.14)}50%{box-shadow:0 12px 34px rgba(23,23,25,.24)}}
+.contact-process{animation:process-section-in .75s .18s cubic-bezier(.16,1,.3,1) both}
+@keyframes process-section-in{from{opacity:0;transform:translateY(24px) scale(.985)}to{opacity:1;transform:none}}
+.process-progress span{background:var(--accent);box-shadow:0 0 14px rgba(229,106,40,.35)}
+.process-list li{animation:process-card-drift 7s ease-in-out infinite,process-card-in .55s cubic-bezier(.16,1,.3,1) both;animation-delay:0s,calc(var(--process-index,0) * 70ms)}
+.process-list li:nth-child(1){--process-index:0}.process-list li:nth-child(2){--process-index:1}.process-list li:nth-child(3){--process-index:2}.process-list li:nth-child(4){--process-index:3}.process-list li:nth-child(5){--process-index:4}
+@keyframes process-card-in{from{opacity:0;transform:translateX(16px) scale(.98)}to{opacity:1;transform:none}}
+.process-list li.is-active{border-color:rgba(229,106,40,.3);box-shadow:0 14px 34px rgba(23,23,25,.1),0 0 0 3px rgba(229,106,40,.08);transform:translateX(5px) translateY(-2px)}
+.process-list li.is-active::before{background:var(--accent)}
+.process-list li.is-active i{background:#fff0e8;color:var(--accent)}
+.process-list li:hover:not(.is-active){border-color:rgba(23,23,25,.055);background:#f7f7f8;box-shadow:none;transform:none}
+.process-list li:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+@media(hover:hover) and (pointer:fine){.process-list li:hover:not(.is-active){border-color:rgba(23,23,25,.12);background:#fff;box-shadow:0 12px 30px rgba(23,23,25,.08);transform:translateX(5px) translateY(-2px)}}
+@media(max-width:700px){body.contact-page .contact-card h1{font-size:clamp(47px,14vw,78px);min-height:2.18em}body.contact-page .contact-lead{min-height:4.2em}.contact-process{touch-action:pan-y}.process-list li{animation-duration:7s,.55s}.process-list li.is-active{transform:translateY(-2px)}}
+@media(prefers-reduced-motion:reduce){body.contact-page .contact-card h1,body.contact-page .contact-lead,.contact-submit,.contact-process,.process-list li{animation:none!important}.process-list li.is-active{transform:none}}
+
+/* Tap-first active state: do not make process navigation depend on a pointer hover. */
+.process-list li:hover:not(.is-active){border-color:rgba(23,23,25,.055);background:#f7f7f8;box-shadow:none;transform:none}
+
+/* Compact tap/swipe process carousel for Telegram Mini App. */
+.process-progress{display:none}
+.process-list{position:relative;display:block;min-height:200px;touch-action:pan-y;overflow:hidden}
+.process-list li{position:absolute;inset:0;display:grid;grid-template-columns:54px 1fr 32px;align-content:center;min-height:200px;padding:25px 26px;border:1px solid rgba(23,23,25,.06);border-radius:34px;background:#f7f7f8;opacity:0;pointer-events:none;transform:translateX(18px) scale(.98);animation:none;transition:opacity .45s cubic-bezier(.2,.8,.2,1),transform .55s cubic-bezier(.2,.8,.2,1),background .3s,box-shadow .3s}
+.process-list li.is-active{opacity:1;pointer-events:auto;transform:none;background:#fff;border-color:rgba(229,106,40,.2);box-shadow:0 16px 44px rgba(23,23,25,.09),0 0 0 4px rgba(229,106,40,.045)}
+.process-list li::before{inset:22px auto 22px 0;width:4px;background:var(--accent);transform:scaleY(0);transition:transform .4s cubic-bezier(.2,.8,.2,1)}
+.process-list li.is-active::before{transform:scaleY(1)}
+.process-list li:hover:not(.is-active){transform:translateX(18px) scale(.98);background:#f7f7f8;box-shadow:none}
+.process-list li.is-active i{opacity:1;transform:none;background:#f2f2f4;color:#171719}
+.process-dots{display:flex;justify-content:center;align-items:center;gap:9px;margin-top:18px}
+.process-dots button{width:8px;height:8px;padding:0;border:0;border-radius:999px;background:#d5d5da;transition:width .4s cubic-bezier(.2,.8,.2,1),background .3s,transform .3s;touch-action:manipulation}
+.process-dots button.is-active{width:28px;background:#171719}
+.process-dots button:active{transform:scale(.86)}
+.contact-process-heading>p{min-height:4.8em}
+.contact-process-heading h2{min-height:2em}
+.contact-process{min-height:310px;transition:transform .5s cubic-bezier(.2,.8,.2,1)}
+.contact-points{min-height:76px}
+body.contact-page .contact-card h1{font-size:clamp(60px,10vw,120px);min-height:2em}
+body.contact-page .contact-lead{min-height:3.2em}
+body.contact-page .contact-form label{font-size:11px;color:#77767c}
+body.contact-page .contact-form textarea{resize:none;min-height:68px;height:68px}
+.contact-form-hint{display:none}
+.contact-submit{animation:none;transition:transform .22s cubic-bezier(.2,.8,.2,1),box-shadow .22s,background .22s}
+.contact-submit:active{transform:scale(.97);box-shadow:0 4px 12px rgba(23,23,25,.13)}
+.contact-submit:hover{transform:none}
+.contact-modal-card,.contact-modal-close,.contact-switch,.contact-switch-button,.contact-points span,.process-list li{border-radius:999px}
+.process-list li{border-radius:34px}
+.contact-modal-card{border-radius:38px}
+@media(max-width:700px){.contact-process{min-height:0}.process-list{min-height:210px}.process-list li{min-height:210px;padding:23px 19px;grid-template-columns:42px 1fr 24px;border-radius:30px}.contact-process-heading h2{min-height:0}.contact-process-heading>p{min-height:0}.contact-points{min-height:0;margin-bottom:20px}body.contact-page .contact-card h1{font-size:clamp(52px,14vw,84px);min-height:2.1em}body.contact-page .contact-lead{min-height:4.4em}.process-dots{margin-top:15px}}
+
+
+
+/* Final contact layout: one stable composition for touch-first Telegram screens. */
+body.contact-page{display:block;min-height:100svh;background:#f5f5f7;overflow-x:hidden}
+body.contact-page .contact-shell{width:min(100%,920px);min-height:100svh;margin:0 auto;padding:calc(18px + env(safe-area-inset-top,0px)) 18px calc(34px + env(safe-area-inset-bottom,0px))}
+body.contact-page .contact-header{height:48px;margin:0 0 clamp(38px,8vw,76px)}
+body.contact-page .contact-back{width:46px;height:46px;border-radius:50%;background:#fff;box-shadow:0 4px 15px rgba(23,23,25,.06)}
+body.contact-page .contact-card{width:100%;max-width:850px;margin:0 auto;padding:0;background:transparent;border:0;border-radius:0;box-shadow:none}
+body.contact-page .contact-card h1{max-width:810px;margin:0 0 20px;font-size:clamp(58px,9.2vw,108px);line-height:.91;letter-spacing:-.075em;min-height:0}
+body.contact-page .contact-lead{max-width:570px;min-height:0;margin:0 0 28px;font-size:clamp(15px,2vw,18px);line-height:1.5}
+.contact-switch{width:min(100%,500px);margin:0 0 15px;padding:4px;border-radius:999px;background:#e9e9ed}
+.contact-switch-button{min-height:44px;border-radius:999px}.contact-switch-button.is-active{background:#171719;box-shadow:0 5px 15px rgba(23,23,25,.13)}
+.contact-points{min-height:0;margin:0 0 24px;gap:7px}.contact-points span{padding:8px 11px;border-radius:999px;background:#fff;color:#68676c;font-size:10px;box-shadow:0 3px 12px rgba(23,23,25,.035)}
+body.contact-page .contact-form{width:min(100%,580px);display:grid;gap:8px;margin:0 0 clamp(46px,8vw,82px)}
+body.contact-page .contact-form label{margin-left:4px;color:#77767c;font-size:11px;font-weight:650}
+body.contact-page .contact-form textarea{width:100%;height:68px;min-height:68px;padding:13px 16px;border:1px solid rgba(23,23,25,.1);border-radius:22px;background:#fff;resize:none;font-size:13px;line-height:1.45}
+.contact-submit{width:max-content;min-height:52px;padding:0 20px;border-radius:999px;background:#171719;color:#fff;box-shadow:0 9px 23px rgba(23,23,25,.15)}.contact-submit:active{transform:scale(.97)}
+.contact-process{display:grid;grid-template-columns:minmax(180px,.65fr) minmax(0,1.35fr);gap:clamp(22px,5vw,68px);align-items:center;width:100%;min-height:0;margin:0;padding:0;background:transparent;border:0;border-radius:0;box-shadow:none}
+.contact-process-heading{position:static;align-self:center}.contact-process-heading h2{max-width:280px;margin:0 0 12px;font-size:clamp(32px,4.4vw,52px);line-height:.94;letter-spacing:-.065em}.contact-process-heading>p{max-width:250px;min-height:0;margin:0;color:#85838a;font-size:12px;line-height:1.5}.process-progress{display:none}
+.process-list{position:relative;display:block;width:100%;height:218px;min-height:218px;margin:0;overflow:hidden;touch-action:pan-y}.process-list li{position:absolute;inset:0;display:grid;grid-template-columns:46px 1fr 28px;align-content:center;gap:12px;height:218px;min-height:218px;padding:25px 23px;border:1px solid rgba(23,23,25,.06);border-radius:32px;background:#fff;opacity:0;pointer-events:none;transform:translateX(24px) scale(.985);transition:opacity .48s cubic-bezier(.2,.8,.2,1),transform .56s cubic-bezier(.2,.8,.2,1),box-shadow .3s,border-color .3s}.process-list li.is-active{opacity:1;pointer-events:auto;transform:none;border-color:rgba(229,106,40,.24);box-shadow:0 16px 42px rgba(23,23,25,.09),0 0 0 4px rgba(229,106,40,.05)}
+.process-list li::before{inset:22px auto 22px 0;width:4px;border-radius:0 999px 999px 0;background:var(--accent);transform:scaleY(0);transition:transform .4s cubic-bezier(.2,.8,.2,1)}.process-list li.is-active::before{transform:scaleY(1)}
+.process-list b{color:#a2a0a5;font-size:12px}.process-list li.is-active b{color:var(--accent)}.process-list span{gap:6px}.process-list strong{font-size:15px;line-height:1.2}.process-list small{max-width:440px;color:#85838a;font-size:11px;line-height:1.45}.process-list i{display:grid;place-items:center;width:28px;height:28px;border-radius:50%;background:#f0f0f2;color:#77767c;font-size:14px;font-style:normal;opacity:1}
+.process-dots{display:flex;justify-content:center;gap:8px;margin-top:13px}.process-dots button{width:8px;height:8px;padding:0;border:0;border-radius:999px;background:#d4d4d9;touch-action:manipulation;transition:width .38s cubic-bezier(.2,.8,.2,1),background .3s,transform .2s}.process-dots button.is-active{width:27px;background:var(--accent)}.process-dots button:active{transform:scale(.84)}
+.contact-modal-card{border-radius:38px;background:#f7f7f8}
+@media(max-width:700px){body.contact-page .contact-shell{padding-inline:14px}body.contact-page .contact-header{margin-bottom:42px}body.contact-page .contact-card h1{font-size:clamp(54px,14vw,84px);line-height:.93}body.contact-page .contact-lead{max-width:440px;margin-bottom:24px}.contact-process{grid-template-columns:1fr;gap:22px}.contact-process-heading h2{max-width:none}.contact-process-heading>p{max-width:360px}.process-list{height:204px;min-height:204px}.process-list li{height:204px;min-height:204px;padding:22px 17px;grid-template-columns:38px 1fr 25px;border-radius:28px}.process-list strong{font-size:13px}.process-list small{font-size:10px}.contact-submit{width:100%}}
+@media(prefers-reduced-motion:reduce){.process-list li,.process-dots button,.contact-card h1,.contact-process{transition:none!important;animation:none!important}}
+
+
+/* Shared typography and button highlight pass. */
+:root{font-family:Onest,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+body,button,input,select,textarea{font-family:Onest,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-weight:430}
+body button,.contact-submit,.telegram-button,.order-fab{font-weight:580}
+body.catalog-page,body.project-page,body.contact-page{font-weight:430}
+body.catalog-page .portfolio-heading h1,body.project-page .project-intro h1,body.project-page .case-article-title,body.contact-page .contact-card h1{font-weight:680}
+body.catalog-page .block-title,body.project-page .block-title{font-weight:590}
+:where(.primary-button,.secondary-button,.telegram-button,.order-fab,.contact-submit,.contact-direct,.rich-editor a.article-cta){position:relative;isolation:isolate;overflow:hidden}
+:where(.primary-button,.secondary-button,.telegram-button,.order-fab,.contact-submit,.contact-direct,.rich-editor a.article-cta)::after{content:"";position:absolute;z-index:-1;top:-75%;left:-35%;width:20%;height:250%;background:rgba(229,106,40,.58);filter:blur(9px);transform:rotate(18deg) translateX(-180%);opacity:0;pointer-events:none}
+:where(.primary-button,.secondary-button,.telegram-button,.order-fab,.contact-submit,.contact-direct,.rich-editor a.article-cta):active::after{opacity:1;animation:orange-button-glint .62s cubic-bezier(.16,1,.3,1) both}
+@keyframes orange-button-glint{from{transform:rotate(18deg) translateX(-180%)}to{transform:rotate(18deg) translateX(800%)}}
+/* The process card is content-led: readable type, no oversized empty shell. */
+body.contact-page .contact-points{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;width:min(100%,700px)}
+body.contact-page .contact-points span{display:flex;align-items:center;justify-content:center;min-height:46px;padding:9px 12px;text-align:center;font-size:12px;line-height:1.2}
+body.contact-page .contact-process{grid-template-columns:minmax(190px,.72fr) minmax(0,1.28fr);gap:32px;align-items:start}
+body.contact-page .contact-process-heading h2{font-size:clamp(36px,5vw,60px);line-height:.9}
+body.contact-page .contact-process-heading>p{font-size:13px;line-height:1.45}
+body.contact-page .process-list{height:188px;min-height:188px}
+body.contact-page .process-list li{height:188px;min-height:188px;grid-template-columns:54px 1fr 32px;gap:16px;padding:25px 27px;border-radius:32px}
+body.contact-page .process-list b{font-size:21px;line-height:1;color:#a2a0a5}
+body.contact-page .process-list li.is-active b{color:var(--accent)}
+body.contact-page .process-list strong{font-size:19px;line-height:1.12}
+body.contact-page .process-list small{max-width:430px;font-size:13px;line-height:1.45}
+body.contact-page .process-list i{width:32px;height:32px;font-size:16px}
+body.contact-page .process-dots{margin-top:11px}
+@media(max-width:700px){body.contact-page .contact-points{grid-template-columns:1fr;width:100%;gap:6px}body.contact-page .contact-points span{justify-content:flex-start;min-height:38px;padding-inline:14px;text-align:left}body.contact-page .contact-process{grid-template-columns:1fr;gap:18px}body.contact-page .contact-process-heading h2{font-size:42px}body.contact-page .process-list{height:195px;min-height:195px}body.contact-page .process-list li{height:195px;min-height:195px;padding:23px 18px;grid-template-columns:42px 1fr 26px;gap:11px}body.contact-page .process-list b{font-size:18px}body.contact-page .process-list strong{font-size:17px}body.contact-page .process-list small{font-size:12px}}
+@media(prefers-reduced-motion:reduce){:where(.primary-button,.secondary-button,.telegram-button,.order-fab,.contact-submit,.contact-direct,.rich-editor a.article-cta)::after{animation:none!important}}
+
+
+/* Continuous orange sheen on dark actions. */
+:where(.primary-button,.secondary-button,.telegram-button,.order-fab,.contact-submit,.contact-direct,.rich-editor a.article-cta){background:linear-gradient(112deg,#171719 0%,#171719 34%,#e56a28 46%,#ffad78 50%,#171719 62%,#171719 100%);background-size:280% 100%;animation:dark-action-sheen 4.2s cubic-bezier(.45,0,.55,1) infinite}
+@keyframes dark-action-sheen{0%,22%{background-position:145% 0}62%,100%{background-position:-45% 0}}
+:where(.primary-button,.secondary-button,.telegram-button,.order-fab,.contact-submit,.contact-direct,.rich-editor a.article-cta)::after{display:none}
+
+/* Slow editorial sheen across portfolio cards (not buttons); leaves the 3D track untouched. */
+.work-block{position:relative;isolation:isolate}
+.work-block::after{content:"";position:absolute;z-index:6;inset:-55% -70%;border-radius:inherit;pointer-events:none;background:linear-gradient(108deg,transparent 38%,rgba(255,255,255,0) 43%,rgba(229,106,40,.12) 47%,rgba(255,255,255,.48) 50%,rgba(255,255,255,.08) 53%,transparent 59%);transform:translateX(-72%) rotate(8deg);opacity:0;mix-blend-mode:screen;animation:portfolio-card-sheen 6.8s cubic-bezier(.55,0,.45,1) infinite}
+@keyframes portfolio-card-sheen{0%,52%{transform:translateX(-72%) rotate(8deg);opacity:0}60%{opacity:.72}80%{transform:translateX(72%) rotate(8deg);opacity:.28}90%,100%{transform:translateX(72%) rotate(8deg);opacity:0}}
+@media(prefers-reduced-motion:reduce){.work-block::after{animation:none!important;opacity:0!important}}
+
+@media(prefers-reduced-motion:reduce){:where(.primary-button,.secondary-button,.telegram-button,.order-fab,.contact-submit,.contact-direct,.rich-editor a.article-cta){animation:none!important;background:#171719}}
+
+
+/* Contact process: simple animated list, equal type scale, no oversized cards. */
+body.contact-page .contact-process{display:block;margin:0;padding:0;border:0;background:none;box-shadow:none}
+body.contact-page .contact-process h2{margin:0 0 18px;font-size:clamp(30px,5vw,46px);line-height:.98;letter-spacing:-.06em}
+body.contact-page .process-list{display:grid;gap:0;width:100%;height:auto;min-height:0;margin:0;padding:0;overflow:visible;list-style:none}
+body.contact-page .process-list .process-row{position:relative;inset:auto;display:grid;grid-template-columns:42px minmax(0,1fr);align-items:center;gap:12px;width:100%;height:auto;min-height:58px;padding:12px 4px;border:0;border-bottom:1px solid rgba(23,23,25,.09);border-radius:0;background:transparent;opacity:1;pointer-events:auto;transform:none;box-shadow:none;animation:process-row-in .5s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(var(--row-index,0)*75ms);transition:padding-left .22s ease,color .22s ease}
+body.contact-page .process-list .process-row:nth-child(1){--row-index:0}body.contact-page .process-list .process-row:nth-child(2){--row-index:1}body.contact-page .process-list .process-row:nth-child(3){--row-index:2}body.contact-page .process-list .process-row:nth-child(4){--row-index:3}body.contact-page .process-list .process-row:nth-child(5){--row-index:4}
+body.contact-page .process-list .process-row:last-child{border-bottom:0}
+body.contact-page .process-list .process-row::before{display:none}
+body.contact-page .process-number{display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:50%;background:#ededf0;color:#77767c;font-size:11px;font-weight:600;font-variant-numeric:tabular-nums}
+body.contact-page .process-copy{display:block;font-size:15px;font-weight:500;line-height:1.35;color:#29292c}
+@keyframes process-row-in{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+body.contact-page .contact-points{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;width:min(100%,740px);margin:0 0 22px}
+body.contact-page .contact-points span{display:block;min-height:0;padding:0;border:0;border-radius:0;background:none;box-shadow:none;text-align:left;color:#4e4d52;font-size:13px;font-weight:500;line-height:1.35}
+body.contact-page .contact-points span::before{content:"";display:block;width:18px;height:2px;margin:0 0 9px;border-radius:2px;background:var(--accent)}
+.process-dots{display:none!important}
+.work-block{overflow:hidden}
+.work-block::after{z-index:4;inset:0;border-radius:inherit;background:linear-gradient(108deg,transparent 34%,rgba(255,255,255,.04) 41%,rgba(255,255,255,.58) 49%,rgba(229,106,40,.24) 52%,rgba(255,255,255,.06) 58%,transparent 66%);mix-blend-mode:screen;animation:portfolio-card-sheen 5.8s cubic-bezier(.55,0,.45,1) infinite}
+@keyframes portfolio-card-sheen{0%,36%{transform:translateX(-115%) skewX(-10deg);opacity:0}43%{opacity:.85}72%{transform:translateX(115%) skewX(-10deg);opacity:.55}82%,100%{transform:translateX(115%) skewX(-10deg);opacity:0}}
+@media(max-width:700px){body.contact-page .contact-points{grid-template-columns:1fr;gap:11px;margin-bottom:20px}body.contact-page .contact-points span{font-size:13px}body.contact-page .contact-points span::before{display:inline-block;vertical-align:middle;margin:0 9px 2px 0;width:12px}body.contact-page .process-list .process-row{min-height:56px;grid-template-columns:38px 1fr;gap:10px;padding-block:11px}body.contact-page .process-copy{font-size:14px}}
+@media(prefers-reduced-motion:reduce){body.contact-page .process-list .process-row{animation:none!important}.work-block::after{animation:none!important;opacity:0!important}}
+
+
+/* The animated sheen is reserved for work cards, not buttons. */
+:where(.primary-button,.secondary-button,.telegram-button,.order-fab,.contact-submit,.contact-direct,.rich-editor a.article-cta){animation:none;background:#171719}
+
+
+/* Make the orange light continuously visible on dark action buttons. */
+:where(.primary-button,.secondary-button,.telegram-button,.order-fab,.contact-submit,.contact-direct,.rich-editor a.article-cta){background:linear-gradient(105deg,#171719 0%,#171719 28%,#e56a28 43%,#ffb184 50%,#171719 62%,#171719 100%);background-size:260% 100%;animation:button-orange-sweep 3.6s linear infinite}
+
+body.contact-page .process-row{position:relative;overflow:hidden}
+body.contact-page .process-row::after{content:"";position:absolute;left:0;bottom:0;width:100%;height:1px;background:linear-gradient(90deg,rgba(229,106,40,.7),rgba(23,23,25,.08) 35%,rgba(23,23,25,.08));transform:scaleX(.18);transform-origin:left;animation:process-rule-breathe 3.2s ease-in-out infinite;animation-delay:calc(var(--row-index,0)*.25s)}
+@keyframes process-rule-breathe{0%,100%{transform:scaleX(.18);opacity:.38}50%{transform:scaleX(.92);opacity:.88}}
+
+@keyframes button-orange-sweep{from{background-position:160% 0}to{background-position:-60% 0}}
+@media(prefers-reduced-motion:reduce){:where(.primary-button,.secondary-button,.telegram-button,.order-fab,.contact-submit,.contact-direct,.rich-editor a.article-cta){animation:none!important;background:#171719}}
+
+
+/* Remove the unwanted white card wash. */
+.work-block::after{content:none!important;display:none!important;animation:none!important}
+/* Text-led process motion: staggered entrance and a gentle active glow on the step number. */
+body.contact-page .process-row{overflow:visible}
+body.contact-page .process-row::after{display:none}
+body.contact-page .process-number{animation:process-number-breathe 3.8s ease-in-out infinite;animation-delay:calc(var(--row-index,0)*.22s);transition:background .25s,color .25s,transform .25s}
+body.contact-page .process-row:nth-child(1){--row-index:0}body.contact-page .process-row:nth-child(2){--row-index:1}body.contact-page .process-row:nth-child(3){--row-index:2}body.contact-page .process-row:nth-child(4){--row-index:3}body.contact-page .process-row:nth-child(5){--row-index:4}
+@keyframes process-number-breathe{0%,100%{background:#ededf0;color:#77767c;transform:scale(1)}50%{background:#fff0e8;color:#d95f22;transform:scale(1.07)}}
+body.contact-page .process-copy{animation:process-copy-breathe 4.4s ease-in-out infinite;animation-delay:calc(var(--row-index,0)*.22s)}
+@keyframes process-copy-breathe{0%,100%{color:#29292c}50%{color:#5a514c}}
+/* Stronger continuous amber ribbon on dark buttons. */
+:where(.primary-button,.secondary-button,.telegram-button,.order-fab,.contact-submit,.contact-direct,.rich-editor a.article-cta){background:linear-gradient(105deg,#171719 0%,#171719 37%,#e56a28 45%,#ffc09a 49%,#e56a28 53%,#171719 62%,#171719 100%)!important;background-size:320% 100%!important;animation:button-orange-sweep 2.8s linear infinite!important}
+@keyframes button-orange-sweep{0%{background-position:160% 0}100%{background-position:-60% 0}}
+@media(prefers-reduced-motion:reduce){body.contact-page .process-number,body.contact-page .process-copy,:where(.primary-button,.secondary-button,.telegram-button,.order-fab,.contact-submit,.contact-direct,.rich-editor a.article-cta){animation:none!important}.work-block::after{display:none!important}}
+
+
+/* Catalog polish: dark image captions, black count, larger headline, no scroll veil. */
+.site-scroll-veil{display:none!important}
+body.catalog-page .portfolio-heading h1{font-size:clamp(38px,9vw,62px);line-height:.98;max-width:17ch}
+body.catalog-page .portfolio-slide-count{color:#171719!important;font-weight:700}
+body.catalog-page .block-caption{z-index:8!important;left:0!important;right:0!important;bottom:0!important;min-height:88px!important;padding:34px 17px 15px!important;background:linear-gradient(180deg,transparent 0%,rgba(12,12,14,.38) 27%,rgba(12,12,14,.86) 100%)!important;color:#fff!important}
+body.catalog-page .block-copy,body.catalog-page .block-title{color:#fff!important}
+body.catalog-page .block-title{font-weight:580!important}
+body.catalog-page .block-detail{position:relative;z-index:8;color:rgba(255,255,255,.75)!important}
+body.catalog-page .block-detail strong{color:#fff!important}
+body.catalog-page .slide-count{min-width:47px!important;height:34px!important;border:1px solid rgba(255,255,255,.42)!important;border-radius:999px!important;background:rgba(255,255,255,.2)!important;color:#fff!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.25),0 5px 15px rgba(0,0,0,.16)!important;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+body.catalog-page .slide-count b,body.catalog-page .slide-count img{color:#fff!important;filter:brightness(0) invert(1)}
+body.catalog-page .work-block{isolation:isolate}
+body.catalog-page .work-block::after{display:none!important;content:none!important;animation:none!important}
+/* Actual moving orange highlight layered over dark CTA fills. */
+:where(.primary-button,.secondary-button,.telegram-button,.order-fab,.contact-submit,.contact-direct,.rich-editor a.article-cta){isolation:isolate!important;overflow:hidden!important}
+:where(.primary-button,.secondary-button,.telegram-button,.order-fab,.contact-submit,.contact-direct,.rich-editor a.article-cta)::before{content:""!important;display:block!important;position:absolute!important;z-index:2!important;top:-45%!important;bottom:-45%!important;left:-45%!important;width:30%!important;border-radius:999px!important;background:linear-gradient(90deg,transparent,rgba(229,106,40,.9) 35%,#ffc39f 50%,rgba(229,106,40,.9) 65%,transparent)!important;filter:blur(7px)!important;opacity:.85!important;pointer-events:none!important;transform:translateX(-180%) rotate(14deg)!important;animation:cta-orange-glide 2.9s cubic-bezier(.48,0,.52,1) infinite!important}
+@keyframes cta-orange-glide{0%,12%{transform:translateX(-180%) rotate(14deg)}78%,100%{transform:translateX(560%) rotate(14deg)}}
+@media(max-width:600px){body.catalog-page .portfolio-heading h1{font-size:clamp(37px,10vw,49px)}body.catalog-page .block-caption{padding-inline:15px!important;min-height:82px!important}}
+@media(prefers-reduced-motion:reduce){:where(.primary-button,.secondary-button,.telegram-button,.order-fab,.contact-submit,.contact-direct,.rich-editor a.article-cta)::before{animation:none!important;opacity:0!important}}
+
+
+/* Final fixes: ensure permanent CTA sheen survives older reduced-motion overrides. */
+:where(.primary-button,.secondary-button,.telegram-button,.order-fab,.contact-submit,.contact-direct,.rich-editor a.article-cta)::before{animation:cta-orange-glide 2.9s cubic-bezier(.48,0,.52,1) infinite!important;opacity:.9!important}
+@media(prefers-reduced-motion:reduce){body.contact-page .process-row{animation:none!important}body.contact-page .process-number,body.contact-page .process-copy{animation:none!important}}
+body.catalog-page .portfolio-heading h1{font-size:clamp(40px,9.5vw,66px);max-width:18ch;letter-spacing:-.075em}
+body.catalog-page .portfolio-slide-count{color:#171719!important;font-weight:700!important}
+body.catalog-page .block-caption{left:0!important;right:0!important;bottom:0!important;min-height:88px!important;padding:34px 16px 14px!important;background:linear-gradient(180deg,transparent 0%,rgba(12,12,14,.52) 32%,rgba(12,12,14,.9) 100%)!important}
+body.catalog-page .block-title{color:#fff!important;font-weight:560!important}
+body.catalog-page .slide-count{background:rgba(255,255,255,.19)!important;color:#fff!important;border-color:rgba(255,255,255,.42)!important;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+body.catalog-page .slide-count b{color:#fff!important}
+body.catalog-page .slide-count img{filter:brightness(0) invert(1)}
+
+
+/* Fix catalog card geometry: compact caption overlay, soft readable shade, glass type tag. */
+body.catalog-page .catalog-shell{width:min(100%,980px)}
+body.catalog-page .portfolio-heading{overflow:visible;margin-inline:0}
+body.catalog-page .portfolio-heading h1{max-width:none;font-size:clamp(32px,7.6vw,58px);line-height:1;letter-spacing:-.07em;overflow:visible}
+body.catalog-page .portfolio-slide-count{display:inline-flex;overflow:visible;white-space:nowrap;color:#171719!important}
+body.catalog-page .work-block{position:relative;overflow:hidden;border-radius:30px}
+body.catalog-page .work-block .carousel-window{display:block}
+body.catalog-page .work-block .block-caption{position:absolute!important;z-index:10!important;left:0!important;right:0!important;bottom:0!important;min-height:0!important;height:76px!important;padding:24px 16px 13px!important;display:flex!important;align-items:flex-end!important;justify-content:space-between!important;gap:10px!important;background:linear-gradient(180deg,rgba(8,8,10,0) 0%,rgba(8,8,10,.34) 29%,rgba(8,8,10,.78) 100%)!important;color:#fff!important}
+body.catalog-page .work-block .block-title{margin:0!important;color:#fff!important;font-size:15px!important;line-height:1.15!important;font-weight:580!important}
+body.catalog-page .work-block .slide-count{position:relative;z-index:11;min-width:52px!important;height:36px!important;gap:6px!important;padding:0 11px!important;border:1px solid rgba(255,255,255,.42)!important;border-radius:999px!important;background:rgba(255,255,255,.2)!important;color:#fff!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.27),0 5px 14px rgba(0,0,0,.18)!important;backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px)}
+body.catalog-page .work-block .slide-count b{color:#fff!important;font-size:12px!important}
+body.catalog-page .work-block .slide-count img{width:14px;height:14px;filter:brightness(0) invert(1)!important}
+
+/* Final catalog layout refinements from visual review. */
+body.catalog-page .portfolio-shell,body.catalog-page .catalog-shell{max-width:1000px;width:100%;padding-inline:clamp(12px,3vw,28px)}
+body.catalog-page .portfolio-heading{width:100%;max-width:100%;overflow:visible}
+body.catalog-page .portfolio-heading h1{width:100%;max-width:none!important;font-size:clamp(34px,7.2vw,58px)!important;line-height:1.02;letter-spacing:-.07em;overflow:visible;white-space:normal;text-wrap:balance}
+body.catalog-page .portfolio-slide-count{display:inline!important;overflow:visible!important;max-width:none!important;color:#171719!important;font-weight:680!important;white-space:nowrap}
+body.catalog-page .odometer-digit{overflow:hidden;max-width:1ch}
+body.catalog-page .work-block .block-caption{height:62px!important;min-height:62px!important;padding:17px 15px 11px!important;background:linear-gradient(180deg,transparent 0%,rgba(10,10,12,.12) 14%,rgba(10,10,12,.68) 100%)!important}
+body.catalog-page .work-block .work-type-badge{padding:9px 15px!important;border:1px solid rgba(255,255,255,.48)!important;border-radius:999px!important;background:rgba(255,255,255,.28)!important;color:#fff!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.32),0 5px 16px rgba(0,0,0,.12)!important;backdrop-filter:blur(18px) saturate(1.25);-webkit-backdrop-filter:blur(18px) saturate(1.25)}
+body.catalog-page .work-block .slide-count img.photo-count-icon{filter:brightness(0) invert(1)!important;opacity:1!important}
+body.catalog-page .work-block .slide-count{background:rgba(255,255,255,.2)!important;color:#fff!important}
+body.catalog-page .work-block .carousel-window{background:transparent!important}
+@media(max-width:600px){body.catalog-page .portfolio-shell,body.catalog-page .catalog-shell{padding-inline:12px}body.catalog-page .portfolio-heading h1{font-size:clamp(32px,8.5vw,46px)!important}body.catalog-page .work-block .block-caption{height:58px!important;min-height:58px!important;padding:16px 13px 10px!important}}
+
+body.catalog-page .work-block .work-type-badge{top:14px!important;left:14px!important;right:auto!important;bottom:auto!important;z-index:12!important;padding:9px 14px!important;border:1px solid rgba(255,255,255,.38)!important;border-radius:999px!important;background:rgba(255,255,255,.34)!important;color:#fff!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.25),0 5px 18px rgba(0,0,0,.1)!important;backdrop-filter:blur(16px);-webkit-backdrop-filter:blur(16px);font-size:11px!important;font-weight:600!important}
+body.catalog-page .work-block::after{display:none!important;content:none!important}
+.site-scroll-veil{display:none!important}
+@media(max-width:600px){body.catalog-page .catalog-shell{padding-inline:12px}body.catalog-page .portfolio-heading h1{font-size:clamp(30px,8.2vw,43px)}body.catalog-page .work-block .block-caption{height:70px!important;padding:22px 13px 11px!important}body.catalog-page .work-block .block-title{font-size:14px!important}}
+
+
+/* Catalog polish: opaque white project tags and neutral gray category filters. */
+body.catalog-page .work-block .work-type-badge{background:#fff!important;color:#171719!important;border:1px solid rgba(23,23,25,.08)!important;box-shadow:0 4px 14px rgba(0,0,0,.12)!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+body.catalog-page .filters .category-chip{color:#77767c!important;background:#e9e9ed!important;border:1px solid transparent!important;box-shadow:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important}
+body.catalog-page .filters .category-chip[aria-pressed="true"]{color:#171719!important;background:#fff!important;border-color:rgba(23,23,25,.12)!important}
+body.catalog-page .work-block .block-caption{padding-left:24px!important;padding-right:15px!important}
+@media(max-width:600px){body.catalog-page .work-block .block-caption{padding-left:22px!important;padding-right:13px!important}}
+body.catalog-page .work-block .slide-count{align-self:flex-end!important;margin:0!important}
+body.catalog-page .category-chip[aria-pressed="true"]{color:#171719!important;background:#fff!important;border-color:#fff!important}
+body.catalog-page .work-block .block-caption{align-items:center!important;padding-top:15px!important;padding-bottom:11px!important}
+body.catalog-page .work-block .block-copy{display:flex;align-items:center;min-height:36px}
+body.catalog-page .work-block .block-title{display:flex;align-items:center;margin:0!important}
+body.catalog-page .work-block .slide-count{display:inline-flex;align-items:center;justify-content:center;line-height:1!important;vertical-align:middle}
+body.catalog-page .work-block .slide-count b{display:inline-flex;align-items:center;line-height:1;font-variant-numeric:tabular-nums}
+body.catalog-page .work-block .slide-count img.photo-count-icon{display:block;flex:none;margin:0!important;vertical-align:middle}
+body.catalog-page .portfolio-slide-count{display:inline-flex!important;min-width:var(--odometer-width,1ch);justify-content:flex-end;align-items:baseline;font-variant-numeric:tabular-nums;vertical-align:baseline;white-space:nowrap}
+body.catalog-page .odometer-digit{width:1ch;max-width:none!important;text-align:center;vertical-align:bottom}
+body.catalog-page .portfolio-heading h1{letter-spacing:-.07em!important}
+body.catalog-page .portfolio-slide-count{letter-spacing:inherit!important;justify-content:center!important;min-width:var(--odometer-width,2ch)!important}
+body.catalog-page .work-block .block-caption{align-items:center!important}
+body.catalog-page .work-block .block-copy{height:36px!important;min-height:36px!important;display:flex!important;align-items:center!important}
+body.catalog-page .work-block .block-title{line-height:1!important;transform:none!important}
+body.catalog-page .work-block .slide-count{height:36px!important;min-height:36px!important;display:inline-flex!important;align-items:center!important;align-self:center!important;line-height:1!important;transform:none!important}
+body.catalog-page .portfolio-slide-count{letter-spacing:-.07em!important}
+body.catalog-page .portfolio-slide-count .odometer-digit{letter-spacing:-.07em!important}
+body.catalog-page .portfolio-slide-count .odometer-digit:not(:last-child){margin-right:-.07em}
+
+
+body.catalog-page .portfolio-slide-count{letter-spacing:-.07em!important}
+body.catalog-page .odometer-digit{letter-spacing:-.07em!important}
+body.catalog-page .work-block .block-caption{align-items:center!important}
+body.catalog-page .work-block .block-copy,body.catalog-page .work-block .slide-count{align-self:center!important;transform:translateY(0)!important}
+
+body.catalog-page .portfolio-slide-count{display:inline-flex!important;flex:none!important;width:var(--odometer-width,2ch)!important;min-width:var(--odometer-width,2ch)!important;gap:0!important;justify-content:flex-end!important}
+body.catalog-page .portfolio-slide-count .odometer-digit{display:block!important;flex:0 0 1ch!important;width:1ch!important;height:1em!important;min-width:1ch!important;margin:0!important;padding:0!important;overflow:hidden!important}
+body.catalog-page .portfolio-slide-count .odometer-wheel{width:1ch!important;text-align:center!important}
+body.catalog-page .portfolio-slide-count .odometer-wheel>span{width:1ch!important;text-align:center!important}
+
+body.catalog-page .work-block .block-caption{position:absolute!important;left:0!important;right:0!important;bottom:0!important;display:flex!important;align-items:center!important;justify-content:space-between!important}
+body.catalog-page .work-block .slide-count{position:static!important;align-self:center!important;margin:0!important;border:0!important;border-radius:0!important;background:transparent!important;color:#fff!important;box-shadow:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;padding:0!important}
+body.catalog-page .work-block .slide-count b{color:#fff!important}
+body.catalog-page .work-block .slide-count img.photo-count-icon{filter:brightness(0) invert(1)!important}
+body.catalog-page .work-block .block-copy{align-self:center!important}
+
+body.catalog-page .work-block .block-caption{align-items:center!important}
+body.catalog-page .work-block .slide-count{align-self:center!important;position:absolute!important;right:15px!important;bottom:15px!important;margin:0!important}
+@media(max-width:600px){body.catalog-page .work-block .slide-count{right:13px!important;bottom:13px!important}}
+
+
+/* Start page: layered dimensional wordmark, touch-first portrait scene. */
+.sr-only{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
+body.start-page{--start-orange:#e56a28;min-width:320px;overflow:hidden;background:#f5f5f7;font-family:Onest,-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif}
+.start-stage{position:relative;min-height:100svh;display:flex;flex-direction:column;padding:clamp(18px,4vw,38px) clamp(18px,5vw,62px) clamp(18px,3vw,30px);isolation:isolate;overflow:hidden;background:radial-gradient(circle at 50% 50%,#fff 0,#f7f7f8 48%,#efeff1 100%);transition:background .6s ease}
+.start-stage::before{content:"";position:absolute;z-index:-1;inset:-25%;background:radial-gradient(ellipse at 50% 55%,rgba(229,106,40,.11),transparent 34%),radial-gradient(ellipse at 48% 48%,rgba(255,255,255,.95),transparent 57%);animation:start-ambient 8s ease-in-out infinite alternate;pointer-events:none}
+@keyframes start-ambient{from{transform:scale(.96) rotate(-1deg);opacity:.72}to{transform:scale(1.06) rotate(1deg);opacity:1}}
+.start-header,.start-footer{display:flex;justify-content:space-between;align-items:center;color:#9a989e;font-size:10px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;z-index:5}.start-header span:last-child,.start-footer span:last-child{font-variant-numeric:tabular-nums}
+.start-hero{display:flex;flex:1;flex-direction:column;align-items:center;justify-content:center;min-height:0;text-align:center}.start-kicker{margin:0 0 clamp(5px,1vw,12px);color:#8b8990;font-size:10px;font-weight:700;letter-spacing:.2em}
+.wordmark-scene{position:relative;width:min(100%,1120px);height:min(61svh,650px);min-height:360px;display:grid;place-items:center;touch-action:none;perspective:1100px;transform:rotateX(var(--tilt-x,0deg)) rotateY(var(--tilt-y,0deg));transition:transform .7s cubic-bezier(.2,.8,.2,1);will-change:transform}
+.wordmark-scene::before{content:"";position:absolute;z-index:0;width:min(70vw,640px);height:min(70vw,640px);border-radius:50%;background:radial-gradient(circle,rgba(255,255,255,.95),rgba(255,255,255,0) 68%);filter:blur(3px);animation:scene-pulse 4.5s ease-in-out infinite}
+@keyframes scene-pulse{50%{transform:scale(1.15);opacity:.72}}
+.wordmark{position:absolute;z-index:1;color:var(--start-orange);font-size:clamp(82px,16vw,220px);font-weight:800;line-height:.75;letter-spacing:-.105em;white-space:nowrap;user-select:none;transition:transform .7s cubic-bezier(.16,1,.3,1),filter .7s ease}
+.wordmark-back{left:50%;top:39%;transform:translate(calc(-100% - 5vw + var(--touch-x,0px)),calc(-50% + var(--touch-y,0px))) scaleX(.98);filter:drop-shadow(0 18px 20px rgba(229,106,40,.12));z-index:1}
+.wordmark-front{left:50%;top:57%;transform:translate(calc(0% + 5vw + var(--touch-x,0px)),calc(-50% + var(--touch-y,0px))) scaleX(.98);filter:drop-shadow(0 18px 20px rgba(229,106,40,.16));z-index:4}
+.portrait-layer{position:absolute;z-index:3;width:min(72vw,720px);height:100%;object-fit:contain;object-position:center bottom;mix-blend-mode:multiply;filter:grayscale(1) contrast(1.04) drop-shadow(0 28px 34px rgba(20,20,24,.17));transform:translate(calc(var(--touch-x,0px)*.45),calc(var(--touch-y,0px)*.35)) translateZ(30px);transition:transform .7s cubic-bezier(.16,1,.3,1),filter .7s ease;pointer-events:none}
+.scene-orbit{position:absolute;z-index:2;border:1px solid rgba(229,106,40,.28);border-radius:50%;pointer-events:none;animation:orbit-spin 14s linear infinite}.orbit-one{width:min(54vw,500px);height:min(19vw,170px);transform:rotate(-14deg)}.orbit-two{width:min(66vw,620px);height:min(25vw,220px);transform:rotate(18deg);animation-duration:20s;animation-direction:reverse;border-color:rgba(23,23,25,.09)}
+@keyframes orbit-spin{to{rotate:360deg}}
+.start-description{max-width:390px;margin:clamp(-35px,-3vw,-14px) auto 19px;color:#75737a;font-size:clamp(13px,1.7vw,16px);line-height:1.45;position:relative;z-index:5}.start-actions{display:flex;gap:8px;position:relative;z-index:5}.start-primary,.start-secondary{min-height:48px;display:inline-flex;align-items:center;justify-content:center;border-radius:999px;padding:0 19px;font-size:12px;font-weight:650;transition:transform .2s,box-shadow .2s}.start-primary{gap:10px;background:#171719;color:#fff;box-shadow:0 10px 25px rgba(23,23,25,.16)}.start-primary span{color:#ff9c67;font-size:18px}.start-secondary{background:rgba(255,255,255,.65);border:1px solid rgba(23,23,25,.1);color:#171719;backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}.start-primary:active,.start-secondary:active{transform:scale(.96)}.start-footer{margin-top:12px}.start-scroll-mark{animation:start-bob 1.8s ease-in-out infinite;color:var(--start-orange);font-size:18px}.start-footer span:first-child{display:none}
+@keyframes start-bob{50%{transform:translateY(4px)}}
+@media(max-width:600px){.start-stage{padding-inline:14px}.start-header,.start-footer{font-size:8px;letter-spacing:.11em}.wordmark-scene{height:54svh;min-height:340px}.wordmark{font-size:clamp(68px,20vw,128px)}.wordmark-back{top:40%;transform:translate(calc(-100% + 2vw + var(--touch-x,0px)),calc(-50% + var(--touch-y,0px)))}.wordmark-front{top:57%;transform:translate(calc(0% - 2vw + var(--touch-x,0px)),calc(-50% + var(--touch-y,0px)))}.portrait-layer{width:96vw;height:100%}.orbit-one{width:80vw;height:27vw}.orbit-two{width:93vw;height:34vw}.start-description{margin-top:-10px}.start-actions{width:100%}.start-primary,.start-secondary{flex:1;padding-inline:10px;font-size:11px}.start-footer span:first-child{display:block}.start-footer span:last-child{display:none}}
+
+/* Final safe catalog/contact corrections. */
+body.catalog-page .work-block .block-caption{align-items:center!important}
+body.catalog-page .work-block .slide-count{position:static!important;right:auto!important;bottom:auto!important;align-self:center!important;margin:0!important;border:0!important;border-radius:0!important;background:transparent!important;color:#fff!important;box-shadow:none!important;backdrop-filter:none!important;-webkit-backdrop-filter:none!important;padding:0!important}
+body.catalog-page .work-block .slide-count b{color:#fff!important}
+body.catalog-page .work-block .slide-count img.photo-count-icon{filter:brightness(0) invert(1)!important}
+body.tg-mini-app.contact-page .contact-shell{padding-top:calc(8px + max(env(safe-area-inset-top,0px),var(--tg-content-safe-area-inset-top,0px),var(--tg-safe-area-inset-top,0px)))!important}
+
+@media(prefers-reduced-motion:reduce){.start-stage::before,.scene-orbit,.start-scroll-mark,.wordmark-scene::before{animation:none!important}.wordmark-scene,.wordmark,.portrait-layer{transition:none!important}}

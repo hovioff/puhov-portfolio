@@ -11,9 +11,24 @@ const searchPanel=document.querySelector('#catalogSearchPanel');
 const portfolioSlideCount=document.querySelector('#portfolioSlideCount');
 const portfolioSlideWord=document.querySelector('#portfolioSlideWord');
 function animateSlideCount(el,target){
-  const value=Math.max(0,Number(target)||0),digits=String(value),old=el.dataset.value||'0';el.setAttribute('aria-label',String(value));el.dataset.value=String(value);
-  if(el.dataset.rendered===digits)return;el.dataset.rendered=digits;
-  el.replaceChildren(...[...digits].map((char,index)=>{const digit=document.createElement('span');digit.className='odometer-digit';digit.setAttribute('aria-hidden','true');const wheel=document.createElement('span');wheel.className='odometer-wheel';wheel.innerHTML=[...'01234567890123456789'].map(number=>`<span>${number}</span>`).join('');digit.append(wheel);const n=Number(char),start=10+Number(old[index]||0),end=10+n;wheel.style.transform=`translateY(-${start}em)`;requestAnimationFrame(()=>{wheel.animate([{transform:`translateY(-${start}em)`},{transform:`translateY(-${end}em)`}],{duration:850+index*55,delay:index*55,easing:'cubic-bezier(.16,1,.3,1)',fill:'forwards'});});return digit;}));
+  const value=Math.max(0,Number(target)||0),digits=String(value);
+  const previous=el.dataset.value===undefined?'':el.dataset.value;
+  const width=digits.length;
+  el.setAttribute('aria-label',digits);
+  el.style.setProperty('--odometer-width',`${width}ch`);
+  el.dataset.value=digits;
+  if(el.dataset.rendered===digits)return;
+  el.dataset.rendered=digits;
+  const from='0'.repeat(width),to=digits;
+  el.replaceChildren(...[...to].map((targetDigit,index)=>{
+    const digit=document.createElement('span');digit.className='odometer-digit';digit.setAttribute('aria-hidden','true');
+    const wheel=document.createElement('span');wheel.className='odometer-wheel';
+    wheel.innerHTML=[...'01234567890123456789'].map(number=>`<span>${number}</span>`).join('');digit.append(wheel);
+    const startIndex=10+Number(from[index]||0),endIndex=10+Number(targetDigit);
+    wheel.style.transform=`translateY(-${startIndex}em)`;
+    requestAnimationFrame(()=>wheel.animate([{transform:`translateY(-${startIndex}em)`},{transform:`translateY(-${endIndex}em)`}],{duration:720+index*35,delay:index*35,easing:'cubic-bezier(.2,.75,.25,1)',fill:'forwards'}));
+    return digit;
+  }));
 }
 const CATALOG_STATE_KEY='puhov-portfolio:catalog-state';
 const RETURN_TO_CATALOG_KEY='puhov-portfolio:return-to-catalog';
@@ -23,7 +38,6 @@ let activeType=savedCatalogState.activeType||'all';const activeCategories=new Se
 function saveCatalogState(){try{sessionStorage.setItem(CATALOG_STATE_KEY,JSON.stringify({activeType,categories:[...activeCategories],search:activeSearch,scrollY:window.scrollY}));}catch{}}
 const typeName=id=>data.types.find(type=>type.id===id)?.name||({products:'Карточки товаров',banners:'Экспресс-баннеры','vk-groups':'Группы ВК'}[id]||id);
 const categoryName=id=>data.categories.find(category=>category.id===id)?.name||id;
-const threeDSkeleton='<span class="carousel-loading-skeleton" aria-hidden="true"></span>';
 function observeScrollImage(){}
 const veil=document.querySelector('.site-scroll-veil');let veilFrame=0,veilY=50,veilTarget=50,lastScrollY=window.scrollY,veilRestTimer=0;
 function updateScrollVeil(){if(!veil)return;veilY+=(veilTarget-veilY)*.2;veil.style.setProperty('--veil-y',`${veilY.toFixed(2)}%`);if(Math.abs(veilTarget-veilY)>.06)veilFrame=requestAnimationFrame(updateScrollVeil);else veilFrame=0;}
