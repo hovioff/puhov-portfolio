@@ -1,5 +1,8 @@
-import {getPortfolio,escapeHTML,displayProjectImageCount,countProjectImages} from './data.js?v=20261116-07';
+import {getPortfolio,escapeHTML,displayProjectImageCount,countProjectImages} from './data.js?v=20261117-01';
 import {polishTypography} from './typography.js?v=20261115-01';
+import {renderPromoCards} from './promo-cards.js?v=20261117-05';
+
+
 const grid=document.querySelector('#workGrid');
 const filters=document.querySelector('#filters');
 const tabs=document.querySelector('#typeTabs');
@@ -10,26 +13,8 @@ let searchToggle=null;
 const searchPanel=document.querySelector('#catalogSearchPanel');
 const portfolioSlideCount=document.querySelector('#portfolioSlideCount');
 const portfolioSlideWord=document.querySelector('#portfolioSlideWord');
-function animateSlideCount(el,target){
-  const value=Math.max(0,Number(target)||0),digits=String(value);
-  const previous=el.dataset.value===undefined?'':el.dataset.value;
-  const width=digits.length;
-  el.setAttribute('aria-label',digits);
-  el.style.setProperty('--odometer-width',`${width}ch`);
-  el.dataset.value=digits;
-  if(el.dataset.rendered===digits)return;
-  el.dataset.rendered=digits;
-  const from='0'.repeat(width),to=digits;
-  el.replaceChildren(...[...to].map((targetDigit,index)=>{
-    const digit=document.createElement('span');digit.className='odometer-digit';digit.setAttribute('aria-hidden','true');
-    const wheel=document.createElement('span');wheel.className='odometer-wheel';
-    wheel.innerHTML=[...'01234567890123456789'].map(number=>`<span>${number}</span>`).join('');digit.append(wheel);
-    const startIndex=10+Number(from[index]||0),endIndex=10+Number(targetDigit);
-    wheel.style.transform=`translateY(-${startIndex}em)`;
-    requestAnimationFrame(()=>wheel.animate([{transform:`translateY(-${startIndex}em)`},{transform:`translateY(-${endIndex}em)`}],{duration:720+index*35,delay:index*35,easing:'cubic-bezier(.2,.75,.25,1)',fill:'forwards'}));
-    return digit;
-  }));
-}
+function animateSlideCount(el,target){const value=Math.max(0,Number(target)||0),digits=String(value);el.textContent=digits;el.setAttribute('aria-label',digits);el.style.setProperty('--odometer-width',`${digits.length}ch`);el.dataset.value=digits;el.dataset.rendered=digits;}
+
 const CATALOG_STATE_KEY='puhov-portfolio:catalog-state';
 const RETURN_TO_CATALOG_KEY='puhov-portfolio:return-to-catalog';
 function readCatalogState(){try{return JSON.parse(sessionStorage.getItem(CATALOG_STATE_KEY)||'{}');}catch{return{};}}
@@ -38,6 +23,8 @@ let activeType=savedCatalogState.activeType||'all';const activeCategories=new Se
 function saveCatalogState(){try{sessionStorage.setItem(CATALOG_STATE_KEY,JSON.stringify({activeType,categories:[...activeCategories],search:activeSearch,scrollY:window.scrollY}));}catch{}}
 const typeName=id=>data.types.find(type=>type.id===id)?.name||({products:'Карточки товаров',banners:'Экспресс-баннеры','vk-groups':'Группы ВК'}[id]||id);
 const categoryName=id=>data.categories.find(category=>category.id===id)?.name||id;
+const threeDSkeleton='<span class="carousel-loading-skeleton" aria-hidden="true"></span>';
+
 function observeScrollImage(){}
 const veil=document.querySelector('.site-scroll-veil');let veilFrame=0,veilY=50,veilTarget=50,lastScrollY=window.scrollY,veilRestTimer=0;
 function updateScrollVeil(){if(!veil)return;veilY+=(veilTarget-veilY)*.2;veil.style.setProperty('--veil-y',`${veilY.toFixed(2)}%`);if(Math.abs(veilTarget-veilY)>.06)veilFrame=requestAnimationFrame(updateScrollVeil);else veilFrame=0;}
@@ -100,7 +87,6 @@ function card(project,cardIndex=0){
   const badge=activeType==='all'?`<span class="work-type-badge" data-work-type="${escapeHTML(project.type)}">${escapeHTML(typeName(project.type))}</span>`:'';
   const mainCarousel=project.blocks?.find(block=>block.type==='carousel'),isSquare=mainCarousel?.format==='square'||mainCarousel?.format==='avito';
   const aspect=isSquare?'1 / 1':project.type==='banners'?'1280 / 920':'808 / 632';
-  if(project.previewImage?.src)return `<a class="work-block" style="--card-index:${Math.min(cardIndex,8)}" href="project.html?id=${encodeURIComponent(project.id)}" aria-label="Открыть проект «${escapeHTML(project.title)}"><div class="carousel-window catalog-static-window" style="--carousel-aspect:${aspect}"><img class="catalog-static-preview" src="${escapeHTML(project.previewImage.previewSrc||project.previewImage.src)}" data-placeholder="${safePlaceholder(project.previewImage.placeholder)}" alt="${escapeHTML(project.title)}" loading="lazy">${badge}</div><div class="block-caption"><div class="block-copy"><h2 class="block-title">${escapeHTML(project.title)}</h2></div><span class="slide-count"><b>${displayProjectImageCount(project)}</b><img class="photo-count-icon" src="assets/photo-icon.png" alt="" aria-hidden="true" width="14" height="14" loading="eager" decoding="async"></span></div></a>`;
   const orderedSlides=slides.length>1?[slides[slides.length-1],...slides.slice(0,-1)]:slides;
   if(!slides.length)return `<a class="work-block" style="--card-index:${Math.min(cardIndex,8)}" href="project.html?id=${encodeURIComponent(project.id)}"><div class="carousel-window catalog-static-window" style="--carousel-aspect:${aspect}"></div><div class="block-caption"><div class="block-copy"><h2 class="block-title">${escapeHTML(project.title)}</h2></div><span class="slide-count"><b>${displayProjectImageCount(project)}</b></span></div></a>`;
   const group=(duplicate=false)=>`<div class="track-set${duplicate?' track-set-repeat':''}"${duplicate?' aria-hidden="true"':''}>${orderedSlides.map((slide,index)=>{const near=index%2===1,wide=project.type==='banners',progress=index/Math.max(1,orderedSlides.length-1),drift=wide?(near?'-5px':'8px'):`-${2+progress*16}px`,cycle=54-progress*48,loading=duplicate||index>2?'lazy':'eager',priority=!duplicate&&cardIndex===0&&index===0?'high':'auto';return`<div class="slide" style="--depth:${index+1};--reveal-order:${index+(duplicate?slides.length:0)};--depth-z:${wide?(near?'12px':'-7px'):(near?'16px':'-9px')};--depth-yaw:${near?'-1.4deg':'1deg'};--depth-scale:${wide?(near?'1.012':'.994'):(near?'1.022':'.986')};--shadow-y:${wide?(near?'4px':'1px'):(near?'5px':'2px')};--shadow-blur:${wide?(near?'9px':'4px'):(near?'11px':'6px')};--shadow-alpha:${wide?(near?'.15':'.08'):(near?'.18':'.11')};--float-duration:${cycle}s;--float-delay:0s;animation-duration:${cycle}s!important;--drift-x:${drift};--drift-y:${wide?(near?'-0.8px':'0.7px'):`${.4+progress*3.6}px`}"><img src="${escapeHTML(slide.previewSrc||slide.src)}" data-placeholder="${safePlaceholder(slide.placeholder)}" alt="${duplicate?'':escapeHTML(slide.alt||project.title)}" loading="${loading}" fetchpriority="${priority}" decoding="async"></div>`;}).join('')}</div>`;
@@ -186,6 +172,9 @@ grid.addEventListener('click',event=>{if(!event.target.closest('.work-block[href
 window.addEventListener('pagehide',saveCatalogState);
 setCatalogLoading(true);
 let fallbackError=null;try{data=await getPortfolio({onFallback:error=>fallbackError=error});}catch(error){console.error('Не удалось загрузить портфолио:',error);fallbackError=error;data={types:[],categories:[],projects:[]};}
+
+try{await renderPromoCards();}catch(error){console.error('Не удалось показать промокарты:',error);}
+
 if(activeType!=='all'&&!data.types.some(type=>type.id===activeType))activeType='all';
 sortedProjects=[...data.projects].sort((a,b)=>dateValue(b.date)-dateValue(a.date)||String(a.id).localeCompare(String(b.id)));projectsById=new Map(sortedProjects.map(project=>[project.id,project]));drawTypes();drawFilters();draw();setCatalogLoading(false);if(searchInput){searchInput.value=activeSearch;if(activeSearch){setSearchOpen(true,false);selectSearchTab(true);requestAnimationFrame(()=>moveTypeIndicator(true));}}
 if(!data.projects.length){empty.textContent=fallbackError?'Не удалось загрузить проекты. Проверьте подключение и попробуйте ещё раз.':'Проекты скоро появятся.';empty.hidden=false;grid.hidden=true;setCatalogLoading(false);}

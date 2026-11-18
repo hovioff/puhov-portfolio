@@ -1,4 +1,3 @@
--- Выполнить один раз в Supabase Dashboard → SQL Editor.
 create table if not exists public.portfolio_content (
   id text primary key check (id = 'main'),
   payload jsonb not null,
@@ -33,6 +32,28 @@ as $$
 $$;
 revoke all on function private.is_portfolio_admin() from public, anon, authenticated;
 grant execute on function private.is_portfolio_admin() to authenticated;
+
+create table if not exists public.promo_cards (
+  id text primary key,
+  payload jsonb not null,
+  position integer not null default 0,
+  active boolean not null default true,
+  updated_at timestamptz not null default now()
+);
+alter table public.promo_cards enable row level security;
+revoke all on public.promo_cards from public, anon, authenticated;
+grant select on public.promo_cards to anon, authenticated;
+grant insert, update, delete on public.promo_cards to authenticated;
+drop policy if exists "Public can read promo cards" on public.promo_cards;
+create policy "Public can read promo cards" on public.promo_cards for select to anon, authenticated using (true);
+drop policy if exists "Signed in admins can manage promo cards" on public.promo_cards;
+create policy "Signed in admins can manage promo cards" on public.promo_cards for all to authenticated using ((select private.is_portfolio_admin())) with check ((select private.is_portfolio_admin()));
+insert into public.promo_cards (id,payload,position,active)
+select card->>'id',card,ordinality::integer-1,coalesce((card->>'active')::boolean,true)
+from public.portfolio_content p cross join lateral jsonb_array_elements(coalesce(p.payload->'promoCards','[]'::jsonb)) with ordinality as cards(card,ordinality)
+where p.id='main' and card->>'id' is not null
+on conflict (id) do nothing;
+
 
 drop policy if exists "Public can read portfolio" on public.portfolio_content;
 create policy "Public can read portfolio" on public.portfolio_content for select to anon, authenticated using (true);

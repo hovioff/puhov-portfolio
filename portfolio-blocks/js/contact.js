@@ -43,9 +43,7 @@
     state.label.textContent = content.label;
     state.brief.placeholder = content.placeholder;
     state.submit.firstChild.textContent = `${content.submit} `;
-    [...state.process.querySelectorAll('strong')].forEach((item, index) => { item.textContent = content.processTitle[index]; });
-
-    [...state.process.querySelectorAll('small')].forEach((item, index) => { item.textContent = content.processDetail[index]; });
+    [...state.process.querySelectorAll('.process-copy')].forEach((item, index) => { item.textContent = content.processDetail[index]; });
     document.querySelectorAll('[data-design-state]').forEach(button => {
       const active = button.dataset.designState === mode;
       button.classList.toggle('is-active', active);
