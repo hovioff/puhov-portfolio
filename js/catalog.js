@@ -1,5 +1,8 @@
-import {getPortfolio,escapeHTML,displayProjectImageCount,countProjectImages} from './data.js?v=20261116-07';
+import {getPortfolio,escapeHTML,displayProjectImageCount,countProjectImages} from './data.js?v=20261117-01';
 import {polishTypography} from './typography.js?v=20261115-01';
+import {renderPromoCards} from './promo-cards.js?v=20261117-04';
+
+
 const grid=document.querySelector('#workGrid');
 const filters=document.querySelector('#filters');
 const tabs=document.querySelector('#typeTabs');
@@ -10,25 +13,8 @@ let searchToggle=null;
 const searchPanel=document.querySelector('#catalogSearchPanel');
 const portfolioSlideCount=document.querySelector('#portfolioSlideCount');
 const portfolioSlideWord=document.querySelector('#portfolioSlideWord');
-function animateSlideCount(el,target){
-  const value=Math.max(0,Number(target)||0),digits=String(value),storedValue=el.dataset.value,old=storedValue===undefined?'':storedValue;
-  const startWidth=Math.max(digits.length,old.length);
-  el.setAttribute('aria-label',digits);
-  el.style.setProperty('--odometer-width',`${startWidth}ch`);
-  el.dataset.maxDigits=String(startWidth);el.dataset.value=String(value);
-  if(el.dataset.rendered===digits)return;
-  el.dataset.rendered=digits;
-  const padded=digits.padStart(startWidth,' '),previous=old.padStart(startWidth,'0');
-  el.replaceChildren(...[...padded].map((char,index)=>{
-    const digit=document.createElement('span');digit.className='odometer-digit';digit.setAttribute('aria-hidden','true');
-    const wheel=document.createElement('span');wheel.className='odometer-wheel';
-    wheel.innerHTML=[...'01234567890123456789'].map(number=>`<span>${number}</span>`).join('');digit.append(wheel);
-    const targetDigit=char===' '?0:Number(char),startDigit=previous[index]===' '?0:Number(previous[index]);
-    const start=10+startDigit,end=10+targetDigit;wheel.style.transform=`translateY(-${start}em)`;
-    requestAnimationFrame(()=>wheel.animate([{transform:`translateY(-${start}em)`},{transform:`translateY(-${end}em)`}],{duration:720+index*35,delay:index*35,easing:'cubic-bezier(.2,.75,.25,1)',fill:'forwards'}));
-    return digit;
-  }));
-}
+function animateSlideCount(el,target){const value=Math.max(0,Number(target)||0),digits=String(value);el.textContent=digits;el.setAttribute('aria-label',digits);el.style.setProperty('--odometer-width',`${digits.length}ch`);el.dataset.value=digits;el.dataset.rendered=digits;}
+
 const CATALOG_STATE_KEY='puhov-portfolio:catalog-state';
 const RETURN_TO_CATALOG_KEY='puhov-portfolio:return-to-catalog';
 function readCatalogState(){try{return JSON.parse(sessionStorage.getItem(CATALOG_STATE_KEY)||'{}');}catch{return{};}}
@@ -38,6 +24,7 @@ function saveCatalogState(){try{sessionStorage.setItem(CATALOG_STATE_KEY,JSON.st
 const typeName=id=>data.types.find(type=>type.id===id)?.name||({products:'Карточки товаров',banners:'Экспресс-баннеры','vk-groups':'Группы ВК'}[id]||id);
 const categoryName=id=>data.categories.find(category=>category.id===id)?.name||id;
 const threeDSkeleton='<span class="carousel-loading-skeleton" aria-hidden="true"></span>';
+
 function observeScrollImage(){}
 const veil=document.querySelector('.site-scroll-veil');let veilFrame=0,veilY=50,veilTarget=50,lastScrollY=window.scrollY,veilRestTimer=0;
 function updateScrollVeil(){if(!veil)return;veilY+=(veilTarget-veilY)*.2;veil.style.setProperty('--veil-y',`${veilY.toFixed(2)}%`);if(Math.abs(veilTarget-veilY)>.06)veilFrame=requestAnimationFrame(updateScrollVeil);else veilFrame=0;}
@@ -186,6 +173,9 @@ grid.addEventListener('click',event=>{if(!event.target.closest('.work-block[href
 window.addEventListener('pagehide',saveCatalogState);
 setCatalogLoading(true);
 let fallbackError=null;try{data=await getPortfolio({onFallback:error=>fallbackError=error});}catch(error){console.error('Не удалось загрузить портфолио:',error);fallbackError=error;data={types:[],categories:[],projects:[]};}
+
+try{await renderPromoCards();}catch(error){console.error('Не удалось показать промокарты:',error);}
+
 if(activeType!=='all'&&!data.types.some(type=>type.id===activeType))activeType='all';
 sortedProjects=[...data.projects].sort((a,b)=>dateValue(b.date)-dateValue(a.date)||String(a.id).localeCompare(String(b.id)));projectsById=new Map(sortedProjects.map(project=>[project.id,project]));drawTypes();drawFilters();draw();setCatalogLoading(false);if(searchInput){searchInput.value=activeSearch;if(activeSearch){setSearchOpen(true,false);selectSearchTab(true);requestAnimationFrame(()=>moveTypeIndicator(true));}}
 if(!data.projects.length){empty.textContent=fallbackError?'Не удалось загрузить проекты. Проверьте подключение и попробуйте ещё раз.':'Проекты скоро появятся.';empty.hidden=false;grid.hidden=true;setCatalogLoading(false);}

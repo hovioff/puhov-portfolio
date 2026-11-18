@@ -3,6 +3,7 @@ import {SUPABASE_URL,SUPABASE_PUBLISHABLE_KEY,SUPABASE_BUCKET} from './supabase-
 export const DEFAULT_DATA = {
   types:[{id:'products',name:'Карточки товаров'},{id:'banners',name:'Экспресс-баннеры'},{id:'vk-groups',name:'Группы ВК'}],
   categories:[{id:'animals',typeId:'products',name:'Товары для животных'},{id:'tech',typeId:'products',name:'Техника'},{id:'other',typeId:'products',name:'Другое'}],
+  promoCards: [],
   projects: [{
     id: 'meatbone', type: 'products', category: 'animals', title: 'Мясное печенье для собак',
     description: 'Визуальная упаковка продукта для маркетплейсов. Акцент на аппетитной подаче, понятной выгоде и характере бренда.',
@@ -59,6 +60,20 @@ export async function savePortfolio(data){
   }
   const {error}=await supabase.from('portfolio_content').upsert({id:'main',payload:data,updated_at:new Date().toISOString()});if(error)throw error;return data;
 }
+export async function getPromoCards(){
+  const localCards=async()=>{const local=await getLocal();if(local.promoCards?.length)return local.promoCards;if(cloudEnabled){try{const response=await fetch(`${SUPABASE_URL}/rest/v1/portfolio_content?id=eq.main&select=payload`,{headers:{apikey:SUPABASE_PUBLISHABLE_KEY,Authorization:`Bearer ${SUPABASE_PUBLISHABLE_KEY}`,Accept:'application/json'},cache:'no-store',signal:AbortSignal.timeout(4000)});if(response.ok){const rows=await response.json();return rows[0]?.payload?.promoCards||[];}}catch{}}return [];};
+  if(!cloudEnabled)return localCards();
+  try{const url=new URL(`${SUPABASE_URL}/rest/v1/promo_cards`);url.searchParams.set('select','payload');url.searchParams.set('order','position.asc');const response=await fetch(url,{headers:{apikey:SUPABASE_PUBLISHABLE_KEY,Authorization:`Bearer ${SUPABASE_PUBLISHABLE_KEY}`,Accept:'application/json'},cache:'no-store',signal:AbortSignal.timeout(5000)});if(!response.ok)throw new Error(`Supabase promo read failed (${response.status})`);const cards=(await response.json()).map(row=>row.payload).filter(Boolean);return cards.length?cards:await localCards();}catch(error){console.warn('Could not load promo cards from Supabase; using saved fallback.',error);return localCards();}
+}
+export async function savePromoCards(cards=[]){
+  cards=Array.isArray(cards)?cards:[];
+  if(!cloudEnabled){const current=await getLocal();return savePortfolio({...current,promoCards:cards});}
+  const supabase=await getSupabase();const{data:auth}=await supabase.auth.getSession();if(!auth.session)throw new Error('Для облачного сохранения войдите в админку.');
+  const{error:removeError}=await supabase.from('promo_cards').delete().not('id','is',null);if(removeError)throw removeError;
+  if(cards.length){const{error:insertError}=await supabase.from('promo_cards').insert(cards.map((payload,position)=>({id:String(payload.id||`promo-${position}`),payload,position,active:payload.active!==false})));if(insertError)throw insertError;}
+  return cards;
+}
+
 export function displayProjectImageCount(project={}){const raw=project?.slideCountOverride;if(raw!==''&&raw!==null&&raw!==undefined&&Number.isFinite(Number(raw))&&Number(raw)>=0)return Math.floor(Number(raw));return countProjectImages(project);}
 export function countProjectImages(project={}){
   const sources=new Set();let anonymous=0;
