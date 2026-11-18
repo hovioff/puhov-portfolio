@@ -1,6 +1,6 @@
 import {getPortfolio,escapeHTML,displayProjectImageCount,countProjectImages} from './data.js?v=20261117-01';
 import {polishTypography} from './typography.js?v=20261115-01';
-import {renderPromoCards} from './promo-cards.js?v=20261117-04';
+import {renderPromoCards} from './promo-cards.js?v=20261117-05';
 
 
 const grid=document.querySelector('#workGrid');
