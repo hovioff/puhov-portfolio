@@ -37,15 +37,14 @@
     state.mode = mode;
     const content = copy[mode];
     state.title.textContent = content.title;
+    requestAnimationFrame(() => window.readAlong?.refresh(state.title));
     state.title.classList.remove('is-changing');
     requestAnimationFrame(() => state.title.classList.add('is-changing'));
     state.lead.textContent = content.lead;
     state.label.textContent = content.label;
     state.brief.placeholder = content.placeholder;
     state.submit.firstChild.textContent = `${content.submit} `;
-    [...state.process.querySelectorAll('strong')].forEach((item, index) => { item.textContent = content.processTitle[index]; });
-
-    [...state.process.querySelectorAll('small')].forEach((item, index) => { item.textContent = content.processDetail[index]; });
+    [...state.process.querySelectorAll('.process-copy')].forEach((item, index) => { item.textContent = content.processDetail[index]; });
     document.querySelectorAll('[data-design-state]').forEach(button => {
       const active = button.dataset.designState === mode;
       button.classList.toggle('is-active', active);

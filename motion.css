@@ -150,11 +150,10 @@ body .carousel-window.carousel-failed { display: grid; place-items: center; }
 html, body { overscroll-behavior-x: none; }
 a, button { touch-action: manipulation; }
 
-@media (max-width: 600px) {
-  #typeTabs { min-height: 54px; }
-  #typeTabs .segment { font-size: 12px; }
-  .work-grid { grid-template-columns: minmax(0, 1fr) !important; }
+@media (max-width: 1400px) {
+  body.catalog-page .work-grid { grid-template-columns: minmax(0, 1fr) !important; }
 }
+body.tg-mini-app.catalog-page .work-grid { grid-template-columns: minmax(0, 1fr) !important; }
 @media (prefers-reduced-motion: reduce) {
   ::view-transition-old(root), ::view-transition-new(root),
   .viewer.open, .viewer.closing, .viewer.open .viewer-frame, .viewer.closing .viewer-frame {
@@ -306,11 +305,6 @@ body .work-grid .work-block {
   body .work-grid .work-block { animation: none !important; }
 }
 
-/* Keep the mobile portfolio geometry stable while Telegram expands its viewport. */
-@media (max-width: 900px) {
-  body.catalog-page .work-grid { grid-template-columns: minmax(0,1fr) !important; }
-}
-body.tg-mini-app.catalog-page .work-grid { grid-template-columns: minmax(0,1fr) !important; }
 body .work-grid .work-block { animation: catalog-card-soft-in 340ms cubic-bezier(.2,.75,.25,1) both !important; }
 @keyframes catalog-card-soft-in {
   from { opacity: .35; transform: translate3d(0,6px,0) scale(.995); }
@@ -389,23 +383,6 @@ body.catalog-page #typeTabs .segment-indicator {
 }
 body.catalog-page #typeTabs .segment-indicator.is-initializing { transition: none !important; }
 
-/* Telegram's WKWebView recomposites preserve-3d children during viewport expansion.
-   Keep the intentional diagonal stack, but make its layer order static there. */
-body.tg-mini-app.catalog-page .carousel-window {
-  perspective: none !important;
-  transform-style: flat !important;
-  isolation: isolate !important;
-}
-body.tg-mini-app.catalog-page .carousel-window .track,
-body.tg-mini-app.catalog-page .carousel-window .track-set {
-  transform-style: flat !important;
-}
-body.tg-mini-app.catalog-page .carousel-window .slide {
-  transform: translateY(var(--rise,0px)) rotate(var(--card-angle,-8deg)) scale(var(--depth-scale,1)) !important;
-  transform-style: flat !important;
-  backface-visibility: visible !important;
-  z-index: var(--depth,1) !important;
-}
 
 /* Let the project cover continue behind Telegram's chrome, while keeping
    controls below Telegram's header and the device status area. */
@@ -545,6 +522,7 @@ body .hero3d-window .slide img.image-ready,body .project-gallery img.image-ready
   body .project-gallery img.image-ready,
   body .case-slide-window img.image-ready,
   body .article-image-block img.image-ready,
+
   body .article-image img.image-ready { transition: none !important; }
 }
 
@@ -554,4 +532,52 @@ body .hero3d-window .slide img.image-ready,body .project-gallery img.image-ready
 body.catalog-page .carousel-window.has-lqip:not(.carousel-ready) .carousel-loading-skeleton,
 body.project-page .hero3d-window.has-lqip:not(.carousel-ready) .carousel-loading-skeleton,
 body.project-page .case-slide-window.has-lqip:not(.carousel-ready) .carousel-loading-skeleton { opacity:.22; }
+
+/* Read along: the highlight automatically travels word by word. */
+.read-along {
+  position: relative;
+  isolation: isolate;
+}
+.read-along-word {
+  position: relative;
+  z-index: 1;
+
+  color: #d0cfd4;
+  transition: color .18s ease;
+}
+.read-along-word.is-read { color: #fff; }
+.read-along-word.is-seen { color: inherit; }
+.read-along.is-read-done .read-along-word { color: inherit; }
+.read-along-highlight {
+  position: absolute;
+  z-index: 0;
+  top: 0;
+  left: 0;
+  min-width: 1px;
+  border-radius: 10px;
+  background: #171719;
+  opacity: 1;
+  transition: opacity .36s ease;
+  pointer-events: none;
+  will-change: transform, width, height;
+}
+.read-along.is-read-done .read-along-highlight { opacity: 0; }
+@media (prefers-reduced-motion: reduce) {
+  .read-along-word { transition: none; }
+}
+
+/* Contact title must keep normal inline wrapping while Read along is active. */
+body.contact-page .read-along {
+  display: block !important;
+  min-height: 0 !important;
+  white-space: normal !important;
+  text-wrap: balance;
+  overflow-wrap: normal;
+}
+body.contact-page .read-along-word {
+  display: inline !important;
+  white-space: normal !important;
+}
+
+
 

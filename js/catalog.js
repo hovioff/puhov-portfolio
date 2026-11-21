@@ -1,6 +1,6 @@
 import {getPortfolio,escapeHTML,displayProjectImageCount,countProjectImages} from './data.js?v=20261117-01';
 import {polishTypography} from './typography.js?v=20261115-01';
-import {renderPromoCards} from './promo-cards.js?v=20261117-05';
+import {renderPromoCards} from './promo-cards.js?v=20261121-02';
 
 
 const grid=document.querySelector('#workGrid');
@@ -11,9 +11,17 @@ const searchInput=document.querySelector('#projectSearch');
 const loadingMessage=document.querySelector('#catalogLoading');
 let searchToggle=null;
 const searchPanel=document.querySelector('#catalogSearchPanel');
-const portfolioSlideCount=document.querySelector('#portfolioSlideCount');
-const portfolioSlideWord=document.querySelector('#portfolioSlideWord');
-function animateSlideCount(el,target){const value=Math.max(0,Number(target)||0),digits=String(value);el.textContent=digits;el.setAttribute('aria-label',digits);el.style.setProperty('--odometer-width',`${digits.length}ch`);el.dataset.value=digits;el.dataset.rendered=digits;}
+const portfolioHeading=document.querySelector('[data-read-along="portfolio"]');
+function russianPlural(value,one,few,many){
+  const n=Math.abs(Number(value))%100,unit=n%10;
+  return n>10&&n<20?many:unit===1?one:unit>=2&&unit<=4?few:many;
+}
+function animatePortfolioCount(caseCount,slideCount){
+  if(!portfolioHeading)return;
+  const cases=Math.max(0,Number(caseCount)||0),slides=Math.max(0,Number(slideCount)||0);
+  portfolioHeading.textContent=`В портфолио уже ${cases} ${russianPlural(cases,'кейс','кейса','кейсов')}, в которых ${slides} ${russianPlural(slides,'слайд','слайда','слайдов')}!`;
+  window.readAlong?.refresh(portfolioHeading);
+}
 
 const CATALOG_STATE_KEY='puhov-portfolio:catalog-state';
 const RETURN_TO_CATALOG_KEY='puhov-portfolio:return-to-catalog';
@@ -87,7 +95,6 @@ function card(project,cardIndex=0){
   const badge=activeType==='all'?`<span class="work-type-badge" data-work-type="${escapeHTML(project.type)}">${escapeHTML(typeName(project.type))}</span>`:'';
   const mainCarousel=project.blocks?.find(block=>block.type==='carousel'),isSquare=mainCarousel?.format==='square'||mainCarousel?.format==='avito';
   const aspect=isSquare?'1 / 1':project.type==='banners'?'1280 / 920':'808 / 632';
-  if(project.previewImage?.src)return `<a class="work-block" style="--card-index:${Math.min(cardIndex,8)}" href="project.html?id=${encodeURIComponent(project.id)}" aria-label="Открыть проект «${escapeHTML(project.title)}"><div class="carousel-window catalog-static-window" style="--carousel-aspect:${aspect}"><img class="catalog-static-preview" src="${escapeHTML(project.previewImage.previewSrc||project.previewImage.src)}" data-placeholder="${safePlaceholder(project.previewImage.placeholder)}" alt="${escapeHTML(project.title)}" loading="lazy">${badge}</div><div class="block-caption"><div class="block-copy"><h2 class="block-title">${escapeHTML(project.title)}</h2></div><span class="slide-count"><b>${displayProjectImageCount(project)}</b><img class="photo-count-icon" src="assets/photo-icon.png" alt="" aria-hidden="true" width="14" height="14" loading="eager" decoding="async"></span></div></a>`;
   const orderedSlides=slides.length>1?[slides[slides.length-1],...slides.slice(0,-1)]:slides;
   if(!slides.length)return `<a class="work-block" style="--card-index:${Math.min(cardIndex,8)}" href="project.html?id=${encodeURIComponent(project.id)}"><div class="carousel-window catalog-static-window" style="--carousel-aspect:${aspect}"></div><div class="block-caption"><div class="block-copy"><h2 class="block-title">${escapeHTML(project.title)}</h2></div><span class="slide-count"><b>${displayProjectImageCount(project)}</b></span></div></a>`;
   const group=(duplicate=false)=>`<div class="track-set${duplicate?' track-set-repeat':''}"${duplicate?' aria-hidden="true"':''}>${orderedSlides.map((slide,index)=>{const near=index%2===1,wide=project.type==='banners',progress=index/Math.max(1,orderedSlides.length-1),drift=wide?(near?'-5px':'8px'):`-${2+progress*16}px`,cycle=54-progress*48,loading=duplicate||index>2?'lazy':'eager',priority=!duplicate&&cardIndex===0&&index===0?'high':'auto';return`<div class="slide" style="--depth:${index+1};--reveal-order:${index+(duplicate?slides.length:0)};--depth-z:${wide?(near?'12px':'-7px'):(near?'16px':'-9px')};--depth-yaw:${near?'-1.4deg':'1deg'};--depth-scale:${wide?(near?'1.012':'.994'):(near?'1.022':'.986')};--shadow-y:${wide?(near?'4px':'1px'):(near?'5px':'2px')};--shadow-blur:${wide?(near?'9px':'4px'):(near?'11px':'6px')};--shadow-alpha:${wide?(near?'.15':'.08'):(near?'.18':'.11')};--float-duration:${cycle}s;--float-delay:0s;animation-duration:${cycle}s!important;--drift-x:${drift};--drift-y:${wide?(near?'-0.8px':'0.7px'):`${.4+progress*3.6}px`}"><img src="${escapeHTML(slide.previewSrc||slide.src)}" data-placeholder="${safePlaceholder(slide.placeholder)}" alt="${duplicate?'':escapeHTML(slide.alt||project.title)}" loading="${loading}" fetchpriority="${priority}" decoding="async"></div>`;}).join('')}</div>`;
@@ -96,8 +103,9 @@ function card(project,cardIndex=0){
 const cardAngle=-Math.PI*8/180,pixelsPerSecond=34;
 const revealedCarousels=new WeakSet();
 function revealCarouselOnEntry(viewport){if(!viewport||revealedCarousels.has(viewport)||!viewport.classList.contains('carousel-ready'))return;revealedCarousels.add(viewport);viewport.classList.add('is-scroll-revealing');}
-function watchCatalogImage(img){observeScrollImage(img);if(img.dataset.catalogImageWatched==='true')return;img.dataset.catalogImageWatched='true';img.classList.add('is-image-loading');const media=img.closest('.catalog-static-window'),host=img.parentElement,placeholder=img.dataset.placeholder;if(host&&/^data:image\/(?:webp|png);base64,[A-Za-z0-9+/=]+$/.test(placeholder||'')){host.style.backgroundImage=`url(\"${placeholder}\")`;host.style.backgroundSize='cover';host.style.backgroundPosition='center';img.closest('.carousel-window,.hero3d-window,.case-slide-window,.article-image-open,.gallery-item')?.classList.add('has-lqip');}let timer=0;const finish=()=>{clearTimeout(timer);timer=0;img.classList.remove('is-image-loading','is-image-error');img.classList.add('image-ready');if(host)host.style.backgroundImage='';if(media&&img.matches('.catalog-static-preview'))media.classList.add('carousel-ready');},fail=()=>{clearTimeout(timer);timer=0;img.classList.remove('is-image-loading');img.classList.add('is-image-error');if(media&&img.matches('.catalog-static-preview'))media.classList.add('carousel-failed');window.portfolioError?.('Не удалось загрузить изображение. Проверьте интернет и перезагрузите страницу.');},armTimeout=()=>{if(!timer&&!img.complete)timer=setTimeout(()=>{timer=0;img.naturalWidth?finish():fail();},30000);};imageLoadGuards.set(img,armTimeout);if(img.complete&&img.naturalWidth){finish();return;}if(img.complete&&img.loading!=='lazy'){fail();return;}if(img.loading!=='lazy')armTimeout();img.addEventListener('load',finish,{once:true});img.addEventListener('error',fail,{once:true});}
+function watchCatalogImage(img){observeScrollImage(img);if(img.dataset.catalogImageWatched==='true')return;img.dataset.catalogImageWatched='true';img.classList.add('is-image-loading');const media=img.closest('.catalog-static-window'),host=img.parentElement,placeholder=img.dataset.placeholder;if(host&&/^data:image\/(?:webp|png);base64,[A-Za-z0-9+/=]+$/.test(placeholder||'')){host.style.backgroundImage=`url(\"${placeholder}\")`;host.style.backgroundSize='cover';host.style.backgroundPosition='center';img.closest('.carousel-window,.hero3d-window,.case-slide-window,.article-image-open,.gallery-item')?.classList.add('has-lqip');}let timer=0;const finish=()=>{clearTimeout(timer);timer=0;img.classList.remove('is-image-loading','is-image-error');img.classList.add('image-ready');if(host)host.style.backgroundImage='';if(media&&img.matches('.catalog-static-preview'))media.classList.add('carousel-ready');},fail=()=>{clearTimeout(timer);timer=0;img.classList.remove('is-image-loading');img.classList.add('is-image-error');if(media&&img.matches('.catalog-static-preview'))media.classList.add('carousel-failed');},armTimeout=()=>{if(!timer&&!img.complete)timer=setTimeout(()=>{timer=0;img.naturalWidth?finish():fail();},30000);};imageLoadGuards.set(img,armTimeout);if(img.complete&&img.naturalWidth){finish();return;}if(img.complete&&img.loading!=='lazy'){fail();return;}if(img.loading!=='lazy')armTimeout();img.addEventListener('load',finish,{once:true});img.addEventListener('error',fail,{once:true});}
 function requestCatalogImage(img){img.loading='eager';imageLoadGuards.get(img)?.();}
+function bindTrackParallax(viewport,track){if(!viewport||!track||track.dataset.parallaxBound==='true')return;track.dataset.parallaxBound='true';let active=false,moved=false,startX=0,startY=0,lastX=0,lastY=0;const setTilt=(x,y)=>{const rect=viewport.getBoundingClientRect(),nx=Math.max(-1,Math.min(1,(x-rect.left)/rect.width*2-1)),ny=Math.max(-1,Math.min(1,(y-rect.top)/rect.height*2-1));track.querySelectorAll('.slide').forEach((slide,index)=>{const depth=Number(slide.style.getPropertyValue('--depth'))||index+1,amount=Math.min(14,8+depth*.75);slide.style.setProperty('--pointer-rotate-y',`${nx*amount}deg`);slide.style.setProperty('--pointer-rotate-x',`${-ny*amount}deg`);slide.style.setProperty('--pointer-z',`${Math.abs(nx)*depth*1.2}px`);});viewport.classList.add('is-pointer-active');};const reset=()=>{active=false;viewport.classList.remove('is-pointer-active');track.querySelectorAll('.slide').forEach(slide=>{slide.style.removeProperty('--pointer-rotate-y');slide.style.removeProperty('--pointer-rotate-x');slide.style.removeProperty('--pointer-z');});};viewport.addEventListener('pointerdown',event=>{if(event.button!==undefined&&event.button!==0)return;active=true;moved=false;startX=lastX=event.clientX;startY=lastY=event.clientY;viewport.classList.add('is-pointer-active');viewport.setPointerCapture?.(event.pointerId);});viewport.addEventListener('pointermove',event=>{if(!active)return;lastX=event.clientX;lastY=event.clientY;if(Math.hypot(lastX-startX,lastY-startY)>8)moved=true;setTilt(lastX,lastY);if(moved&&event.pointerType==='touch')event.preventDefault();},{passive:false});viewport.addEventListener('pointerup',()=>{if(active)reset();});viewport.addEventListener('pointercancel',reset);viewport.addEventListener('lostpointercapture',()=>{if(active)reset();});}
 async function prepareTrack(track,project){
   const run=(trackRuns.get(track)||0)+1;trackRuns.set(track,run);
   const ordered=project.slides.length>1?[project.slides.at(-1),...project.slides.slice(0,-1)]:project.slides;
@@ -131,14 +139,14 @@ async function prepareTrack(track,project){
   const baseImages=[...base.querySelectorAll('.slide img')],visibleCount=Math.min(baseImages.length,Math.max(3,Math.ceil(viewportWidth/Math.max(1,widths[0]*.75))+1));
   baseImages.forEach((img,index)=>{if(index<visibleCount)requestCatalogImage(img);else img.loading='lazy';});
   const criticalImages=baseImages.slice(0,visibleCount);
-  await Promise.all(criticalImages.map(img=>new Promise((resolve,reject)=>{if(img.complete){img.naturalWidth?resolve():reject(new Error('Изображение карусели недоступно'));return;}const timer=setTimeout(()=>reject(new Error('Таймаут загрузки видимых изображений')),30000);img.addEventListener('load',()=>{clearTimeout(timer);resolve();},{once:true});img.addEventListener('error',()=>{clearTimeout(timer);reject(new Error('Изображение карусели недоступно'));},{once:true});})));
+  await Promise.all(criticalImages.map(img=>new Promise(resolve=>{if(img.complete){resolve();return;}const timer=setTimeout(resolve,6000);const done=()=>{clearTimeout(timer);resolve();};img.addEventListener('load',done,{once:true});img.addEventListener('error',done,{once:true});})));
   await Promise.all(criticalImages.map(img=>typeof img.decode==='function'?img.decode():Promise.resolve()));
   if(trackRuns.get(track)!==run||!track.isConnected)return;
-  const window=track.closest('.carousel-window');window.classList.add('carousel-ready');revealCarouselOnEntry(window);
+  const window=track.closest('.carousel-window');window.classList.add('carousel-ready');revealCarouselOnEntry(window);bindTrackParallax(window,track);
 }
 let trackObserver,visibilityObserver;const trackQueue=[];let preparingTracks=0;
 function enqueueTrack(track,project){if(track.dataset.preparing==='true'||track.closest('.carousel-window')?.classList.contains('carousel-ready'))return;track.dataset.preparing='true';trackQueue.push({track,project});pumpTrackQueue();}
-function pumpTrackQueue(){while(preparingTracks<2&&trackQueue.length){const {track,project}=trackQueue.shift();if(!track.isConnected){continue;}preparingTracks++;prepareTrack(track,project).catch(error=>{if(track.isConnected){console.warn('Карусель переключена на упрощённый показ:',error);window.portfolioError?.('Не удалось загрузить карусель. Проверьте соединение и перезагрузите страницу.');track.classList.add('is-static');track.closest('.carousel-window')?.classList.add('carousel-failed');}}).finally(()=>{preparingTracks--;if(track.isConnected)delete track.dataset.preparing;pumpTrackQueue();});}}
+function pumpTrackQueue(){while(preparingTracks<2&&trackQueue.length){const {track,project}=trackQueue.shift();if(!track.isConnected){continue;}preparingTracks++;prepareTrack(track,project).catch(error=>{if(track.isConnected){console.warn('Карусель переключена на упрощённый показ:',error);track.classList.add('is-static');track.closest('.carousel-window')?.classList.add('carousel-failed');}}).finally(()=>{preparingTracks--;if(track.isConnected)delete track.dataset.preparing;pumpTrackQueue();});}}
 function draw(){
   trackObserver?.disconnect();visibilityObserver?.disconnect();trackQueue.length=0;activeImageObservers.forEach(observer=>observer.disconnect());activeImageObservers.clear();
   const query=activeSearch.trim().toLocaleLowerCase('ru');
@@ -150,7 +158,7 @@ function draw(){
   });
   grid.innerHTML=shown.map((project,index)=>card(project,index)).join('');grid.hidden=!shown.length;empty.hidden=!!shown.length;
   polishTypography(grid);
-  if(portfolioSlideCount){const total=sortedProjects.reduce((sum,item)=>sum+countProjectImages(item),0);animateSlideCount(portfolioSlideCount,total);if(portfolioSlideWord){const n=total%100,unit=total%10;portfolioSlideWord.textContent=unit===1&&n!==11?'слайд':unit>=2&&unit<=4&&(n<12||n>14)?'слайда':'слайдов';}}
+  if(portfolioHeading){const total=sortedProjects.reduce((sum,item)=>sum+countProjectImages(item),0);animatePortfolioCount(sortedProjects.length,total);}
   grid.querySelectorAll('.catalog-static-preview,.photo-count-icon,.track img').forEach(watchCatalogImage);
   const tracks=[...grid.querySelectorAll('[data-carousel]')];
   if('IntersectionObserver'in window){visibilityObserver=new IntersectionObserver(entries=>entries.forEach(entry=>{entry.target.classList.toggle('is-carousel-in-view',entry.isIntersecting);if(entry.isIntersecting)revealCarouselOnEntry(entry.target);}),{rootMargin:'0px'});tracks.forEach(track=>visibilityObserver.observe(track.closest('.carousel-window')));}else tracks.forEach(track=>{track.closest('.carousel-window')?.classList.add('is-carousel-in-view');revealCarouselOnEntry(track.closest('.carousel-window'));});
@@ -178,6 +186,8 @@ try{await renderPromoCards();}catch(error){console.error('Не удалось п
 
 if(activeType!=='all'&&!data.types.some(type=>type.id===activeType))activeType='all';
 sortedProjects=[...data.projects].sort((a,b)=>dateValue(b.date)-dateValue(a.date)||String(a.id).localeCompare(String(b.id)));projectsById=new Map(sortedProjects.map(project=>[project.id,project]));drawTypes();drawFilters();draw();setCatalogLoading(false);if(searchInput){searchInput.value=activeSearch;if(activeSearch){setSearchOpen(true,false);selectSearchTab(true);requestAnimationFrame(()=>moveTypeIndicator(true));}}
+window.dispatchEvent(new Event('portfolio:catalog-ready'));
+
 if(!data.projects.length){empty.textContent=fallbackError?'Не удалось загрузить проекты. Проверьте подключение и попробуйте ещё раз.':'Проекты скоро появятся.';empty.hidden=false;grid.hidden=true;setCatalogLoading(false);}
 if(fallbackError)window.portfolioError?.('Не удалось обновить портфолио. Показана доступная сохранённая версия.');
 try{if(sessionStorage.getItem(RETURN_TO_CATALOG_KEY)==='1'){sessionStorage.removeItem(RETURN_TO_CATALOG_KEY);const saved=readCatalogState();requestAnimationFrame(()=>requestAnimationFrame(()=>window.scrollTo({top:Number(saved.scrollY)||0,behavior:'auto'})));}}catch{}

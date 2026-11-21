@@ -10,8 +10,8 @@
     if(!toast){toast=document.createElement('aside');toast.id='appErrorToast';toast.className='app-error-toast';toast.setAttribute('role','alert');toast.setAttribute('aria-live','assertive');toast.innerHTML='<span class="app-error-mark" aria-hidden="true">!</span><span class="app-error-message"></span><button class="app-error-reload" type="button">Перезагрузить</button><button class="app-error-close" type="button" aria-label="Закрыть">×</button>';document.body?.append(toast);toast.querySelector('.app-error-reload').addEventListener('click',()=>location.reload());toast.querySelector('.app-error-close').addEventListener('click',()=>toast.classList.remove('is-visible'));}
     toast.querySelector('.app-error-message').textContent=message;toast.classList.add('is-visible');clearTimeout(toastTimer);toastTimer=setTimeout(()=>toast.classList.remove('is-visible'),12000);
   };
-  window.addEventListener('error',event=>{if(event.error)window.portfolioError('На странице произошла ошибка. Перезагрузите её, чтобы продолжить.');});
-  window.addEventListener('unhandledrejection',()=>window.portfolioError('Не удалось завершить загрузку. Проверьте интернет и перезагрузите страницу.'));
+  window.addEventListener('error',event=>{if(event.error){console.error('Portfolio runtime error:',event.error);window.portfolioError('На странице произошла ошибка. Перезагрузите её, чтобы продолжить.');}});
+  window.addEventListener('unhandledrejection',event=>{console.error('Portfolio promise error:',event.reason);window.portfolioError('Не удалось завершить загрузку. Проверьте интернет и перезагрузите страницу.');});
   if (!inTelegram) { if (inlineBack) inlineBack.hidden = false; return; }
   // Mark immediately; Telegram WebViews can expand after first paint and otherwise
   // briefly composite preserve-3d carousel layers in a different order.
