@@ -8,13 +8,14 @@
   <meta name="referrer" content="no-referrer">
   <meta name="description" content="Обсудить дизайн-проект с Кириллом Пуховым">
   <title>Обсудить проект — Пухов Кирилл</title>
-  <link rel="stylesheet" href="styles.css?v=20261117-67">
+  <link rel="stylesheet" href="styles.css?v=20261121-06">
   <script defer src="js/telegram-app.js?v=20261116-08"></script>
   <script defer src="js/contact.js?v=20261116-11"></script>
+  <script defer src="js/step-progress.js?v=20261122-01"></script>
 
-  <script type="module" src="js/promo-cards.js?v=20261121-04"></script>
+  <script type="module" src="js/promo-cards.js?v=20261121-08"></script>
   <link rel="stylesheet" href="motion.css?v=20261116-41">
-  <script defer src="js/read-along.js?v=20261121-01"></script>
+  <script defer src="js/read-along.js?v=20261122-01"></script>
   <link rel="preload" href="assets/fonts/onest-cyrillic.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="preload" href="assets/fonts/onest-latin.woff2" as="font" type="font/woff2" crossorigin>
 </head>
@@ -37,16 +38,21 @@
         <button class="contact-submit" type="submit" id="contactSubmit">Рассказать о товаре</button>
       </form>
       <section class="contact-process" aria-labelledby="processTitle">
-        <h2 id="processTitle">Как будем работать</h2>
+        <div class="contact-process-heading">
+          <h2 id="processTitle">Как будем работать</h2>
+          <div class="step-progress" id="stepProgress" aria-label="Этапы работы">
+            <div class="step-progress-track" aria-hidden="true">
+              <span class="step-progress-bar" id="stepProgressBar"></span>
+              <div class="step-progress-dots" id="stepProgressDots"></div>
+            </div>
+          </div>
+        </div>
         <ol class="process-list" id="processList">
-
-
-          <li class="process-row"><span class="process-number">01</span><span class="process-copy">Изучу нишу и целевую аудиторию</span></li>
-          <li class="process-row"><span class="process-number">02</span><span class="process-copy">Подберу примеры и согласую направление</span></li>
-          <li class="process-row"><span class="process-number">03</span><span class="process-copy">Составлю план дизайна и дополнительных слайдов</span></li>
-          <li class="process-row"><span class="process-number">04</span><span class="process-copy">Оценю сроки и стоимость</span></li>
-          <li class="process-row"><span class="process-number">05</span><span class="process-copy">Создам дизайн и подготовлю материалы</span></li>
-
+          <li class="process-row"><span class="process-copy">Изучу нишу и целевую аудиторию</span></li>
+          <li class="process-row"><span class="process-copy">Подберу примеры и согласую направление</span></li>
+          <li class="process-row"><span class="process-copy">Составлю план дизайна и дополнительных слайдов</span></li>
+          <li class="process-row"><span class="process-copy">Оценю сроки и стоимость</span></li>
+          <li class="process-row"><span class="process-copy">Создам дизайн и подготовлю материалы</span></li>
         </ol>
       </section>
     </section>

@@ -11,20 +11,49 @@
     return state.x;
   }
 
+  const attachedWords = new Set(['а', 'в', 'во', 'и', 'к', 'ко', 'с', 'со', 'у', 'о', 'об', 'от', 'до', 'из', 'за', 'на', 'по', 'под', 'при', 'без', 'для', 'над', 'про', 'но', 'не', 'же', 'ли']);
+  const isNumber = token => /^\d+(?:[.,]\d+)?(?:%|[a-zа-яё]+)?$/iu.test(token);
+
   function makeWords(element, state) {
     const text = element.textContent.trim();
+    const parts = text.split(/(\s+)/);
+    const tokens = [];
+    for (let index = 0; index < parts.length; index += 1) {
+      if (/^\s+$/.test(parts[index])) continue;
+      tokens.push({ word: parts[index], whitespace: parts[index + 1] || '' });
+    }
+
+    const groups = [];
+    for (let index = 0; index < tokens.length; index += 1) {
+      const token = tokens[index];
+      let value = token.word;
+      let next = index + 1;
+      const isAttachedWord = attachedWords.has(token.word.toLocaleLowerCase('ru'));
+      if ((isAttachedWord || isNumber(token.word)) && tokens[next]) {
+        value += tokens[next - 1]?.whitespace || ' ';
+        value += tokens[next].word;
+        next += 1;
+        // Keep phrases such as "в 12 кейсов" together as one unit.
+        if (isAttachedWord && isNumber(tokens[index + 1].word) && tokens[next]) {
+          value += tokens[next - 1]?.whitespace || ' ';
+          value += tokens[next].word;
+          next += 1;
+        }
+      }
+      groups.push({ value, trailingWhitespace: tokens[next - 1]?.whitespace || token.whitespace });
+      index = next - 1;
+    }
+
     element.dataset.readAlongText = text;
     state.words.length = 0;
     element.replaceChildren();
-    text.split(/(\s+)/).forEach(part => {
-      if (/^\s+$/.test(part)) element.append(document.createTextNode(part));
-      else {
-        const word = document.createElement('span');
-        word.className = 'read-along-word';
-        word.textContent = part;
-        element.append(word);
-        state.words.push(word);
-      }
+    groups.forEach(({ value, trailingWhitespace }) => {
+      const word = document.createElement('span');
+      word.className = 'read-along-word';
+      word.textContent = value;
+      element.append(word);
+      state.words.push(word);
+      if (trailingWhitespace) element.append(document.createTextNode(trailingWhitespace));
     });
     const highlight = document.createElement('span');
     highlight.className = 'read-along-highlight';

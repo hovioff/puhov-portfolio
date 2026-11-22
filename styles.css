@@ -723,6 +723,68 @@ body.catalog-page .portfolio-slide-count,body.project-page .slide-count,body.pro
 .site-scroll-veil{position:fixed;z-index:9990;inset:0;pointer-events:none;background:radial-gradient(ellipse 140% 105% at 50% var(--veil-y,50%),rgba(255,255,255,0) 30%,rgba(255,255,255,.025) 40%,rgba(255,255,255,.12) 55%,rgba(255,255,255,.32) 74%,rgba(255,255,255,.5) 100%)}
 body .order-fab,body .contact-hero .telegram-button{z-index:10000!important}
 body.project-page .viewer{z-index:10001}
+
+body.project-page .marker-word{position:relative;display:inline;isolation:isolate;white-space:normal}
+body.project-page .marker-word::after{transition-duration:.9s}
+body.project-page .marker-word[data-marker="circle"]::after{transition-duration:.9s,.3s}
+
+body.project-page .marker-word::after{position:absolute;z-index:-1;right:-.08em;bottom:.02em;left:-.08em;height:.3em;border-radius:2px 4px 2px 3px;background:color-mix(in srgb,var(--accent,#e56a28) 34%,transparent);clip-path:polygon(0 34%,18% 18%,43% 28%,69% 12%,100% 22%,98% 83%,68% 74%,39% 92%,14% 77%,1% 90%);content:"";transform:scaleX(0) rotate(-1.5deg);transform-origin:left center;transition:transform .9s cubic-bezier(.22,.72,.2,1);transition-delay:var(--marker-delay,0ms)}
+body.project-page .marker-word.is-marker-drawn::after{transform:scaleX(1) rotate(-1deg)}
+body.project-page .marker-word[data-marker="highlight"]::after{inset:-.04em -.1em 0;height:auto;border-radius:.14em;transform:scaleX(0) rotate(0);transform-origin:left center}
+body.project-page .marker-word[data-marker="highlight"].is-marker-drawn::after{transform:scaleX(1)}
+body.project-page .marker-word[data-marker="circle"]::after{inset:-.28em -.22em -.18em;height:auto;border:1.4px solid color-mix(in srgb,var(--accent,#e56a28) 75%,transparent);border-radius:48% 54% 46% 52%;background:transparent;transform:scale(.7) rotate(-11deg);opacity:0;transition:transform .9s cubic-bezier(.2,.8,.2,1),opacity .3s linear;transform-origin:center}
+body.project-page .marker-word[data-marker="circle"].is-marker-drawn::after{transform:scale(1) rotate(-5deg);opacity:1}
+body.project-page .marker-word[data-marker="box"]::after{inset:-.17em -.13em -.12em;height:auto;border:1.5px solid color-mix(in srgb,var(--accent,#e56a28) 72%,transparent);border-radius:2px;background:transparent;transform:scaleX(0);transform-origin:left center}
+body.project-page .marker-word[data-marker="box"].is-marker-drawn::after{transform:scaleX(1) rotate(-.5deg)}
+body.project-page .marker-word[data-marker="strike"]::after{top:48%;right:-.08em;bottom:auto;left:-.08em;height:2px;border-radius:2px;transform:scaleX(0) rotate(-3deg);transform-origin:left center}
+body.project-page .marker-word[data-marker="strike"].is-marker-drawn::after{transform:scaleX(1) rotate(-3deg)}
+body.project-page .case-slider.is-single-slide{padding-bottom:0}
+
+/* Kokonut-style marker drawing: the SVG pen travels along the hand-drawn path. */
+body.project-page .marker-word::after{display:none!important}
+body.project-page .marker-word{display:inline-block;position:relative;isolation:isolate;line-height:inherit}
+body.project-page .marker-svg{position:absolute;z-index:-1;inset:-.16em -.2em -.12em;width:calc(100% + .4em);height:calc(100% + .28em);overflow:visible;pointer-events:none}
+body.project-page .marker-stroke{fill:none;stroke:#fff;stroke-linecap:round;stroke-dashoffset:var(--marker-length,100);transition:stroke-dashoffset 1.05s cubic-bezier(.45,.05,.25,1)}
+body.project-page .marker-word.is-marker-drawn .marker-stroke{stroke-dashoffset:0}
+body.project-page .marker-ink{position:relative;z-index:0}
+@media(prefers-reduced-motion:reduce){body.project-page .marker-stroke{transition:none;stroke-dashoffset:0}}
+body.project-page .marker-svg{preserveAspectRatio:none}
+
+
+/* Keep each hand-drawn path tight to the marked word, not to the full line box. */
+body.project-page .marker-word{line-height:1;vertical-align:baseline}
+body.project-page .marker-svg{inset:-.22em -.16em -.16em;width:calc(100% + .32em);height:calc(100% + .38em)}
+body.project-page .marker-word[data-marker="circle"] .marker-svg{inset:-.3em -.2em -.26em;width:calc(100% + .4em);height:calc(100% + .56em)}
+body.project-page .marker-word[data-marker="box"] .marker-svg{inset:-.2em -.14em -.16em;width:calc(100% + .28em);height:calc(100% + .36em)}
+body.project-page .marker-word[data-marker="underline"] .marker-svg{inset:.25em -.08em -.16em;width:calc(100% + .16em);height:calc(100% - .08em)}
+body.project-page .marker-word[data-marker="strike"] .marker-svg{inset:-.08em -.08em -.08em;width:calc(100% + .16em);height:calc(100% + .16em)}
+body.project-page .marker-word[data-marker="highlight"] .marker-svg{inset:-.12em -.08em -.08em;width:calc(100% + .16em);height:calc(100% + .2em)}
+
+
+body.project-page .case-slider.is-single-slide .case-slider-count,body.project-page .case-slider.is-single-slide .case-slider-dots{display:none}
+
+/* Final marker text surface: one warm, hand-drawn highlight behind each phrase. */
+body.project-page .marker-word::after{display:none!important}
+body.project-page .marker-word{display:inline-block!important;position:relative;line-height:inherit!important;vertical-align:baseline;isolation:isolate}
+body.project-page .marker-svg{position:absolute!important;z-index:0!important;inset:-.18em -.18em -.12em!important;width:calc(100% + .36em)!important;height:calc(100% + .3em)!important;overflow:visible;pointer-events:none}
+body.project-page .marker-word{z-index:0!important}
+body.project-page .marker-ink{fill:#f59e78!important;fill-opacity:.42!important;stroke:none!important}
+body.project-page .marker-word{color:inherit}
+body.project-page .marker-stroke{fill:none!important;stroke:#fff!important;stroke-width:var(--marker-pen-width,16px)!important;stroke-linecap:round!important;stroke-linejoin:round!important;stroke-dasharray:var(--marker-length,100) var(--marker-length,100)!important;stroke-dashoffset:var(--marker-length,100)!important;transition:none!important}
+body.project-page .marker-word.is-marker-drawn .marker-stroke{animation:marker-ink-draw 1.25s cubic-bezier(.45,.05,.25,1) both!important}
+@keyframes marker-ink-draw{from{stroke-dashoffset:var(--marker-length,100)}to{stroke-dashoffset:0}}
+@media(prefers-reduced-motion:reduce){body.project-page .marker-word.is-marker-drawn .marker-stroke{animation:none!important;stroke-dashoffset:0!important}}
+body.project-page .marker-svg{z-index:-1!important}
+body.project-page .marker-word{isolation:isolate!important}
+body.project-page .marker-ink{position:static!important;z-index:auto!important}
+
+body.project-page .marker-svg .marker-ink{z-index:0!important}
+body.project-page .marker-svg .marker-stroke{z-index:1}
+body.project-page .marker-word{z-index:0!important}
+
+
+@media(prefers-reduced-motion:reduce){body.project-page .marker-word::after{transition:none;transform:scaleX(1) rotate(-1deg);opacity:1}body.project-page .marker-word[data-marker="circle"]::after{transform:scale(1) rotate(-5deg)}body.project-page .marker-word[data-marker="box"]::after{transform:scaleX(1)}body.project-page .marker-word[data-marker="strike"]::after{transform:scaleX(1) rotate(-3deg)}}
+
 body .app-error-toast{z-index:10002}
 body .slide.is-scroll-fogged::after,body .catalog-static-window.is-scroll-fogged::after,body .gallery-item.is-scroll-fogged::after,body .case-slide.is-scroll-fogged::after,body .article-image-open.is-scroll-fogged::after,body .article-image.is-scroll-fogged::after{display:none!important;content:none!important}
 .catalog-static-window .carousel-loading-skeleton,.case-slide-window .carousel-loading-skeleton{display:none!important}
@@ -976,6 +1038,26 @@ body.contact-page .process-dots{margin-top:11px}
 @keyframes portfolio-card-sheen{0%,52%{transform:translateX(-72%) rotate(8deg);opacity:0}60%{opacity:.72}80%{transform:translateX(72%) rotate(8deg);opacity:.28}90%,100%{transform:translateX(72%) rotate(8deg);opacity:0}}
 @media(prefers-reduced-motion:reduce){.work-block::after{animation:none!important;opacity:0!important}}
 
+/* Spring-driven progress navigation for the contact process. */
+body.contact-page .contact-process-heading{min-width:0}
+.step-progress{width:min(100%,360px);margin-top:28px}
+.step-progress-track{position:relative;height:32px;margin:0 16px}
+.step-progress-track::before,.step-progress-bar{position:absolute;top:14px;left:0;height:4px;border-radius:999px}
+.step-progress-track::before{right:0;background:#e5e5e8;content:""}
+.step-progress-bar{width:0;background:var(--accent);will-change:width}
+.step-progress-dots{position:absolute;inset:0}
+.step-progress-dot{position:absolute;top:0;display:grid;place-items:center;width:36px;height:36px;margin-left:-18px;padding:0;border:0;border-radius:50%;background:#ededf0;color:#85838a;font:700 12px/1 inherit;font-variant-numeric:tabular-nums;cursor:pointer;appearance:none;-webkit-appearance:none;will-change:transform,background-color,color}
+.step-progress-dot:focus-visible{outline:2px solid var(--accent);outline-offset:3px}
+.step-progress-dot[aria-current="true"]{z-index:1}
+.step-progress-dot b,.step-progress-dot svg{position:absolute}
+.step-progress-dot b{font-weight:inherit}
+.step-progress-dot svg{width:16px;height:16px;fill:none;stroke:#fff;stroke-width:2.8;stroke-linecap:round;stroke-linejoin:round}
+.step-progress-dot path{stroke-dasharray:22}
+.step-progress{touch-action:pan-y;user-select:none}
+@media(max-width:700px){.step-progress{margin-top:18px}.step-progress-names span{font-size:9px}}
+@media(prefers-reduced-motion:reduce){.step-progress-names span{transition:none}}
+
+
 @media(prefers-reduced-motion:reduce){:where(.primary-button,.secondary-button,.telegram-button,.order-fab,.contact-submit,.contact-direct,.rich-editor a.article-cta){animation:none!important;background:#171719}}
 
 
@@ -1026,6 +1108,14 @@ body.contact-page .process-row:nth-child(1){--row-index:0}body.contact-page .pro
 @keyframes process-number-breathe{0%,100%{background:#ededf0;color:#77767c;transform:scale(1)}50%{background:#fff0e8;color:#d95f22;transform:scale(1.07)}}
 body.contact-page .process-copy{animation:process-copy-breathe 4.4s ease-in-out infinite;animation-delay:calc(var(--row-index,0)*.22s)}
 @keyframes process-copy-breathe{0%,100%{color:#29292c}50%{color:#5a514c}}
+
+/* One readable process step at a time; the progress rail remains in sync. */
+body.contact-page .process-list{display:block;position:relative;min-height:104px}
+body.contact-page .process-list .process-row{position:absolute;inset:0;display:grid;grid-template-columns:minmax(0,1fr);align-content:center;min-height:0;padding:12px 0;opacity:0;pointer-events:none;transform:translateY(9px);border:0;border-radius:0;background:transparent;box-shadow:none;animation:none!important;animation-delay:0s!important;transition:opacity .42s cubic-bezier(.2,.8,.2,1),transform .52s cubic-bezier(.2,.8,.2,1)}
+body.contact-page .process-list .process-row.is-active{opacity:1;pointer-events:auto;transform:none}
+@media(max-width:700px){body.contact-page .process-list{min-height:94px}.step-progress-track{margin-inline:16px}}
+@media(prefers-reduced-motion:reduce){body.contact-page .process-list .process-row{transition:none!important}}
+
 /* Stronger continuous amber ribbon on dark buttons. */
 :where(.primary-button,.secondary-button,.telegram-button,.order-fab,.contact-submit,.contact-direct,.rich-editor a.article-cta){background:linear-gradient(105deg,#171719 0%,#171719 37%,#e56a28 45%,#ffc09a 49%,#e56a28 53%,#171719 62%,#171719 100%)!important;background-size:320% 100%!important;animation:button-orange-sweep 2.8s linear infinite!important}
 @keyframes button-orange-sweep{0%{background-position:160% 0}100%{background-position:-60% 0}}
@@ -1423,6 +1513,7 @@ body.catalog-page .order-fab .order-fab-label{display:inline!important;width:aut
 
 
 .site-loader{position:fixed;z-index:9999;inset:0;display:grid;place-items:center;background:#fff;opacity:1;transition:opacity .5s ease}.site-loader.is-done{opacity:0;pointer-events:none}.site-loader-logo{width:44px;height:44px;object-fit:contain}body.project-page .project-hero-3d:not(.is-carousel-in-view) .track{animation-play-state:paused!important}
+
 body.contact-page .contact-promos .promo-cards{overflow:visible!important}body.contact-page .contact-promos .promo-cards-track{touch-action:pan-x pan-y!important;overscroll-behavior-x:contain!important}body.contact-page .contact-promos .promo-card{touch-action:pan-x pan-y!important}
 
 
@@ -1458,30 +1549,48 @@ body.contact-page .contact-promos .promo-card{touch-action:pan-x pan-y!important
 
 
 
-/* Promo cards: keep the complete card visible and give the countdown a living rhythm. */
+/* Promo cards: visible card edges, compact rail, and horizontal scrolling. */
 .promo-cards,
-.promo-cards-track,
 .promo-card-wrap,
 .promo-card,
 .promo-card-body,
 .promo-face,
 .promo-front,
 .promo-back{overflow:visible!important;}
-.promo-cards{padding:24px 0 34px!important;}
-.promo-cards-track{align-items:flex-start!important;padding:0 24px 18px!important;}
-.promo-card-wrap{padding:0 0 12px!important;}
+.promo-cards{height:auto!important;min-height:0!important;margin:0 0 10px!important;padding:0!important;}
+.promo-cards-track{display:flex!important;align-items:flex-start!important;gap:14px!important;height:auto!important;min-height:0!important;margin:0!important;padding:0 12px 10px!important;overflow-x:auto!important;overflow-y:visible!important;scroll-snap-type:x mandatory!important;touch-action:pan-x!important;scrollbar-width:none!important;}
+.promo-cards-track::-webkit-scrollbar{display:none!important;}
+.promo-card-wrap{padding:0!important;}
 .promo-card{height:auto!important;min-height:260px;border-radius:28px!important;}
 .promo-card-body{min-height:260px!important;}
 .promo-face{min-height:260px!important;border-radius:28px!important;}
 .promo-front{display:flex!important;flex-direction:column!important;justify-content:space-between!important;padding:32px!important;}
 .promo-card-copy{max-width:100%!important;}
-.promo-timer-wrap{position:relative!important;z-index:3!important;margin-top:28px!important;padding-top:12px!important;}
+.promo-timer-wrap{position:relative!important;z-index:3!important;margin-top:18px!important;padding-top:10px!important;}
 .promo-timer{display:inline-block!important;min-width:8ch!important;font-variant-numeric:tabular-nums!important;animation:promo-timer-breathe 2.4s ease-in-out infinite!important;}
 .promo-timer-line{overflow:visible!important;}
 .promo-timer-line:before{transform:scaleX(var(--time-progress,0))!important;transform-origin:left center!important;}
 .promo-card.is-timer-ending .promo-timer{animation:promo-timer-ending .8s ease-in-out infinite!important;}
 @keyframes promo-timer-breathe{0%,100%{opacity:1;transform:translateY(0)}50%{opacity:.82;transform:translateY(-2px)}}
 @keyframes promo-timer-ending{0%,100%{color:#fff;transform:scale(1)}50%{color:#ffd4c7;transform:scale(1.045)}}
-@media(max-width:640px){.promo-cards-track{padding-inline:16px!important}.promo-front{padding:25px!important}.promo-face,.promo-card-body,.promo-card{min-height:230px!important}.promo-front h2{font-size:clamp(28px,8vw,42px)!important}}
+@media(max-width:640px){.promo-cards-track{padding:0 10px 8px!important}.promo-front{padding:25px!important}.promo-face,.promo-card-body,.promo-card{min-height:230px!important}.promo-front h2{font-size:clamp(28px,8vw,42px)!important}}
 @media(prefers-reduced-motion:reduce){.promo-timer,.promo-card.is-timer-ending .promo-timer{animation:none!important}}
+
+/* Promo interaction polish: a real top offset, smaller titles, and a clear expired state. */
+.promo-cards{transform:translateY(16px)!important;margin-bottom:26px!important;}
+.promo-card-copy h2{font-size:clamp(23px,6vw,34px)!important;line-height:1.02!important;}
+.promo-card{touch-action:pan-x pan-y!important;}
+.promo-expired-label{display:none;margin:14px 0 0;color:#fff;font-size:13px;font-weight:750;letter-spacing:.01em;}
+.promo-card.is-expired .promo-face{background:linear-gradient(135deg,#fff8ef,#ffd8bd 55%,#f09a68)!important;color:#59301f!important;box-shadow:0 12px 28px rgba(228,122,61,.22)!important;}
+.promo-card.is-expired .promo-front{color:#59301f!important;}
+.promo-card.is-expired .promo-timer-wrap{display:none!important;}
+.promo-card.is-expired .promo-expired-label{display:block!important;color:#7e4025!important;}
+.promo-card.is-expired .promo-timer{animation:none!important;}
+.promo-card.is-expired .promo-face:before,.promo-card.is-expired .promo-face:after{display:none!important;}
+.promo-card.is-expired .promo-face{box-shadow:none!important;}
+.promo-card.is-expired .promo-back{visibility:hidden!important;pointer-events:none!important;}
+.promo-card.is-expired{cursor:default!important;}
+
+@media(max-width:640px){.promo-cards{transform:translateY(12px)!important;margin-bottom:20px!important}.promo-card-copy h2{font-size:clamp(21px,5.8vw,30px)!important;}}
+
 
