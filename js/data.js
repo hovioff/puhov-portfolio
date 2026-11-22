@@ -69,6 +69,7 @@ export async function savePromoCards(cards=[]){
   cards=Array.isArray(cards)?cards:[];
   if(!cloudEnabled){const current=await getLocal();return savePortfolio({...current,promoCards:cards});}
   const supabase=await getSupabase();const{data:auth}=await supabase.auth.getSession();if(!auth.session)throw new Error('Для облачного сохранения войдите в админку.');
+  cards=await mapLimit(cards,3,async(card,index)=>{if(!card.frontImage?.startsWith('data:'))return card;const blob=dataURLToBlob(card.frontImage);if(!['image/webp','image/png','image/jpeg','image/avif'].includes(blob.type))throw new Error('Неподдерживаемый формат дизайна промокарты.');const ext=blob.type==='image/png'?'png':blob.type==='image/jpeg'?'jpg':blob.type==='image/avif'?'avif':'webp';const path=`promo-cards/${card.id||index}-${Date.now()}.${ext}`;const{error}=await supabase.storage.from(SUPABASE_BUCKET).upload(path,blob,{contentType:blob.type,upsert:true});if(error)throw error;return{...card,frontImage:supabase.storage.from(SUPABASE_BUCKET).getPublicUrl(path).data.publicUrl};});
   const{error:removeError}=await supabase.from('promo_cards').delete().not('id','is',null);if(removeError)throw removeError;
   if(cards.length){const{error:insertError}=await supabase.from('promo_cards').insert(cards.map((payload,position)=>({id:String(payload.id||`promo-${position}`),payload,position,active:payload.active!==false})));if(insertError)throw insertError;}
   return cards;

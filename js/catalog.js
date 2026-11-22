@@ -72,12 +72,16 @@ function moveTypeIndicator(center=false){
   indicator.style.width=`${activeRect.width}px`;
 }
 function drawFilters(){
-  const available=activeType==='all'
-    ? [...new Set(sortedProjects.map(project=>project.type).filter(Boolean))]
-    : [...new Set(sortedProjects.filter(project=>project.type===activeType).map(project=>project.category).filter(Boolean))];
+  if(activeType==='all'){
+    activeCategories.clear();
+    filters.innerHTML='';
+    filters.hidden=true;
+    return;
+  }
+  const available=[...new Set(sortedProjects.filter(project=>project.type===activeType).map(project=>project.category).filter(Boolean))];
   for(const key of activeCategories)if(!available.includes(key))activeCategories.delete(key);
-  filters.innerHTML=available.map(key=>`<button class="category-chip" type="button" data-filter="${escapeHTML(key)}" aria-pressed="${String(activeCategories.has(key))}">${escapeHTML(activeType==='all'?typeName(key):categoryName(key))}</button>`).join('');
-  filters.setAttribute('aria-label',activeType==='all'?'Фильтры по типу работ':'Подкатегории');
+  filters.innerHTML=available.map(key=>`<button class="category-chip" type="button" data-filter="${escapeHTML(key)}" aria-pressed="${String(activeCategories.has(key))}">${escapeHTML(categoryName(key))}</button>`).join('');
+  filters.setAttribute('aria-label','Подкатегории');
   filters.hidden=!available.length;
 }
 function safePlaceholder(value=''){return /^data:image\/(?:webp|png);base64,[A-Za-z0-9+/=]+$/.test(value)?escapeHTML(value):'';}

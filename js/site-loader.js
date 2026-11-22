@@ -12,7 +12,7 @@
   loader.className = 'site-loader';
   loader.setAttribute('role', 'status');
   loader.setAttribute('aria-label', 'Загрузка сайта');
-  loader.innerHTML = '<video class="site-loader-logo" autoplay muted playsinline preload="auto" aria-hidden="true"><source src="assets/Эпизод 01_5.webm" type="video/webm"></video>';
+  loader.innerHTML = '<div class="site-loader-orbit" aria-hidden="true"><span></span><span></span><span></span></div><strong class="site-loader-label">Загрузка</strong>';
   document.body.prepend(loader);
 
   let catalogReady = false;

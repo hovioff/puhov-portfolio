@@ -8,7 +8,7 @@
   const dots = root.querySelector('#stepProgressDots');
   const motionPreference = window.matchMedia('(prefers-reduced-motion: reduce)');
   const reduceMotion = motionPreference.matches;
-  const dwellTime = 5200;
+  const dwellTime = 3000;
   let autoTimer = 0;
   let touchStart = null;
   const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
@@ -108,10 +108,11 @@
   }
 
   rows.forEach((row, index) => row.addEventListener('click', () => go(index)));
-  root.addEventListener('touchstart', event => {
+  const swipeSurface = root.closest('.contact-process');
+  swipeSurface.addEventListener('touchstart', event => {
     touchStart = event.changedTouches[0].clientX;
   }, { passive: true });
-  root.addEventListener('touchend', event => {
+  swipeSurface.addEventListener('touchend', event => {
     if (touchStart === null) return;
     const distance = event.changedTouches[0].clientX - touchStart;
     touchStart = null;
